@@ -1,0 +1,13 @@
+Package: eSIR
+Type: Package
+Title: extended state-space SIR models
+Version: 0.1.0
+Date: 2020-02-14
+Author: Song Lab (http://www.umich.edu/~songlab/)
+Maintainer: Lili Wang <lilywang@umich.edu>
+Description: A inplementation of various extended state-space SIR models developed recently by the study group of Song lab.   
+License: MIT
+Encoding: UTF-8
+Depends: rjags, scales, ggplot2, chron, gtools
+Suggests: nCov2019
+RoxygenNote: 6.1.1
