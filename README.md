@@ -15,7 +15,11 @@ The standard SIR model has three components: susceptible, infected, and removed 
 Preparation
 -----------
 
-To install and use this R package from Github, you will need to install another R package "devtools". Please uncomment the codes to install them. We notice some convenient access to the COVID-19 from [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) and [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
+To install and use this R package from Github, you will need to first install the R package `devtools`. Please uncomment the codes to install them. `eSIR` depends on three other packages, `rjags` (an interface to the JAGS library), `chron` and `gtools`, which could be installed with `eSIR` if not yet. 
+
+An error may occur if you have not yet installed JAGS-4.x.y.exe (for any x >= 0, y >=0). **Windows** users may download and install from [
+http://www.sourceforge.net/projects/mcmc-jags/files](
+http://www.sourceforge.net/projects/mcmc-jags/files). **Mac** users may follow these steps [https://gist.github.com/casallas/8411082](https://gist.github.com/casallas/8411082).
 
 ``` r
 # install.packages("devtools")
@@ -24,7 +28,11 @@ To install and use this R package from Github, you will need to install another 
 #for information and covariance calculation; sample size computation using Hasegawa proposal
 # install_github("lilywang1988/eSIR")
 library(eSIR) 
+```
 
+Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5). Alternatively, we notice some convenient access to COVID-19 data from [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) and [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
+
+``` r
 # Data of COVID-19 can be found in the following R packages: 
 # install_github("GuangchuangYu/nCov2019")
 #library(nCov2019) 
