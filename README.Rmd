@@ -26,22 +26,27 @@ The standard SIR model has three components: susceptible, infected, and removed 
 
 ## Preparation
 
-To install and use this R package from Github, you will need to install another R package "devtools". Please uncomment the codes to install them. We notice some convenient access to the COVID-19 from [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) and [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data). 
+To install and use this R package from Github, you will need to first install the R package `devtools`. Please uncomment the codes to install them. `eSIR` depends on three other packages, `rjags` (an interface to the JAGS library), `chron` and `gtools`, which could be installed with `eSIR` if not yet. 
 
-```{r installation, results = "hide",message=FALSE}
+An error may occur if you have not yet installed JAGS-4.x.y.exe (for any x >= 0, y >=0). **Windows** users may download and install JAGS from [here](http://www.sourceforge.net/projects/mcmc-jags/files). **Mac** users may follow steps  at [casallas/8411082](https://gist.github.com/casallas/8411082).
+
+``` r
 # install.packages("devtools")
 # library(devtools)
 
 #for information and covariance calculation; sample size computation using Hasegawa proposal
 # install_github("lilywang1988/eSIR")
 library(eSIR) 
+```
 
+Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5). Alternatively, we notice some convenient access to COVID-19 data from [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) and [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
+
+``` r
 # Data of COVID-19 can be found in the following R packages: 
 # install_github("GuangchuangYu/nCov2019")
 #library(nCov2019) 
 # install_github("qingyuanzhao/2019-nCov-Data")
 #library(2019-nCov-Data) 
-
 ```
 
 
@@ -63,24 +68,36 @@ $$
 
 ```{r model1}
 set.seed(20192020)
-NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,1052,1423,2714,3554,4903,5806,7153,9074,11177,13522,16678,19665,22112,24953,27100,29631,31728,33366)
-  RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,252,345,417,561,650,811,1017,1261,1485,1917,2260,2725,3284,3754)
-  N=58.5e6
-  R <- RI_complete/N
-  Y <- NI_complete/N- R #Jan13->Feb 11
-  ### Step function of pi_qbar(t)
-  change_time <- c("01/23/2020","02/04/2020","02/08/2020")
-  pi_qbar0 <- c(1.0,0.9,0.5,0.1)
-  res.step <-pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,casename="Hubei_step",save_files = T)
-  res.step$forecast_infection
+# Hubei province data Jan13 -> Feb 11
+# cumulative number of infected
+NI_complete <- c(41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549,  729, 1052, 
+                 1423, 2714, 3554, 4903, 5806, 7153, 9074, 11177, 13522, 16678, 
+                 19665, 22112, 24953, 27100, 29631, 31728, 33366)
+# cumulative number of recovered and death
+RI_complete <- c(1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94, 121, 152, 213, 
+                 252, 345, 417, 561, 650, 811, 1017, 1261, 1485, 1917, 2260, 
+                 2725, 3284, 3754) 
+N <- 58.5e6 # total population
+R <- RI_complete / N
+Y <- NI_complete / N - R 
+### Step function of pi_qbar(t)
+change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
+pi_qbar0 <- c(1.0, 0.9, 0.5, 0.1)
+res.step <- pi.SIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_qbar0,
+                  change_time = change_time, casename = "Hubei_step", save_files = TRUE,
+                  M = 5e3, nburnin = 2e3)
+res.step$forecast_infection
   
-  ### continuous exponential function of pi_qbar(t)
-  res.exp <- pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,exponential=TRUE,lambda0=0.01,casename="Hubei_exp")
-  res.exp$forecast_infection
+### continuous exponential function of pi_qbar(t)
+res.exp <- pi.SIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_qbar0,
+                  change_time = change_time, exponential = TRUE, lambda0 = 0.01, 
+                  casename = "Hubei_exp", M = 5e3, nburnin = 2e3)
+res.exp$forecast_infection
   
-  ### without pi_qbar(t)
-  res.nopi <- pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_nopi")
-  res.nopi$forecast_infection
+### without pi_qbar(t)
+res.nopi <- pi.SIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_nopi",
+                   M = 5e3, nburnin = 2e3)
+res.nopi$forecast_infection
 ```
 
 
@@ -98,17 +115,18 @@ $$
 
 
 ```{r model2}
-  set.seed(20192020)
-  change_time <- c("01/23/2020","02/04/2020","02/08/2020")
-  phi <- c(0.1,0.4,0.4)
-  res.q <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q")
-  res.q$forecast_infection
+set.seed(20192020)
+change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
+phi <- c(0.1, 0.4, 0.4)
+res.q <- q.SIR(Y, R, begin_str = "01/13/2020", T_fin = 200, phi = phi,
+               change_time = change_time, casename = "Hubei_q", save_files = TRUE,
+               M = 5e3, nburnin = 2e3)
+res.q$forecast_infection
   
-  # The following codes provide identical result as the one fron res.nopi in pi.SIR
-  #res.noq <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_noq")
-  #res.noq$forecast_infection
-
-
+# The following codes provide identical result as the one fron res.nopi in pi.SIR
+res.noq <- q.SIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_noq",
+                 M = 5e3, nburnin = 2e3)
+res.noq$forecast_infection
 ```
 
 Following the uncommented codes we obtain following the plot in your working directory:
