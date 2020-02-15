@@ -133,7 +133,7 @@ $$
   set.seed(20192020)
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   phi <- c(0.1,0.4,0.4)
-  res.q <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q",save_files = T)
+  res.q <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q")
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for q.SIR
 #> Compiling model graph
@@ -145,8 +145,6 @@ $$
 #>    Total graph size: 2676
 #> 
 #> Initializing model
-#> Saving 12 x 8 in image
-#> Saving 12 x 8 in image
   res.q$forecast_infection
 ```
 

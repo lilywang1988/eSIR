@@ -101,7 +101,7 @@ $$
   set.seed(20192020)
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   phi <- c(0.1,0.4,0.4)
-  res.q <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q",save_files = T)
+  res.q <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q")
   res.q$forecast_infection
   
   # The following codes provide identical result as the one fron res.nopi in pi.SIR
