@@ -32,6 +32,9 @@ library(eSIR)
 #library(2019-nCov-Data) 
 ```
 
+In Ubuntu (18.04) Linux, please first update R to a version >= 3.6. You many need to install jags package as well by  "sudo apt-get install jags"  before install devtools by "install.packages("devtools")". 
+
+
 Model 1 using `pi.SIR()`: a SIR model with a time-varying transmission rate
 ---------------------------------------------------------------------------
 
