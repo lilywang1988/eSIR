@@ -1,4 +1,4 @@
-R package eSIR: a simulation-free group sequential design with max-combo tests in the presence of non-proportional hazards
+R package eSIR: An extended SIR epidemiological model
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
 2020-02-14
@@ -39,7 +39,7 @@ By introducing a time-dependent $\\pi\_\\bar{q}(t)\\in \[0,1\]$ function that mu
 
 The function can be either stepwise or exponential:
 $$
-\\pi\_\\bar{q}(t)=\\sum\_{k=1}^K \\pi\_{k}I(t\\in\[t\_k,t\_{k+1})\])
+\\pi\_\\bar{q}(t)=\\sum\_{k=1}^K \\pi\_{k}I(t\\in\[t\_k,t\_{k+1}))
 $$
  and
 $$
@@ -164,9 +164,9 @@ Following the uncommented codes we obtain following the plot in your working dir
 Outputs and summary table
 -------------------------
 
-To save all the plots (including trace plots) and summary tables, please set `save_files=T`, and if possible, provide a location by setting `file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other intermediate plots will not be saved, but you can still retrieve the forecast plots and summary table by using `res.step$forecast_infection` and `res.step$out_table`.
+To save all the plots (including trace plots) and summary tables, please set `save_files=T`, and if possible, provide a location by setting `file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other intermediate plots will not be saved, but you can still retrieve the forecast plots and summary table based on the return list, e.g., using `res.step$forecast_infection` and `res.step$out_table`.
 
-For details, please explore our package directly. We have .rd files establisehd, please `help(q.SIR)` or `?pi.SIR` to find them.
+For details, please explore our package directly. We have .rd files establisehd, please use `help(q.SIR)` or `?pi.SIR` to find them.
 
 References
 ----------

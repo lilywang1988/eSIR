@@ -1,5 +1,5 @@
 ---
-  title: "R package eSIR: a simulation-free group sequential design with max-combo tests in the presence of non-proportional hazards"
+  title: "R package eSIR: An extended SIR epidemiological model"
   author: "[Song Lab](http://www.umich.edu/~songlab/)"
   date: "`r Sys.Date()`"
   output: github_document
@@ -52,7 +52,7 @@ By introducing a time-dependent $\pi_\bar{q}(t)\in [0,1]$ function that multipli
 
 The function can be either stepwise or exponential:
 $$
-\pi_\bar{q}(t)=\sum_{k=1}^K \pi_{k}I(t\in[t_k,t_{k+1})])
+\pi_\bar{q}(t)=\sum_{k=1}^K \pi_{k}I(t\in[t_k,t_{k+1}))
 $$
 and
 $$
