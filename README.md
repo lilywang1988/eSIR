@@ -38,7 +38,7 @@ In Ubuntu (18.04) Linux, please first update R to a version >= 3.6. You many nee
 Model 1 using `pi.SIR()`: a SIR model with a time-varying transmission rate
 ---------------------------------------------------------------------------
 
-By introducing a time-dependent $\\pi\_\\bar{q}(t)\\in \[0,1\]$ function that multiplies the transmission rate *β*, we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
+By introducing a time-dependent $\\pi\_\\bar{q}(t)\\in \[0,1\]$ function that multiplies the transmission rate $\beta$, we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
 
 The function can be either stepwise or exponential:
 $$
