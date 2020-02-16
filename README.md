@@ -8,7 +8,7 @@ Purpose
 
 The outbreak of novel Corona Virus disease (a.k.a. COVID-19), originated in Wuhan, the capital of Hubei Province spreads quickly and affects many cities in China as well as many countries in the world. The Chinese government has enforced very stringent quarantine and inspection to prevent the worsening spread of COVID-19. Although various forms of forecast on the turning points of this epidemic within and outside Hubei Province have been published in the media, none of the prediction models has explicitly accounted for the time-varying quarantine protocols. We extended the classical SIR model for infectious disease by incorporating forms of medical isolation (in-home quarantine and hospitalization) in the underlying infectious disease dynamic system. Using the state-space model for both daily infected and hospitalized incidences and MCMC algorithms, we assess the effectiveness of quarantine protocols for confining COVID-19 spread in both Hubei Province and the other regions of China. Both predicted turning points and their credible bands may be obtained from the extended SIR under a given quarantine protocol. R software packages are also made publicly available for interested users.
 
-The standard SIR model has three components: susceptible, infected, and removed (including the recovery and dead). In the following sections, we will introduce the other extended state-space SIR models and their implementation in the package. *All the results provided are based on very short chains.* Please set at least `M=5e5` and `nburnin=2e5` to obtain stable MCMC chains via [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
+The standard SIR model has three components: susceptible, infected, and removed (including the recovery and dead). In the following sections, we will introduce an extended state-space SIR models and their implementation in the package. *All the results provided are based on very short chains.* Please set at least `M=5e5` and `nburnin=2e5` to obtain stable MCMC chains via [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
 
 ![Standard SIR](man/figures/SIR.png)
 
@@ -40,7 +40,7 @@ Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-
 #library(2019-nCov-Data) 
 ```
 
-In Ubuntu (18.04) Linux, please first update R to a version >= 3.6. You many need to install jags package as well by  "sudo apt-get install jags"  before install devtools by "install.packages("devtools")". 
+In Ubuntu (18.04) Linux, please first update R to a version >= 3.6. You may need to install the jags package by  "sudo apt-get install jags"  and the R devtools package by "install.packages("devtools")". 
 
 
 Model 1 using `pi.SIR()`: a SIR model with a time-varying transmission rate
@@ -131,7 +131,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,1052,1423,2714,355
 Model 2 using `q.SIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
 -----------------------------------------------------------------------------------------------
 
-By introducing a vector of `phi` and its corresponding changing points `change_time`, we introduced a quarantine process that is dependent on a dirac delta function *ϕ*(*t*)∈\[0, 1\]. In other words, only at time points defined by `change_time`, we have certain porportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model than the previous time-varying transmission one is that we do not allow the tranmission rate to change, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
+By introducing a vector of `phi` and its corresponding changing points `change_time`, we can consider a quarantine process that is dependent on a dirac delta function *ϕ*(*t*)∈\[0, 1\]. In other words, only at time points defined by `change_time`, we have certain porportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model from the previous time-varying transmission one is that we do not allow the tranmission rate to change, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
 
 $$
 \\phi(t)=\\left\\{\\begin{array}{c l}
