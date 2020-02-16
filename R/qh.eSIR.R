@@ -427,7 +427,7 @@ qh.eSIR<-function (Y,R, phi=NULL,change_time=NULL,begin_str="01/23/2020",T_fin=2
 
   if(save_files) write.csv(out_table,file=paste0(file_add,casename,"_summary.csv"))
 
-  return(list(casename=casename,incidence_mean=incidence_mean,incidence_ci=incidence_ci,out_table=out_table,forecast_infection=plot,forecast_removed=plot2,first_stat_mean=as.character(first_order_change_date),first_stat_ci=as.character(first_order_change_date_ci),second_stat_mean=as.character(second_order_change_date),second_stat_ci=as.character(second_order_change_date_ci),dic_val=dic_val,plot_list=plot_list,plot2_list=plot2_list))
+  return(list(casename=casename,incidence_mean=incidence_mean,incidence_ci=incidence_ci,out_table=out_table,forecast_infection=plot,forecast_removed=plot2,first_stat_mean=as.character(first_order_change_date),first_stat_ci=as.character(first_order_change_date_ci),second_stat_mean=as.character(second_order_change_date),second_stat_ci=as.character(second_order_change_date_ci),dic_val=dic_val,plot_list=plot_list,plot2_list=plot2_list,theta_p=theta_p,theta_pp=theta_pp,Y_pp=Y_pp,R_pp=R_pp))
 }
 
 if(F){
