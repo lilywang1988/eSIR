@@ -1,25 +1,23 @@
 R package eSIR: An extended SIR epidemiological model
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
-2020-02-14
+2020-02-16
 
 Purpose
 -------
 
 The outbreak of novel Corona Virus disease (a.k.a. COVID-19), originated in Wuhan, the capital of Hubei Province spreads quickly and affects many cities in China as well as many countries in the world. The Chinese government has enforced very stringent quarantine and inspection to prevent the worsening spread of COVID-19. Although various forms of forecast on the turning points of this epidemic within and outside Hubei Province have been published in the media, none of the prediction models has explicitly accounted for the time-varying quarantine protocols. We extended the classical SIR model for infectious disease by incorporating forms of medical isolation (in-home quarantine and hospitalization) in the underlying infectious disease dynamic system. Using the state-space model for both daily infected and hospitalized incidences and MCMC algorithms, we assess the effectiveness of quarantine protocols for confining COVID-19 spread in both Hubei Province and the other regions of China. Both predicted turning points and their credible bands may be obtained from the extended SIR under a given quarantine protocol. R software packages are also made publicly available for interested users.
 
-The standard SIR model has three components: susceptible, infected, and removed (including the recovery and dead). In the following sections, we will introduce an extended state-space SIR models and their implementation in the package. *All the results provided are based on very short chains.* Please set at least `M=5e5` and `nburnin=2e5` to obtain stable MCMC chains via [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
+The standard SIR model has three components: susceptible, infected, and removed (including the recovery and dead). In the following sections, we will introduce the other extended state-space SIR models and their implementation in the package. *All the results provided are based on very short chains.* Please set at least `M=5e5` and `nburnin=2e5` to obtain stable MCMC chains via [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
 
 ![Standard SIR](man/figures/SIR.png)
 
 Preparation
 -----------
 
-To install and use this R package from Github, you will need to first install the R package `devtools`. Please uncomment the codes to install them. `eSIR` depends on three other packages, `rjags` (an interface to the JAGS library), `chron` and `gtools`, which could be installed with `eSIR` if not yet. 
+To install and use this R package from Github, you will need to first install the R package `devtools`. Please uncomment the codes to install them. `eSIR` depends on three other packages, `rjags` (an interface to the JAGS library), `chron` and `gtools`, which could be installed with `eSIR` if not yet.
 
-An error may occur if you have not yet installed JAGS-4.x.y.exe (for any x >= 0, y >=0). **Windows** users may download and install from [
-http://www.sourceforge.net/projects/mcmc-jags/files](
-http://www.sourceforge.net/projects/mcmc-jags/files). **Mac** users may follow these steps [https://gist.github.com/casallas/8411082](https://gist.github.com/casallas/8411082).
+An error may occur if you have not yet installed JAGS-4.x.y.exe (for any x &gt;= 0, y &gt;=0). **Windows** users may download and install JAGS from [here](http://www.sourceforge.net/projects/mcmc-jags/files). **Mac** users may follow steps at [casallas/8411082](https://gist.github.com/casallas/8411082).
 
 ``` r
 # install.packages("devtools")
@@ -40,13 +38,16 @@ Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-
 #library(2019-nCov-Data) 
 ```
 
-In Ubuntu (18.04) Linux, please first update R to a version >= 3.6. You may need to install the jags package by  "sudo apt-get install jags"  and the R devtools package by "install.packages("devtools")". 
-
+In Ubuntu (18.04) Linux, please first update R to a version &gt;= 3.6. You many need to install jags package as well by "sudo apt-get install jags" before install devtools by "install.packages("devtools")".
 
 Model 1 using `pi.SIR()`: a SIR model with a time-varying transmission rate
 ---------------------------------------------------------------------------
 
-By introducing a time-dependent $$\inline \\pi\_\\bar{q}(t)\\in \[0,1\]$$ function that multiplies the transmission rate $$\inline \beta$$, we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
+By introducing a time-dependent
+$$\\inline \\pi\_\\bar{q}(t)\\in \[0,1\]$$
+ function that multiplies the transmission rate
+$$\\inline \\beta$$
+, we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
 
 The function can be either stepwise or exponential:
 $$
@@ -61,15 +62,33 @@ $$
 
 ``` r
 set.seed(20192020)
-NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,1052,1423,2714,3554,4903,5806,7153,9074,11177,13522,16678,19665,22112,24953,27100,29631,31728,33366)
-  RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,252,345,417,561,650,811,1017,1261,1485,1917,2260,2725,3284,3754)
-  N=58.5e6
-  R <- RI_complete/N
-  Y <- NI_complete/N- R #Jan13->Feb 11
-  ### Step function of pi_qbar(t)
-  change_time <- c("01/23/2020","02/04/2020","02/08/2020")
-  pi_qbar0 <- c(1.0,0.9,0.5,0.1)
-  res.step <-pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,casename="Hubei_step",save_files = T)
+library(eSIR)
+#> Loading required package: rjags
+#> Loading required package: coda
+#> Linked to JAGS 4.3.0
+#> Loaded modules: basemod,bugs
+#> Loading required package: scales
+#> Loading required package: ggplot2
+#> Loading required package: chron
+#> Loading required package: gtools
+# Hubei province data Jan13 -> Feb 11
+# cumulative number of infected
+NI_complete <- c(41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549,  729, 1052, 
+                 1423, 2714, 3554, 4903, 5806, 7153, 9074, 11177, 13522, 16678, 
+                 19665, 22112, 24953, 27100, 29631, 31728, 33366)
+# cumulative number of recovered and death
+RI_complete <- c(1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94, 121, 152, 213, 
+                 252, 345, 417, 561, 650, 811, 1017, 1261, 1485, 1917, 2260, 
+                 2725, 3284, 3754) 
+N <- 58.5e6 # total population
+R <- RI_complete / N
+Y <- NI_complete / N - R 
+### Step function of pi_qbar(t)
+change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
+pi_qbar0 <- c(1.0, 0.9, 0.5, 0.1)
+res.step <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_qbar0,
+                  change_time = change_time, casename = "Hubei_step", save_files = TRUE,
+                  M = 5e3, nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for step-function pi_qbar(t)
 #> Compiling model graph
@@ -83,15 +102,17 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,1052,1423,2714,355
 #> Initializing model
 #> Saving 12 x 8 in image
 #> Saving 12 x 8 in image
-  res.step$forecast_infection
+res.step$forecast_infection
 ```
 
 ![](man/figures/README-model1-1.png)
 
 ``` r
   
-  ### continuous exponential function of pi_qbar(t)
-  res.exp <- pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,exponential=TRUE,lambda0=0.01,casename="Hubei_exp")
+### continuous exponential function of pi_qbar(t)
+res.exp <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_qbar0,
+                  change_time = change_time, exponential = TRUE, lambda0 = 0.01, 
+                  casename = "Hubei_exp", M = 5e3, nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for exponential-function pi_qbar(t)
 #> Compiling model graph
@@ -103,15 +124,16 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,1052,1423,2714,355
 #>    Total graph size: 1873
 #> 
 #> Initializing model
-  res.exp$forecast_infection
+res.exp$forecast_infection
 ```
 
 ![](man/figures/README-model1-2.png)
 
 ``` r
   
-  ### without pi_qbar(t)
-  res.nopi <- pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_nopi")
+### without pi_qbar(t)
+res.nopi <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_nopi",
+                   M = 5e3, nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running without pi_qbar(t)
 #> Compiling model graph
@@ -123,15 +145,15 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,1052,1423,2714,355
 #>    Total graph size: 1873
 #> 
 #> Initializing model
-  res.nopi$forecast_infection
+res.nopi$forecast_infection
 ```
 
 ![](man/figures/README-model1-3.png)
 
-Model 2 using `q.SIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
------------------------------------------------------------------------------------------------
+Model 2 using `qh.eSIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
+-------------------------------------------------------------------------------------------------
 
-By introducing a vector of `phi` and its corresponding changing points `change_time`, we can consider a quarantine process that is dependent on a dirac delta function *ϕ*(*t*)∈\[0, 1\]. In other words, only at time points defined by `change_time`, we have certain proportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model from the previous time-varying transmission one is that we do not allow a changing transmission rate, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
+By introducing a vector of `phi` and its corresponding changing points `change_time`, we introduced a quarantine process that is dependent on a dirac delta function *ϕ*(*t*)∈\[0, 1\]. In other words, only at time points defined by `change_time`, we have certain porportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model than the previous time-varying transmission one is that we do not allow the tranmission rate to change, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
 
 $$
 \\phi(t)=\\left\\{\\begin{array}{c l}
@@ -141,10 +163,12 @@ $$
 $$
 
 ``` r
-  set.seed(20192020)
-  change_time <- c("01/23/2020","02/04/2020","02/08/2020")
-  phi <- c(0.1,0.4,0.4)
-  res.q <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q")
+set.seed(20192020)
+change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
+phi <- c(0.1, 0.4, 0.4)
+res.q <- qh.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, phi = phi,
+               change_time = change_time, casename = "Hubei_q", save_files = TRUE,
+               M = 5e3, nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for q.SIR
 #> Compiling model graph
@@ -156,17 +180,33 @@ $$
 #>    Total graph size: 2676
 #> 
 #> Initializing model
-  res.q$forecast_infection
+#> Saving 12 x 8 in image
+#> Saving 12 x 8 in image
+res.q$forecast_infection
 ```
 
 ![](man/figures/README-model2-1.png)
 
 ``` r
   
-  # The following codes provide identical result as the one fron res.nopi in pi.SIR
-  #res.noq <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_noq")
-  #res.noq$forecast_infection
+# The following codes provide identical result as the one fron res.nopi in pi.SIR
+res.noq <- qh.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_noq",
+                 M = 5e3, nburnin = 2e3)
+#> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
+#> Running for q.SIR
+#> Compiling model graph
+#>    Resolving undeclared variables
+#>    Allocating nodes
+#> Graph information:
+#>    Observed stochastic nodes: 60
+#>    Unobserved stochastic nodes: 37
+#>    Total graph size: 2676
+#> 
+#> Initializing model
+res.noq$forecast_infection
 ```
+
+![](man/figures/README-model2-2.png)
 
 Following the uncommented codes we obtain following the plot in your working directory: ![Standard SIR](man/figures/Hubei_qthetaQ_plot.png)
 
@@ -175,7 +215,7 @@ Outputs and summary table
 
 To save all the plots (including trace plots) and summary tables, please set `save_files=T`, and if possible, provide a location by setting `file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other intermediate plots will not be saved, but you can still retrieve the forecast plots and summary table based on the return list, e.g., using `res.step$forecast_infection` and `res.step$out_table`.
 
-For details, please explore our package directly. We have .rd files established, please use `help(q.SIR)` or `?pi.SIR` to find them.
+For details, please explore our package directly. We have .rd files establisehd, please use `help(q.SIR)` or `?pi.SIR` to find them.
 
 References
 ----------

@@ -69,7 +69,7 @@
 #'
 #'
 #' @export
-pi.SIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lambda0=NULL,begin_str="01/23/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e3,thn=10,nburnin=2e3,dic=FALSE,file_add=character(0),save_files=FALSE,death_in_R=0.02,casename="pi.SIR",beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1){
+tvt.eSIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lambda0=NULL,begin_str="01/23/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e3,thn=10,nburnin=2e3,dic=FALSE,file_add=character(0),save_files=FALSE,death_in_R=0.02,casename="pi.SIR",beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1){
 
   len <- round(M/thn)*nchain #number of MCMC draws in total
 
@@ -317,14 +317,26 @@ pi.SIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lambda
     png(paste0(file_add,casename,"deriv.png"), width = 700, height = 350)
     plot(y=dthetaI,x=chron_ls,type='l',ylab="1st order derivative",main="Infection Proportion")
     abline(h=0,col=2)
-    abline(v=change_time_chorn[-c(1,length(change_time_chorn))],col="gray")
     abline(v=begin,col="blue")
+    if(exponential==FALSE & !is.null(change_time) & !is.null(pi_qbar0)) abline(v=change_time_chorn[-c(1,length(change_time_chorn))],col="gray")
     dev.off()
   }
 
-  y_text_ht <- max(Y_band)/2
-  plot <- ggplot(data = data_poly, aes(x = x, y = y)) +geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +labs(title=substitute(paste(casename,": infection forecast with prior ",beta[0],"=",v1,",",gamma[0], "=",v2," and ", R[0],"=",v3), list(casename=casename,v1=format(beta0,digits=3),v2=format(gamma0,digits=3),v3=format(R0,digits=3))),subtitle = substitute(paste("Posterior: ", beta[p],"=",v1,",",gamma[p], "=",v2," and ", R[0],"=",v3), list(v1=format(beta_p_mean,digits=3),v2=format(gamma_p_mean,digits=3),v3=format(R0_p_mean,digits=3))),x = "time", y = "P(Removed)")+geom_line(data=data_comp,aes(x=time,y=median),color="red")+geom_vline(xintercept = T_prime,color="blue",show.legend = TRUE)+geom_vline(xintercept = dthetaI_stationary2,color="darkgreen",show.legend = TRUE)+geom_vline(xintercept = dthetaI_stationary1,color="purple",show.legend = TRUE)+geom_line(data=data_comp,aes(x=time,y=mean),color="darkgray")+geom_point(data=data_pre,aes(x=time,y=Y))+theme_bw()+theme( plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust=0.5))+scale_x_continuous(labels= as.character(chron_ls)[seq(1,T_fin,30)],breaks=seq(1,T_fin,30))+scale_fill_discrete(name="Posterior",labels=c(expression(paste(y[t+1:T],' | ',y[1:t],', ',r[1:t])),expression(paste(theta[1:t]^I,' | ',y[1:t],', ',r[1:t]))))+annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=y_text_ht,color="blue")+annotate(geom="text", label=as.character(chron(dthetaI_stationary2_date,format="mon day")), x=dthetaI_stationary2+12, y=y_text_ht*1.25,color="darkgreen")+annotate(geom="text", label=as.character(chron(dthetaI_stationary1_date,format="mon day")), x=dthetaI_stationary1+12, y=y_text_ht*1.5,color="purple")
+  y_text_ht <- max(rbind(thetaI_band ,Y_band))/2
+  plot <- ggplot(data = data_poly, aes(x = x, y = y)) +
+    geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +
+    labs(title=substitute(paste(casename,": infection forecast with prior ",beta[0],"=",v1,",",gamma[0], "=",v2," and ", R[0],"=",v3), list(casename=casename,v1=format(beta0,digits=3),v2=format(gamma0,digits=3),v3=format(R0,digits=3))),subtitle = substitute(paste("Posterior: ", beta[p],"=",v1,",",gamma[p], "=",v2," and ", R[0],"=",v3), list(v1=format(beta_p_mean,digits=3),v2=format(gamma_p_mean,digits=3),v3=format(R0_p_mean,digits=3))),x = "time", y = "P(Removed)")+
+    geom_line(data=data_comp,aes(x=time,y=median),color="red")+geom_vline(xintercept = T_prime,color="blue",show.legend = TRUE)+
+    geom_vline(xintercept = dthetaI_stationary2,color="darkgreen",show.legend = TRUE)+
+    geom_vline(xintercept = dthetaI_stationary1,color="purple",show.legend = TRUE)+
+    geom_line(data=data_comp,aes(x=time,y=mean),color="darkgray")+
+    geom_point(data=data_pre,aes(x=time,y=Y))+theme_bw()+
+    theme( plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust=0.5))+scale_x_continuous(labels= as.character(chron_ls)[seq(1,T_fin,30)],breaks=seq(1,T_fin,30))+scale_fill_discrete(name="Posterior",labels=c(expression(paste(y[t+1:T],' | ',y[1:t],', ',r[1:t])),expression(paste(theta[1:t]^I,' | ',y[1:t],', ',r[1:t]))))+
+    annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=y_text_ht,color="blue")+
+    annotate(geom="text", label=as.character(chron(dthetaI_stationary2_date,format="mon day")), x=dthetaI_stationary2+12, y=y_text_ht*1.25,color="darkgreen")+
+    annotate(geom="text", label=as.character(chron(dthetaI_stationary1_date,format="mon day")), x=dthetaI_stationary1+12, y=y_text_ht*1.5,color="purple")
 
+  plot_list <- list(data_poly=data_poly,data_comp=data_comp,T_prime=T_prime,dthetaI_stationary2=dthetaI_stationary2,dthetaI_stationary1=dthetaI_stationary1,data_pre=data_pre,dthetaI_stationary2_date,dthetaI_stationary1_date,y_text_ht)
 
   if(save_files) ggsave(paste0(file_add,casename,"_forecast.png"))
 
@@ -344,14 +356,25 @@ pi.SIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lambda
 
   data_poly_R<-data.frame(y=c(thetaR_band$upper,rev(thetaR_band$lower),R_band$upper,rev(R_band$lower)),x=c(1:T_prime,T_prime:1,(T_prime+1):T_fin,T_fin:(T_prime+1)),phase=c(rep('pre',T_prime*2),rep('post',(T_fin-T_prime)*2)),value=c(rep(col2[1],T_prime*2),rep(col2[2],(T_fin-T_prime)*2)))
 
-  r_text_ht <- max(R_band)/2
-  plot2 <- ggplot(data = data_poly_R, aes(x = x, y = y)) +geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +labs(title=substitute(paste(casename,": removed forecast with prior ",beta[0],"=",v1,",",gamma[0], "=",v2," and ", R[0],"=",v3), list(casename=casename,v1=format(beta0,digits=3),v2=format(gamma0,digits=3),v3=format(R0,digits=3))),subtitle = substitute(paste("posterior: ", beta[p],"=",v1,",",gamma[p], "=",v2," and ", R[0],"=",v3), list(v1=format(beta_p_mean,digits=3),v2=format(gamma_p_mean,digits=3),v3=format(R0_p_mean,digits=3))),x = "time", y = "P(Removed)")+geom_line(data=data_comp_R,aes(x=time,y=median),color="red",linetype=1)+geom_line(data=data_comp_R,aes(x=time,y=dead),color="black",linetype=1)+geom_vline(xintercept = T_prime,color="blue")+geom_vline(xintercept = dthetaI_stationary2,color="darkgreen")+geom_vline(xintercept = dthetaI_stationary1,color="purple")+geom_line(data=data_comp_R,aes(x=time,y=mean),color="darkgray")+geom_point(data=data_pre_R,aes(x=time,y=R))+theme_bw()+theme( plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust=0.5))+scale_x_continuous(labels= as.character(chron_ls)[seq(1,T_fin,30)],breaks=seq(1,T_fin,30))+scale_fill_discrete(name="Posterior",labels=c(expression(paste(r[t+1:T],' | ',y[1:t],', ',r[1:t])),expression(paste(theta[1:t]^R,' | ',y[1:t],', ',r[1:t]))))+annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=r_text_ht,color="blue")+annotate(geom="text", label=as.character(chron(dthetaI_stationary2_date,format="mon day")), x=dthetaI_stationary2+12, y=r_text_ht*1.25,color="darkgreen")+annotate(geom="text", label=as.character(chron(dthetaI_stationary1_date,format="mon day")), x=dthetaI_stationary1+12, y=r_text_ht*1.5,color="purple")
+  r_text_ht <- max(rbind(thetaR_band ,R_band))/2
+  plot2 <- ggplot(data = data_poly_R, aes(x = x, y = y)) +geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +labs(title=substitute(paste(casename,": removed forecast with prior ",beta[0],"=",v1,",",gamma[0], "=",v2," and ", R[0],"=",v3), list(casename=casename,v1=format(beta0,digits=3),v2=format(gamma0,digits=3),v3=format(R0,digits=3))),subtitle = substitute(paste("posterior: ", beta[p],"=",v1,",",gamma[p], "=",v2," and ", R[0],"=",v3), list(v1=format(beta_p_mean,digits=3),v2=format(gamma_p_mean,digits=3),v3=format(R0_p_mean,digits=3))),x = "time", y = "P(Infected)")+
+    geom_line(data=data_comp_R,aes(x=time,y=median),color="red",linetype=1)+geom_line(data=data_comp_R,aes(x=time,y=dead),color="black",linetype=1)+
+    geom_vline(xintercept = T_prime,color="blue")+
+    geom_vline(xintercept = dthetaI_stationary2,color="darkgreen")+
+    geom_vline(xintercept = dthetaI_stationary1,color="purple")+
+    geom_line(data=data_comp_R,aes(x=time,y=mean),color="darkgray")+
+    geom_point(data=data_pre_R,aes(x=time,y=R))+theme_bw()+
+    theme( plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust=0.5))+
+    scale_x_continuous(labels= as.character(chron_ls)[seq(1,T_fin,30)],breaks=seq(1,T_fin,30))+
+    scale_fill_discrete(name="Posterior",labels=c(expression(paste(r[t+1:T],' | ',y[1:t],', ',r[1:t])),expression(paste(theta[1:t]^R,' | ',y[1:t],', ',r[1:t]))))+
+    annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=r_text_ht,color="blue")+annotate(geom="text", label=as.character(chron(dthetaI_stationary2_date,format="mon day")), x=dthetaI_stationary2+12, y=r_text_ht*1.25,color="darkgreen")+
+    annotate(geom="text", label=as.character(chron(dthetaI_stationary1_date,format="mon day")), x=dthetaI_stationary1+12, y=r_text_ht*1.5,color="purple")
 
-
+plot2_list <- list(data_poly_R=data_poly_R,data_comp_R=data_comp_R,T_prime=T_prime,dthetaI_stationary2=dthetaI_stationary2,dthetaI_stationary1=dthetaI_stationary1,data_pre_R=data_pre_R,dthetaI_stationary2_date,dthetaI_stationary1_date)
 
   if(save_files) ggsave(paste0(file_add,casename,"_forecast2.png"))
 
-  out_table<-matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci),nrow=1)
+  out_table<-data.frame(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci)
   #out_table<-matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,k_p_mean,k_p_ci,lambdaY_p_mean,lambdaY_p_ci,lambdaR_p_mean,lambdaR_p_ci,as.character(first_order_change_date),as.character(second_order_change_date)),nrow=1)
 
 
@@ -361,7 +384,7 @@ pi.SIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lambda
 
   if(save_files) write.csv(out_table,file=paste0(file_add,casename,"_summary.csv"))
 
-  return(list(casename=casename,incidence_mean=incidence_mean,incidence_ci=incidence_ci,out_table=out_table,forecast_infection=plot,forecast_removed=plot2,first_stat_mean=first_order_change_date,first_stat_ci=first_order_change_date_ci,second_stat_mean=second_order_change_date,second_stat_ci=second_order_change_date_ci,dic_val=dic_val))
+  return(list(casename=casename,incidence_mean=incidence_mean,incidence_ci=incidence_ci,out_table=out_table,forecast_infection=plot,forecast_removed=plot2,first_stat_mean=as.character(first_order_change_date),first_stat_ci=as.character(first_order_change_date_ci),second_stat_mean=as.character(second_order_change_date),second_stat_ci=as.character(second_order_change_date_ci),dic_val=dic_val,plot_list=plot_list,plot2_list=plot2_list))
 }
 
 if(F){

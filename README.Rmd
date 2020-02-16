@@ -30,6 +30,7 @@ To install and use this R package from Github, you will need to first install th
 
 An error may occur if you have not yet installed JAGS-4.x.y.exe (for any x >= 0, y >=0). **Windows** users may download and install JAGS from [here](http://www.sourceforge.net/projects/mcmc-jags/files). **Mac** users may follow steps  at [casallas/8411082](https://gist.github.com/casallas/8411082).
 
+
 ``` r
 # install.packages("devtools")
 # library(devtools)
@@ -69,6 +70,7 @@ $$
 
 ```{r model1}
 set.seed(20192020)
+library(eSIR)
 # Hubei province data Jan13 -> Feb 11
 # cumulative number of infected
 NI_complete <- c(41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549,  729, 1052, 
@@ -84,25 +86,25 @@ Y <- NI_complete / N - R
 ### Step function of pi_qbar(t)
 change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
 pi_qbar0 <- c(1.0, 0.9, 0.5, 0.1)
-res.step <- pi.SIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_qbar0,
+res.step <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_qbar0,
                   change_time = change_time, casename = "Hubei_step", save_files = TRUE,
                   M = 5e3, nburnin = 2e3)
 res.step$forecast_infection
   
 ### continuous exponential function of pi_qbar(t)
-res.exp <- pi.SIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_qbar0,
+res.exp <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_qbar0,
                   change_time = change_time, exponential = TRUE, lambda0 = 0.01, 
                   casename = "Hubei_exp", M = 5e3, nburnin = 2e3)
 res.exp$forecast_infection
   
 ### without pi_qbar(t)
-res.nopi <- pi.SIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_nopi",
+res.nopi <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_nopi",
                    M = 5e3, nburnin = 2e3)
 res.nopi$forecast_infection
 ```
 
 
-## Model 2 using `q.SIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
+## Model 2 using `qh.eSIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
 
 By introducing a vector of `phi` and its corresponding changing points `change_time`, we introduced a quarantine process that is dependent on a dirac delta function $\phi(t)\in [0,1]$. In other words, only at time points defined by `change_time`, we have certain porportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model than the previous time-varying transmission one is that we do not allow the tranmission rate to change, but only let the proportion of susceptible subjects decrease. 
 ![Standard SIR](man/figures/model2.png)
@@ -119,13 +121,13 @@ $$
 set.seed(20192020)
 change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
 phi <- c(0.1, 0.4, 0.4)
-res.q <- q.SIR(Y, R, begin_str = "01/13/2020", T_fin = 200, phi = phi,
+res.q <- qh.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, phi = phi,
                change_time = change_time, casename = "Hubei_q", save_files = TRUE,
                M = 5e3, nburnin = 2e3)
 res.q$forecast_infection
   
 # The following codes provide identical result as the one fron res.nopi in pi.SIR
-res.noq <- q.SIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_noq",
+res.noq <- qh.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_noq",
                  M = 5e3, nburnin = 2e3)
 res.noq$forecast_infection
 ```
