@@ -123,7 +123,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,1052,1423,2714,355
 Model 2 using `q.SIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
 -----------------------------------------------------------------------------------------------
 
-By introducing a vector of `phi` and its corresponding changing points `change_time`, we can consider a quarantine process that is dependent on a dirac delta function *ϕ*(*t*)∈\[0, 1\]. In other words, only at time points defined by `change_time`, we have certain porportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model from the previous time-varying transmission one is that we do not allow the tranmission rate to change, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
+By introducing a vector of `phi` and its corresponding changing points `change_time`, we can consider a quarantine process that is dependent on a dirac delta function *ϕ*(*t*)∈\[0, 1\]. In other words, only at time points defined by `change_time`, we have certain proportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model from the previous time-varying transmission one is that we do not allow a changing transmission rate, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
 
 $$
 \\phi(t)=\\left\\{\\begin{array}{c l}
@@ -167,7 +167,7 @@ Outputs and summary table
 
 To save all the plots (including trace plots) and summary tables, please set `save_files=T`, and if possible, provide a location by setting `file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other intermediate plots will not be saved, but you can still retrieve the forecast plots and summary table based on the return list, e.g., using `res.step$forecast_infection` and `res.step$out_table`.
 
-For details, please explore our package directly. We have .rd files establisehd, please use `help(q.SIR)` or `?pi.SIR` to find them.
+For details, please explore our package directly. We have .rd files established, please use `help(q.SIR)` or `?pi.SIR` to find them.
 
 References
 ----------
