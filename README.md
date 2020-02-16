@@ -40,23 +40,21 @@ Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-
 
 In Ubuntu (18.04) Linux, please first update R to a version &gt;= 3.6. You many need to install jags package as well by "sudo apt-get install jags" before install devtools by "install.packages("devtools")".
 
-Model 1 using `pi.SIR()`: a SIR model with a time-varying transmission rate
----------------------------------------------------------------------------
+Model 1 using `tvt.eSIR()`: a SIR model with a time-varying transmission rate
+-----------------------------------------------------------------------------
 
 By introducing a time-dependent
-$$\\inline \\pi\_\\bar{q}(t)\\in \[0,1\]$$
+$$\\pi\_\\bar{q}(t)\\in \[0,1\]$$
  function that multiplies the transmission rate
-$$\\inline \\beta$$
+*β*
 , we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
 
 The function can be either stepwise or exponential:
 $$
-\\pi\_\\bar{q}(t)=\\sum\_{k=1}^K \\pi\_{k}I(t\\in\[t\_k,t\_{k+1}))
+\\pi(t)=\\sum\_{k=1}^K \\pi\_{0k}I(t\\in\[t\_k,t\_{k+1}))
 $$
  and
-$$
-\\pi\_\\bar{q}(t)=\\exp(-\\lambda\_0t)
-$$
+*π*(*t*)=exp(−*λ*<sub>0</sub>*t*)
 
 ![Standard SIR](man/figures/model1.png)
 
@@ -83,14 +81,14 @@ RI_complete <- c(1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94, 121, 152, 213,
 N <- 58.5e6 # total population
 R <- RI_complete / N
 Y <- NI_complete / N - R 
-### Step function of pi_qbar(t)
+### Step function of pi(t)
 change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
 pi_qbar0 <- c(1.0, 0.9, 0.5, 0.1)
 res.step <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_qbar0,
                   change_time = change_time, casename = "Hubei_step", save_files = TRUE,
                   M = 5e3, nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
-#> Running for step-function pi_qbar(t)
+#> Running for step-function pi(t)
 #> Compiling model graph
 #>    Resolving undeclared variables
 #>    Allocating nodes
@@ -114,7 +112,7 @@ res.exp <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_q
                   change_time = change_time, exponential = TRUE, lambda0 = 0.01, 
                   casename = "Hubei_exp", M = 5e3, nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
-#> Running for exponential-function pi_qbar(t)
+#> Running for exponential-function pi(t)
 #> Compiling model graph
 #>    Resolving undeclared variables
 #>    Allocating nodes
@@ -135,7 +133,7 @@ res.exp$forecast_infection
 res.nopi <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_nopi",
                    M = 5e3, nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
-#> Running without pi_qbar(t)
+#> Running without pi(t)
 #> Compiling model graph
 #>    Resolving undeclared variables
 #>    Allocating nodes
@@ -170,7 +168,7 @@ res.q <- qh.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, phi = phi,
                change_time = change_time, casename = "Hubei_q", save_files = TRUE,
                M = 5e3, nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
-#> Running for q.SIR
+#> Running for qh.eSIR
 #> Compiling model graph
 #>    Resolving undeclared variables
 #>    Allocating nodes
@@ -193,7 +191,7 @@ res.q$forecast_infection
 res.noq <- qh.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_noq",
                  M = 5e3, nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
-#> Running for q.SIR
+#> Running for qh.eSIR
 #> Compiling model graph
 #>    Resolving undeclared variables
 #>    Allocating nodes

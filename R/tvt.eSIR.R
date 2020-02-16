@@ -31,7 +31,7 @@
 #' @param file_add the string to denote the location to save the output files and tables.
 #' @param save_files logical, whether save (\code{TRUE}) the results or not (\code{FALSE}). This will enable saving the summary table, trace plots, and the plot of the posterior mean of the first derivative of the infection proportion \eqn{\theta_t^I}.
 #' @param death_in_R numeric value of average ratio between deaths and cumulative removed subjects. The default is 0.4 within Hubei, and 0.02 outsite Hubei according to the reported data by Feb 11, 2020.
-#' @param casename string of the job's name. The default is "pi.SIR".
+#' @param casename string of the job's name. The default is "tvt.eSIR".
 #' @param beta0 the hyperparameter of the mean transmission rate, the default is the one estimated from SARS (0.2586) first-month outbreak.
 #' @param gamma0 the hyperparameter of the mean recovery rate (including death), the default is estimated from SARS (0.0821) first-month outbreak.
 #' @param R0 the hyperparameter of the mean R0 value. The default is \code{beta0/gamma0}, which can be overwritten by discarding the value set in \code{beta0}.
@@ -57,19 +57,19 @@
 #' ### Step function of pi_qbar(t)
 #' change_time <- c("01/23/2020","02/04/2020","02/08/2020")
 #' pi_qbar0 <- c(1.0,0.9,0.5,0.1)
-#' res.step <-pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,casename="Hubei_step",save_files = T)
+#' res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,casename="Hubei_step",save_files = T)
 #' res.step$forecast_infection
 #' ### continuous exponential function of pi_qbar(t)
-#' res.exp <- pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,exponential=TRUE,lambda0=0.01,casename="Hubei_exp")
+#' res.exp <- pi.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,exponential=TRUE,lambda0=0.01,casename="Hubei_exp")
 #' res.exp$forecast_infection
 #' ### without pi_qbar(t)
-#' res.nopi <- pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_nopi")
+#' res.nopi <- pi.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_nopi")
 #' res.nopi$forecast_infection
 #'
 #'
 #'
 #' @export
-tvt.eSIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lambda0=NULL,begin_str="01/23/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e3,thn=10,nburnin=2e3,dic=FALSE,file_add=character(0),save_files=FALSE,death_in_R=0.02,casename="pi.SIR",beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1){
+tvt.eSIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lambda0=NULL,begin_str="01/23/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e3,thn=10,nburnin=2e3,dic=FALSE,file_add=character(0),save_files=FALSE,death_in_R=0.02,casename="pi.eSIR",beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1){
 
   len <- round(M/thn)*nchain #number of MCMC draws in total
 
@@ -87,16 +87,16 @@ tvt.eSIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lamb
   if(exponential==FALSE & !is.null(change_time) & !is.null(pi_qbar0)){
 
     #pi_qbar0 <- c(1,0.9,0.5,0.1)
-    message("Running for step-function pi_qbar(t)")
+    message("Running for step-function pi(t)")
     if(length(change_time)!=length(pi_qbar0)-1){stop("We need the length of vector change_time to be the length of pi_qbar0 minus 1. ")}
     change_time_chorn<-c(begin-1,chron(dates.=change_time),end)
     pi_qbar <-rep(pi_qbar0,diff(change_time_chorn))
 
   } else if (exponential==TRUE & !is.null(lambda0)){
-    message("Running for exponential-function pi_qbar(t)")
+    message("Running for exponential-function pi(t)")
     pi_qbar <-exp(-lambda0*(0:(T_fin-1)))
   }else {
-    message("Running without pi_qbar(t)")
+    message("Running without pi(t)")
 
     pi_qbar <- rep(1,T_fin)
   }
@@ -374,8 +374,8 @@ plot2_list <- list(data_poly_R=data_poly_R,data_comp_R=data_comp_R,T_prime=T_pri
 
   if(save_files) ggsave(paste0(file_add,casename,"_forecast2.png"))
 
-  out_table<-data.frame(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci)
-  #out_table<-matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,k_p_mean,k_p_ci,lambdaY_p_mean,lambdaY_p_ci,lambdaR_p_mean,lambdaR_p_ci,as.character(first_order_change_date),as.character(second_order_change_date)),nrow=1)
+out_table<-matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci),nrow=1)
+#out_table<-matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,k_p_mean,k_p_ci,lambdaY_p_mean,lambdaY_p_ci,lambdaR_p_mean,lambdaR_p_ci,as.character(first_order_change_date),as.character(second_order_change_date)),nrow=1)
 
 
   colnames(out_table)<-c("thetaS_p_mean","thetaI_p_mean","thetaR_p_mean","thetaS_p_ci_low","thetaS_p_ci_med","thetaS_p_ci_up","thetaI_p_ci_low","thetaI_p_ci_med","thetaI_p_ci_up","thetaR_p_ci_low","thetaR_p_ci_med","thetaR_p_ci_up","R0_p_mean","R0_p_ci_low","R0_p_ci_med","R0_p_ci_up","gamma_p_mean","gamma_p_ci_low","gamma_p_ci_med","gamma_p_ci_up","beta_p_mean","beta_p_ci_low","beta_p_ci_med","beta_p_ci_up")
@@ -396,15 +396,15 @@ if(F){
   ### Step function of pi_qbar(t)
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   pi_qbar0 <- c(1.0,0.9,0.5,0.1)
-  res.step <-pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,casename="Hubei_step",save_files = T)
+  res.step <-pi.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,casename="Hubei_step",save_files = T)
   res.step$forecast_infection
 
   ### continuous exponential function of pi_qbar(t)
-  res.exp <- pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,exponential=TRUE,lambda0=0.01,casename="Hubei_exp")
+  res.exp <- pi.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,exponential=TRUE,lambda0=0.01,casename="Hubei_exp")
   res.exp$forecast_infection
 
   ### without pi_qbar(t)
-  res.nopi <- pi.SIR(Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_nopi")
+  res.nopi <- pi.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_nopi")
   res.nopi$forecast_infection
 }
 

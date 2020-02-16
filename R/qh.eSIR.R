@@ -29,7 +29,7 @@
 #' @param file_add the string to denote the location to save the output files and tables.
 #' @param save_files logical, whether save (\code{TRUE}) the results or not (\code{FALSE}). This will enable saving the summary table, trace plots, the plot of the posterior mean of the first derivative of the infection proportion \eqn{\theta_t^I}, and the proportion of quarantine.
 #' @param death_in_R numeric value of average ratio between deaths and cumulative removed subjects. It is 0.4 within Hubei and 0.02 outsite Hubei according to the reported data by Feb 11, 2020.
-#' @param casename string of the job's name. The default is "q.SIR".
+#' @param casename string of the job's name. The default is "qh.eSIR".
 #' @param beta0 the hyperparameter of the mean transmission rate, the default is the one estimated from SARS (0.2586) first-month outbreak.
 #' @param gamma0 the hyperparameter of the mean recovery rate (including death), the default is estimated from SARS (0.0821) first-month outbreak.
 #' @param R0 the hyperparameter of the mean R0 value. The default is \code{beta0/gamma0}, which can be overwritten by discarding the value set in \code{beta0}.
@@ -55,14 +55,14 @@
 #'   Y <- NI_complete/N- R #Jan13->Feb 11
 #'   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
 #'   phi <- c(0.1,0.4,0.4)
-#'   res.q <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q",save_files = T)
+#'   res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q",save_files = T)
 #'   res.q$forecast_infection
-#'   res.noq <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_noq")
+#'   res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_noq")
 #'   res.noq$forecast_infection
 #'
 #'
 #' @export
-qh.eSIR<-function (Y,R, phi=NULL,change_time=NULL,begin_str="01/23/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e3,thn=10,nburnin=2e3,dic=FALSE,file_add=character(0),save_files=FALSE,death_in_R=0.02,casename="q.SIR",beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1){
+qh.eSIR<-function (Y,R, phi=NULL,change_time=NULL,begin_str="01/23/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e3,thn=10,nburnin=2e3,dic=FALSE,file_add=character(0),save_files=FALSE,death_in_R=0.02,casename="qh.eSIR",beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1){
 
   len <- round(M/thn)*nchain #number of MCMC draws in total
 
@@ -77,12 +77,12 @@ qh.eSIR<-function (Y,R, phi=NULL,change_time=NULL,begin_str="01/23/2020",T_fin=2
   R0_var <- R0_sd^2
   lognorm_R0_parm <- lognorm.parm(R0,R0_var)
 
-  message("Running for q.SIR")
+  message("Running for qh.eSIR")
 
   if(length(change_time)!=length(phi)){stop("We need the length of vector change_time to be the length of phi. ")}
   change_time_chorn<-chron(dates.=change_time)
   phi_vec <-rep(0,T_fin)
-  phi_vec[as.numeric(change_time-begin)] <- phi
+  phi_vec[as.numeric(change_time_chorn-begin)] <- phi
 
 
   ################ MCMC ##########
@@ -417,7 +417,7 @@ qh.eSIR<-function (Y,R, phi=NULL,change_time=NULL,begin_str="01/23/2020",T_fin=2
 
   if(save_files) ggsave(paste0(file_add,casename,"_forecast2.png"))
 
-  out_table<-data.frame(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci)
+  out_table<-matrix(c(theta_p_mean,theta_p_ci,thetaQ_p_mean,thetaQ_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci),nrow=1)
   #out_table<-matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,k_p_mean,k_p_ci,lambdaY_p_mean,lambdaY_p_ci,lambdaR_p_mean,lambdaR_p_ci,as.character(first_order_change_date),as.character(second_order_change_date)),nrow=1)
 
 
@@ -439,11 +439,11 @@ if(F){
 
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   phi <- c(0.1,0.4,0.4)
-  res.q <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q",save_files = T)
+  res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q",save_files = T)
   res.q$forecast_infection
 
 
-  res.noq <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_noq")
+  res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_noq")
   res.noq$forecast_infection
 }
 

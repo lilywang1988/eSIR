@@ -8,7 +8,7 @@ qh.eSIR(Y, R, phi = NULL, change_time = NULL,
   begin_str = "01/23/2020", T_fin = 200, nchain = 4,
   nadapt = 10000, M = 5000, thn = 10, nburnin = 2000,
   dic = FALSE, file_add = character(0), save_files = FALSE,
-  death_in_R = 0.02, casename = "q.SIR", beta0 = 0.2586,
+  death_in_R = 0.02, casename = "qh.eSIR", beta0 = 0.2586,
   gamma0 = 0.0821, R0 = beta0/gamma0, gamma0_sd = 0.1, R0_sd = 1)
 }
 \arguments{
@@ -42,7 +42,7 @@ qh.eSIR(Y, R, phi = NULL, change_time = NULL,
 
 \item{death_in_R}{numeric value of average ratio between deaths and cumulative removed subjects. It is 0.4 within Hubei and 0.02 outsite Hubei according to the reported data by Feb 11, 2020.}
 
-\item{casename}{string of the job's name. The default is "q.SIR".}
+\item{casename}{string of the job's name. The default is "qh.eSIR".}
 
 \item{beta0}{the hyperparameter of the mean transmission rate, the default is the one estimated from SARS (0.2586) first-month outbreak.}
 
@@ -80,9 +80,9 @@ In this function we introduce a time-dependent multiplier (boundared between 0 a
   Y <- NI_complete/N- R #Jan13->Feb 11
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   phi <- c(0.1,0.4,0.4)
-  res.q <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q",save_files = T)
+  res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",T_fin=200,phi=phi,change_time=change_time,casename="Hubei_q",save_files = T)
   res.q$forecast_infection
-  res.noq <- q.SIR (Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_noq")
+  res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_noq")
   res.noq$forecast_infection
 
 
