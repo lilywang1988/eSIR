@@ -1,16 +1,16 @@
 R package eSIR: An extended SIR epidemiological model
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
-2020-02-16
+2020-02-19
 
 Purpose
 -------
 
 The outbreak of novel Corona Virus disease (a.k.a. COVID-19), originated in Wuhan, the capital of Hubei Province spreads quickly and affects many cities in China as well as many countries in the world. The Chinese government has enforced very stringent quarantine and inspection to prevent the worsening spread of COVID-19. Although various forms of forecast on the turning points of this epidemic within and outside Hubei Province have been published in the media, none of the prediction models has explicitly accounted for the time-varying quarantine protocols. We extended the classical SIR model for infectious disease by incorporating forms of medical isolation (in-home quarantine and hospitalization) in the underlying infectious disease dynamic system. Using the state-space model for both daily infected and hospitalized incidences and MCMC algorithms, we assess the effectiveness of quarantine protocols for confining COVID-19 spread in both Hubei Province and the other regions of China. Both predicted turning points and their credible bands may be obtained from the extended SIR under a given quarantine protocol. R software packages are also made publicly available for interested users.
 
-The standard SIR model has three components: susceptible, infected, and removed (including the recovery and dead). In the following sections, we will introduce the other extended state-space SIR models and their implementation in the package. *All the results provided are based on very short chains.* Please set at least `M=5e5` and `nburnin=2e5` to obtain stable MCMC chains via [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
+The standard SIR model has three components: susceptible, infected, and removed (including the recovery and dead). In the following sections, we will introduce the other extended state-space SIR models and their implementation in the package. **All the results provided are based on very short chains.** Please set at least `M=5e5` and `nburnin=2e5` to obtain stable MCMC chains via [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
 
-![Standard SIR](man/figures/SIR.png)
+![Standard SIR](man/figures/model0.png)
 
 Preparation
 -----------
@@ -44,7 +44,7 @@ Model 1 using `tvt.eSIR()`: a SIR model with a time-varying transmission rate
 -----------------------------------------------------------------------------
 
 By introducing a time-dependent
-$$\\pi\_\\bar{q}(t)\\in \[0,1\]$$
+*π*(*t*)∈\[0, 1\]
  function that multiplies the transmission rate
 *β*
 , we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
@@ -71,22 +71,21 @@ library(eSIR)
 #> Loading required package: gtools
 # Hubei province data Jan13 -> Feb 11
 # cumulative number of infected
-NI_complete <- c(41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549,  729, 1052, 
-                 1423, 2714, 3554, 4903, 5806, 7153, 9074, 11177, 13522, 16678, 
-                 19665, 22112, 24953, 27100, 29631, 31728, 33366)
-# cumulative number of recovered and death
-RI_complete <- c(1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94, 121, 152, 213, 
-                 252, 345, 417, 561, 650, 811, 1017, 1261, 1485, 1917, 2260, 
-                 2725, 3284, 3754) 
-N <- 58.5e6 # total population
-R <- RI_complete / N
-Y <- NI_complete / N - R 
-### Step function of pi(t)
-change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
-pi_qbar0 <- c(1.0, 0.9, 0.5, 0.1)
-res.step <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_qbar0,
-                  change_time = change_time, casename = "Hubei_step", save_files = TRUE,
-                  M = 5e3, nburnin = 2e3)
+NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
+                   1052,1423,2714,3554,4903,5806,7153,9074,11177,
+                13522,16678,19665,22112,24953,27100,29631,31728,33366)
+  RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,
+                   252,345,417,561,650,811,1017,1261,1485,1917,2260,
+                   2725,3284,3754)
+  N=58.5e6
+  R <- RI_complete/N
+  Y <- NI_complete/N- R #Jan13->Feb 11
+  ### Step function of pi(t)
+  change_time <- c("01/23/2020","02/04/2020","02/08/2020")
+  pi0<- c(1.0,0.9,0.5,0.1)
+  res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,
+                    pi0=pi0,change_time=change_time,dic=T,casename="Hubei_step",                   save_files = T, save_mcmc=F,
+                    M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for step-function pi(t)
 #> Compiling model graph
@@ -100,17 +99,27 @@ res.step <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_
 #> Initializing model
 #> Saving 12 x 8 in image
 #> Saving 12 x 8 in image
-res.step$forecast_infection
+  res.step$plot_infection
 ```
 
 ![](man/figures/README-model1-1.png)
 
 ``` r
-  
-### continuous exponential function of pi_qbar(t)
-res.exp <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_qbar0,
-                  change_time = change_time, exponential = TRUE, lambda0 = 0.01, 
-                  casename = "Hubei_exp", M = 5e3, nburnin = 2e3)
+  res.step$plot_removed
+```
+
+![](man/figures/README-model1-2.png)
+
+``` r
+  res.step$dic_val
+#> Mean deviance:  -1261 
+#> penalty 39.64 
+#> Penalized deviance: -1222
+
+  ### continuous exponential function of pi(t)
+  res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,                 exponential=TRUE,dic=F,lambda0=0.05,
+                  casename="Hubei_exp",save_files = F,save_mcmc=F,
+                  M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for exponential-function pi(t)
 #> Compiling model graph
@@ -122,16 +131,18 @@ res.exp <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, pi_qbar0 = pi_q
 #>    Total graph size: 1873
 #> 
 #> Initializing model
-res.exp$forecast_infection
+  res.exp$plot_infection
 ```
 
-![](man/figures/README-model1-2.png)
+![](man/figures/README-model1-3.png)
 
 ``` r
-  
-### without pi_qbar(t)
-res.nopi <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_nopi",
-                   M = 5e3, nburnin = 2e3)
+  #res.exp$plot_removed
+
+  ### without pi(t), the standard state-space SIR model without intervention
+  res.nopi <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,
+                       casename="Hubei_nopi",save_files = F,
+                       M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running without pi(t)
 #> Compiling model graph
@@ -143,10 +154,14 @@ res.nopi <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hu
 #>    Total graph size: 1873
 #> 
 #> Initializing model
-res.nopi$forecast_infection
+  res.nopi$plot_infection
 ```
 
-![](man/figures/README-model1-3.png)
+![](man/figures/README-model1-4.png)
+
+``` r
+  #res.nopi$plot_removed
+```
 
 Model 2 using `qh.eSIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
 -------------------------------------------------------------------------------------------------
@@ -162,11 +177,22 @@ $$
 
 ``` r
 set.seed(20192020)
-change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
-phi <- c(0.1, 0.4, 0.4)
-res.q <- qh.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, phi = phi,
-               change_time = change_time, casename = "Hubei_q", save_files = TRUE,
-               M = 5e3, nburnin = 2e3)
+NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
+                    1052,1423,2714,3554,4903,5806,7153,9074,11177,
+                    13522,16678,19665,22112,24953,27100,29631,31728,33366)
+  RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,
+                   252,345,417,561,650,811,1017,1261,1485,1917,2260,
+                   2725,3284,3754)
+  N=58.5e6
+  R <- RI_complete/N
+  Y <- NI_complete/N- R #Jan13->Feb 11
+
+  change_time <- c("01/23/2020","02/04/2020","02/08/2020")
+  phi0 <- c(0.1,0.4,0.4)
+  res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
+                    phi0=phi0,change_time=change_time,
+                    casename="Hubei_q",save_files = T,save_mcmc = F,
+                    M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for qh.eSIR
 #> Compiling model graph
@@ -180,40 +206,30 @@ res.q <- qh.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, phi = phi,
 #> Initializing model
 #> Saving 12 x 8 in image
 #> Saving 12 x 8 in image
-res.q$forecast_infection
+  res.q$plot_infection
 ```
 
 ![](man/figures/README-model2-1.png)
 
 ``` r
-  
-# The following codes provide identical result as the one fron res.nopi in pi.SIR
-res.noq <- qh.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200, casename = "Hubei_noq",
-                 M = 5e3, nburnin = 2e3)
-#> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
-#> Running for qh.eSIR
-#> Compiling model graph
-#>    Resolving undeclared variables
-#>    Allocating nodes
-#> Graph information:
-#>    Observed stochastic nodes: 60
-#>    Unobserved stochastic nodes: 37
-#>    Total graph size: 2676
-#> 
-#> Initializing model
-res.noq$forecast_infection
+  #res.q$plot_removed
+
+  #res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
+  #                    T_fin=200,casename="Hubei_noq",
+  #                    M=5e3,nburnin = 2e3)
+  #res.noq$plot_infection
 ```
 
-![](man/figures/README-model2-2.png)
+You will obtain the following plot in addition to the traceplots and summart table if you set `save_file=T` in `qh.eSIR`. The blue vertical line denotes the beginning date, and the other three gray lines denote the three change points.
 
-Following the uncommented codes we obtain following the plot in your working directory: ![Standard SIR](man/figures/Hubei_qthetaQ_plot.png)
+![Standard SIR](man/figures/Hubei_qthetaQ_plot.png)
 
 Outputs and summary table
 -------------------------
 
 To save all the plots (including trace plots) and summary tables, please set `save_files=T`, and if possible, provide a location by setting `file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other intermediate plots will not be saved, but you can still retrieve the forecast plots and summary table based on the return list, e.g., using `res.step$forecast_infection` and `res.step$out_table`.
 
-For details, please explore our package directly. We have .rd files establisehd, please use `help(q.SIR)` or `?pi.SIR` to find them.
+For details, please explore our package directly. We have .rd files establisehd, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them.
 
 References
 ----------

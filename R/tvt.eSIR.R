@@ -1,75 +1,98 @@
 # This is the source code for R package eSIR: extended-SIR
-# Built on Feb 13, 2020, and last edited on Feb 14, 2020
+# Built on Feb 13, 2020, and last edited on Feb 19, 2020
 # Correspondence : Peter X.K. Song, Ph.D. (pxsong@umich.edu)
 # Creator: Lili Wang, M.S. (lilywang@umich.edu)
-# Model 1: An extended SIR model with a time-varying pi_qbar, a multplier for beta, the transmission rate.
+# Model 1: An extended SIR model with a time-varying transmission rate modifier pi(t)
 # library(rjags)
 # library(gtools) #rdirichlet(n, alpha)
 # library(scales) #alpha　function
 # library(ggplot2)
 # library(chron)
-#' SIR model with a time-varying transmission rate
+#' Fit extended state-space SIR model with time-varying transmission rates
 #'
-#' SIR model with fixed and known changes in the transmission rate, either stepwise or continuous.
+#' Fit extended state-space SIR model with prespecified changes in the transmission rate, either stepwise or continuous, accomodating time-varying quaratine protocols.
 #'
-#' In this function we introduce a time-dependent multiplier (boundared between 0 and 1) of the transmisison rate, \eqn{pi_{qbar}(t)}. In this way,  we can edow the transmission some time-dependent changes, either following a step-function or a smooth exponetial function (\eqn{\exp(\lambda_0t)}). The parameters of the function and change points, if any, need to be predefined.
+#' We fit a state-space model with extended SIR, in which a time-varying transmission rate modifier \eqn{\pi(t)} (between 0 and 1) is introcuded to model. This allows us to accommodate quarantine protocol changes and ignored resources of hospitalization. The form of reducing rate may be a step-function with jomps at times of big policy changes or a smooth exponential survival function \eqn{\exp(-\lambda_0t)}. The parameters of the function and change points, if any, should be predefined.
 #'
-#' @param Y the observed infected proportions by time.
-#' @param R the observed removed proportions by time, including death and recovered.
-#' @param pi_qbar0 the time dependent function \eqn{\pi_bar{q}(t)} between 0 and 1.
-#' @param change_time the change time points for step function pi, defalt value is \code{NULL}.
-#' @param exponential logical, whether \eqn{\pi_bar{q}(t)} is exponential \eqn{\exp(-\lambda_0t)} or not; the default is \code{FALSE}.
-#' @param lambda0 the rate of decline in the exponential function in \eqn{\exp(-\lambda_0t)}.
-#' @param begin_str the character of the starting time, the default is "01/23/2020", which is the starting date that the local government blocked Wuhan City.
-#' @param T_fin the maximum follow-up date after the beginning \code{begin_str}, the default is 200.
-#' @param nchain the number of MCMC chains called in rjags, the default is 4.
-#' @param nadapt the number of iterations for adaptation in the MCMC. The default is 1e4, which is what we suggest to use 1e4 instead.
-#' @param M number of draws from each chain, without considering thinning. The default is M=5e3 but we suggest using 5e5 instead.
-#' @param thn thinning interval for monitors. Thus, the total number of draws would be \code{round(M/thn)*nchain }. The default is 10.
-#' @param nburnin the burn-in period. The default is nburnin=2e3 but we suggest using nburin=2e5.
-#' @param dic logical, whether compute the DIC or deviance information criterion.
-#' @param file_add the string to denote the location to save the output files and tables.
-#' @param save_files logical, whether save (\code{TRUE}) the results or not (\code{FALSE}). This will enable saving the summary table, trace plots, and the plot of the posterior mean of the first derivative of the infection proportion \eqn{\theta_t^I}.
-#' @param death_in_R numeric value of average ratio between deaths and cumulative removed subjects. The default is 0.4 within Hubei, and 0.02 outsite Hubei according to the reported data by Feb 11, 2020.
-#' @param casename string of the job's name. The default is "tvt.eSIR".
-#' @param beta0 the hyperparameter of the mean transmission rate, the default is the one estimated from SARS (0.2586) first-month outbreak.
-#' @param gamma0 the hyperparameter of the mean recovery rate (including death), the default is estimated from SARS (0.0821) first-month outbreak.
-#' @param R0 the hyperparameter of the mean R0 value. The default is \code{beta0/gamma0}, which can be overwritten by discarding the value set in \code{beta0}.
-#' @param gamma0_sd the standard deviance for the prior of the recovery/remove rate, the default is 0.1.
-#' @param R0_sd the standard deviance for the prior of R0, the default is 1.
+#'
+#' @param Y the time series of daily observed infected compartment proportions.
+#' @param R the time series of daily observed removed compartment proportions, including death and recovered.
+#' @param pi0 the time-dependent transission rate modifier \eqn{\pi(t)} between 0 and 1.
+#' @param change_time the change points over time for step function pi, defalt value is \code{NULL}.
+#' @param exponential logical, whether \eqn{\pi(t)} is exponential \eqn{\exp(-\lambda_0t)} or not; the default is \code{FALSE}.
+#' @param lambda0 the rate of decline in the exponential survival function in \eqn{\exp(-\lambda_0t)}.
+#' @param begin_str the character of starting time, the default is "01/13/2020".
+#' @param T_fin the end of follow-up time after the beginning date \code{begin_str}, the default is 200.
+#' @param nchain the number of MCMC chains generated by \code{\link[rjags]{rjags}}, the default is 4.
+#' @param nadapt the iteration number of adaptation in the MCMC. We recommend using at least the default value 1e4 to obtained fully adapted chains.
+#' @param M the number of draws in each chain, with no thinning. The default is M=5e2 but suggest using 5e5.
+#' @param thn the thinning interval between mixing. The total number of draws thus would become \code{round(M/thn)*nchain}. The default is 10.
+#' @param nburnin the burn-in period. The default is 2e2 but suggest 2e5.
+#' @param dic logical, whether compute the DIC (deviance information criterion) for model selection.
+#' @param death_in_R the numeric value of average of cumulative deaths in the removed compartments. The default is 0.4 within Hubei and 0.02 outside Hubei.
+#' @param casename the string of the job's name. The default is "tvt.eSIR".
+#' @param beta0 the hyperparameter of average transmission rate, the default is the one estimated from the SARS first-month outbreak (0.2586).
+#' @param gamma0 the hyperparameter of average removed rate, the default is the one estimated from the SARS first-month outbreak (0.0821).
+#' @param R0 the hyperparameter of the mean reproduction number R0. The default is thus the ratio of \code{beta0/gamma0}, which can be specified directly.
+#' @param gamma0_sd the standard deviation for the prior distrbution of the removed rate \eqn{\gamma}, the default is 0.1.
+#' @param R0_sd the standard deviation for the prior disbution of R0, the default is 1.
+#' @param file_add the string to denote the location of saving output files and tables.
+#' @param save_files logical, whether save (\code{TRUE}) results or not (\code{FALSE}). This enables to save summary tables, trace plots, and plots of the posterior means of the first-order derivatives of the infection prevalence process \eqn{\theta_t^I}.
+#' @param save_mcmc logical, whether save (\code{TRUE}) all the MCMC outputs or not (\code{FALSE}).The output file will be an \code{.RData} file named by the \eqn{casename}. We include arrays of prevalence values of the three compartments with their matrices of posterior draws up to the last date of the collected data as \code{theta_p[,,1]} and afterwards as \code{theta_pp[,,1]} for \eqn{\theta_t^S}, \code{theta_p[,,2]} and \code{theta_pp[,,2]} for \eqn{\theta_t^I}, and \code{theta_p[,,3]} and \code{theta_pp[,,3]} for \eqn{\theta_t^R}. Moreover, the input and predicted proportions \code{Y}, \code{Y_pp}, \code{R} and \code{R_pp} can also be retrieved. The prevalence and prediceted proportion matrices have rows for MCMC replicates, and columns for days. The MCMC posterior draws of other parameters including \code{beta_p}, \code{gamma_p}, \code{R0_p}, and variance controllers \code{k_p}, \code{lambdaY_p}, \code{lambdaR_p} are also available.
+#'
 #' @return
-#' \item{casename}{casename defined before}
-#' \item{incidence_mean}{mean incidence}
-#' \item{incidence_ci}{2.5\%, 50\%, and 97.5\% quantiles of the incidences}
-#' \item{out_table}{summary table with varibles including the posterior mean of the proportions of the 3 states at their last observation date, and their respective credible inctervals (ci) including the median; the mean and ci of the reporduction number (R0), removed/recovery rate (gamma), transmission rate  (beta)}
-#' \item{forecast_infection}{plot to forecast the infection with following lines: the vertial blue line denotes the last observation date; vertial purple line denotes the change point indicating a decrease in infection proportion or the date with 0 value of the posterior mean first-derivative infection proportion \eqn{\theta_t^{\prime I}}; the vertial darkgreen line denotes the deacceleration point of the increasing infection proportion or the date with maximum value of the posterior mean first-derivative infection proportion \eqn{\theta_t^{\prime I}}; the darkgray line denotes the posterior mean of the infection proportion; the red line denotes the posterior median of the infection proportion}
-#' \item{forecast_removed}{plot to forecast the removed lines described in \code{forecast_infection}. The meaning of the vertical lines were identical, but the horizontal mean and median were corresponding to the posterior mean and median of the removed state. Moreover, we introduce an additional line for the estimated death proportion, which is based on the input \code{death_in_R}}
-#' \item{first_stat_mean}{the mean first stationary date, which is the change point that we observe decline in the infection proportion (\eqn{\theta_t^I}), or its stationary point; it is calculated using the average of the 0-points of all the repeats of posterior draws of the first derivative proportion or \eqn{\theta_t{\prime I}}; this value may be slightly different from the one labeled by the "purple" lines in the \code{forecast_infection} and \code{forecast_removed} two plots, as the latter indicate the 0-value point of the first-derivative the posterior mean of \eqn{\theta_t^I}.}
-#' \item{first_stat_ci}{following the definition of \code{first_stat_mean}, but is the corresponding credible interval.}
-#' \item{second_stat_mean}{the mean second stationary date, which is the change point that we observe the decline in the increasing spead of the infection proportion (\eqn{\theta_t^I}) or its derivative's stationary point;it is calculated using the average of the stationary values of all the repeats of posterior draws of the first-derivative porportion of infection or \eqn{\theta_t^{\prime I}}; this value may be slightly different from the one labeled by the "darkgreen" lines in the \code{forecast_infection} and \code{forecast_removed} two plots, as the latter indicate the stationary point of the first-derivative the posterior mean of \eqn{\theta_t^I}.}
-#' \item{dic_val}{the output of \code{dic.sample()} in \code{rjags}, computing deviance information criterion for model comparison.}
+#' \item{casename}{the predefined \code{casename}.}
+#' \item{incidence_mean}{mean incidence.}
+#' \item{incidence_ci}{2.5\%, 50\%, and 97.5\% quantiles of the incidences.}
+#' \item{out_table}{summary tables including the posterior mean of the prevalance processes of the 3 states compartments (\eqn{\theta_t^S,\theta_t^I,\theta_t^R}) at last date of data collected ((\eqn{t^\prime}) decided by the lengths of your input data \code{Y} and \code{R}), and their respective credible inctervals (ci); the respective means and ci's of the reporduction number (R0), removed rate (\eqn{\gamma}), transmission rate  (\eqn{\beta}).}
+#' \item{plot_infection}{plot of summarizing and forecasting for the infection compartment, in which the vertial blue line denotes the last date of data collected (\eqn{t^\prime}), the vertial darkgray line denotes the deacceleration point (first turning point) that the posterior mean first-derivative of infection prevalence \eqn{\dot{\theta}_t^I} achieves the  maximum, the vertical purple line denotes the second turning point that the posterior mean first-derivative infection proportion \eqn{\dot{\theta}_t^I} equals zero, the darkgray line denotes the posterior mean of the infection prevalence \eqn{\theta_t^I} and the red line denotes its posterior median. }
+#' \item{plot_removed}{plot of summarizing and forecasting for the removed compartment with lines similar to those in the \code{plot_infection}. The vertical lines are identical, but the horizontal mean and median correspond to the posterior mean and median of the removed process \eqn{\theta_t^R}. An additional line indicates the estimated death prevalence from the input \code{death_in_R}.}
+#' \item{first_tp_mean}{the date t at which \eqn{\ddot{\theta}_t^I=0}, calculated as the average of the time points with maximum posterior first-order derivatives \eqn{\dot{\theta}_t^I}; this value may be slightly different from the one labeled by the "darkgreen" lines in the two plots \code{plot_infection} and \code{plot_removed}, which indicate the stationary point such that the first-order derivative of the averaged posterior of \eqn{\theta_t^I} reaches its maximum.}
+#'
+#'\item{first_tp_ci}{fwith \code{first_tp_mean}, it reports the corresponding credible interval and median.}
+#' \item{second_tp_mean}{the date t at which \eqn{\theta_t^I=0}, calculated as the average of the stationary points of all of posterior first-order derivatives \eqn{\dot{\theta}_t^I}; this value may be slightly different from the one labeled by the "pruple" lines in the plots of \code{plot_infection} and \code{plot_removed}. The latter indicate stationary t at which the first-order derivative of the averaged posterior of \eqn{\theta_t^I} equals zero.}
+#' \item{second_tp_ci}{with \code{second_tp_mean}, it reports the corresponding credible interval and median.}
+#' \item{dic_val}{the output of \code{dic.sample()} in  \code{\link[rjags]{dic.sample}}, computing deviance information criterion for model comparison.}
 #' @examples
-#' NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,1052,1423,2714,3554,4903,5806,7153,9074,11177,13522,16678,19665,22112,24953,27100,29631,31728,33366)
-#' RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,252,345,417,561,650,811,1017,1261,1485,1917,2260,2725,3284,3754)
+#' NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
+#'                   1052,1423,2714,3554,4903,5806,7153,9074,11177,
+#'                13522,16678,19665,22112,24953,27100,29631,31728,33366)
+#' RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,
+#'                  252,345,417,561,650,811,1017,1261,1485,1917,2260,
+#'                  2725,3284,3754)
 #' N=58.5e6
 #' R <- RI_complete/N
 #' Y <- NI_complete/N- R #Jan13->Feb 11
-#' ### Step function of pi_qbar(t)
+#' ### Step function of pi(t)
 #' change_time <- c("01/23/2020","02/04/2020","02/08/2020")
-#' pi_qbar0 <- c(1.0,0.9,0.5,0.1)
-#' res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,casename="Hubei_step",save_files = T)
-#' res.step$forecast_infection
-#' ### continuous exponential function of pi_qbar(t)
-#' res.exp <- pi.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,exponential=TRUE,lambda0=0.01,casename="Hubei_exp")
-#' res.exp$forecast_infection
-#' ### without pi_qbar(t)
-#' res.nopi <- pi.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_nopi")
-#' res.nopi$forecast_infection
+#' pi0<- c(1.0,0.9,0.5,0.1)
+#' res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
+#'          T_fin=200,pi0=pi0,change_time=change_time,dic=T,
+#'          casename="Hubei_step",save_files = T,
+#'          save_mcmc=F,M=5e2,nburnin = 2e2)
+#' res.step$plot_infection
+#' res.step$plot_removed
+#' res.step$dic_val
+#'
+#' ### continuous exponential function of pi(t)
+#' res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
+#'            T_fin=200,exponential=TRUE,dic=F,lambda0=0.05,
+#'            casename="Hubei_exp",save_files = F,save_mcmc=F,
+#'            M=5e2,nburnin = 2e2)
+#' res.exp$plot_infection
+#' #res.exp$plot_removed
+#'
+#' ### without pi(t), the standard state-space SIR model without intervention
+#' res.nopi <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
+#'                 T_fin=200,casename="Hubei_nopi",save_files = F,
+#'                 M=5e2,nburnin = 2e2)
+#' res.nopi$plot_infection
+#' #res.nopi$plot_removed
 #'
 #'
 #'
 #' @export
-tvt.eSIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lambda0=NULL,begin_str="01/23/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e3,thn=10,nburnin=2e3,dic=FALSE,file_add=character(0),save_files=FALSE,death_in_R=0.02,casename="pi.eSIR",beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1){
+tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=NULL,begin_str="01/13/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e2,thn=10,nburnin=2e2,dic=FALSE,death_in_R=0.02,beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1,casename="tvt.eSIR",file_add=character(0),save_files=FALSE,save_mcmc=FALSE){
 
   len <- round(M/thn)*nchain #number of MCMC draws in total
 
@@ -78,46 +101,50 @@ tvt.eSIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lamb
   begin <- chron(dates.=begin_str)
   chron_ls <- chron(begin:(begin+T_fin))
   end <- chron(begin:(begin+T_fin))[T_fin]
-  message(paste0("The follow-up is from ",begin," to ",end," and the last observed date is ", chron_ls [T_prime],".") )# current data up to this date
+  message(paste0("The follow-up is from ",begin," to ",
+                 end," and the last observed date is ", chron_ls [T_prime],".") )
+  # current data up to this date
   gamma_var <- gamma0_sd^2
   lognorm_gamma_parm <- lognorm.parm(gamma0,gamma_var)
   R0_var <- R0_sd^2
   lognorm_R0_parm <- lognorm.parm(R0,R0_var)
 
-  if(exponential==FALSE & !is.null(change_time) & !is.null(pi_qbar0)){
+  if(exponential==FALSE & !is.null(change_time) & !is.null(pi0)){
 
-    #pi_qbar0 <- c(1,0.9,0.5,0.1)
+    #pi0<- c(1,0.9,0.5,0.1)
     message("Running for step-function pi(t)")
-    if(length(change_time)!=length(pi_qbar0)-1){stop("We need the length of vector change_time to be the length of pi_qbar0 minus 1. ")}
+    if(length(change_time)!=length(pi0)-1){
+      stop("We need the length of vector change_time to be the length of pi0 minus 1. ")
+      }
     change_time_chorn<-c(begin-1,chron(dates.=change_time),end)
-    pi_qbar <-rep(pi_qbar0,diff(change_time_chorn))
+    pi <-rep(pi0,diff(change_time_chorn))
 
   } else if (exponential==TRUE & !is.null(lambda0)){
     message("Running for exponential-function pi(t)")
-    pi_qbar <-exp(-lambda0*(0:(T_fin-1)))
+    pi <-exp(-lambda0*(0:(T_fin-1)))
   }else {
     message("Running without pi(t)")
 
-    pi_qbar <- rep(1,T_fin)
+    pi <- rep(1,T_fin)
   }
 
   ################ MCMC ##########
   model1.string <-　paste0("
              model{
                    for(t in 2:(T_prime+1)){
-                   Km[t-1,1] <- -beta*pi_qbar[t-1]*theta[t-1,1]*theta[t-1,2]
+                   Km[t-1,1] <- -beta*pi[t-1]*theta[t-1,1]*theta[t-1,2]
                    Km[t-1,9] <- gamma*theta[t-1,2]
                    Km[t-1,5] <- -Km[t-1,1]-Km[t-1,9]
 
-                   Km[t-1,2] <- -beta*pi_qbar[t-1]*(theta[t-1,1]+0.5*Km[t-1,1])*(theta[t-1,2]+0.5*Km[t-1,5])
+                   Km[t-1,2] <- -beta*pi[t-1]*(theta[t-1,1]+0.5*Km[t-1,1])*(theta[t-1,2]+0.5*Km[t-1,5])
                    Km[t-1,10] <- gamma*(theta[t-1,2]+0.5*Km[t-1,5])
                    Km[t-1,6] <- -Km[t-1,2]-Km[t-1,10]
 
-                   Km[t-1,3] <- -beta*pi_qbar[t-1]*(theta[t-1,1]+0.5*Km[t-1,2])*(theta[t-1,2]+0.5*Km[t-1,6])
+                   Km[t-1,3] <- -beta*pi[t-1]*(theta[t-1,1]+0.5*Km[t-1,2])*(theta[t-1,2]+0.5*Km[t-1,6])
                    Km[t-1,11] <- gamma*(theta[t-1,2]+0.5*Km[t-1,6])
                    Km[t-1,7] <- -Km[t-1,3]-Km[t-1,11]
 
-                   Km[t-1,4] <- -beta*pi_qbar[t-1]*(theta[t-1,1]+Km[t-1,3])*(theta[t-1,2]+Km[t-1,7])
+                   Km[t-1,4] <- -beta*pi[t-1]*(theta[t-1,1]+Km[t-1,3])*(theta[t-1,2]+Km[t-1,7])
                    Km[t-1,12] <- gamma*(theta[t-1,2]+Km[t-1,7])
                    Km[t-1,8] <- -Km[t-1,4]-Km[t-1,12]
 
@@ -143,21 +170,23 @@ tvt.eSIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lamb
 
   model.spec <- textConnection(model1.string)
 
-  posterior <- jags.model(model.spec,data=list('Y'=Y,'R'=R,'T_prime'=T_prime,'pi_qbar'=pi_qbar),n.chains =nchain, n.adapt = nadapt)
+  posterior <- jags.model(model.spec,data=list('Y'=Y,'R'=R,'T_prime'=T_prime,'pi'=pi),n.chains =nchain, n.adapt = nadapt)
 
   update(posterior,nburnin) #burn-in
 
-  jags_sample <-jags.samples(posterior,c('theta','gamma','R0','beta','Y','lambdaY','lambdaR','k'),n.iter=M*nchain,thin=thn)
+  jags_sample <-jags.samples(posterior,c('theta','gamma','R0','beta','Y','lambdaY','lambdaR','k'),
+                             n.iter=M*nchain,thin=thn)
 
   if(dic) {
     dic_val <-dic.samples(posterior,n.iter=M*nchain,thin=thn)
-    message(paste0("DIC is: ", dic_val))
+   # message(paste0("DIC is: ", dic_val))
   } else dic_val=NULL
 
 
   if(save_files) {
     png(paste0(file_add,casename,"theta_p.png"), width = 700, height = 900)
-    plot(as.mcmc.list(jags_sample$theta)[[1]][,(1:3)*(T_prime+1)]) # posterior true porbabilities
+    plot(as.mcmc.list(jags_sample$theta)[[1]][,(1:3)*(T_prime+1)])
+    # posterior true porbabilities
     dev.off()
     png(paste0(file_add,casename,"R0_p.png"), width = 700, height = 350)
     plot(R0_p<-as.mcmc.list(jags_sample$R0)[[1]])
@@ -232,19 +261,19 @@ tvt.eSIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lamb
     for(t in 1:(T_fin-T_prime)){
       Km <- NULL
       alpha_pp <- NULL
-      Km[1] <- -betal*pi_qbar[t+T_prime]*thetalt1*thetalt2
+      Km[1] <- -betal*pi[t+T_prime]*thetalt1*thetalt2
       Km[9] <- gammal*thetalt2
       Km[5] <- -Km[1]-Km[9]
 
-      Km[2] <- -betal*pi_qbar[t+T_prime]*(thetalt1+0.5*Km[1])*(thetalt2+0.5*Km[5])
+      Km[2] <- -betal*pi[t+T_prime]*(thetalt1+0.5*Km[1])*(thetalt2+0.5*Km[5])
       Km[10] <- gammal*(thetalt2+0.5*Km[5])
       Km[6] <- -Km[2]-Km[10]
 
-      Km[3] <- -betal*pi_qbar[t+T_prime]*(thetalt1+0.5*Km[2])*(thetalt2+0.5*Km[6])
+      Km[3] <- -betal*pi[t+T_prime]*(thetalt1+0.5*Km[2])*(thetalt2+0.5*Km[6])
       Km[11] <- gammal*(thetalt2+0.5*Km[6])
       Km[7] <- -Km[3]-Km[11]
 
-      Km[4] <- -betal*pi_qbar[t+T_prime]*(thetalt1+Km[3])*(thetalt2+Km[7])
+      Km[4] <- -betal*pi[t+T_prime]*(thetalt1+Km[3])*(thetalt2+Km[7])
       Km[12] <- gammal*(thetalt2+Km[7])
       Km[8] <- -Km[4]-Km[12]
 
@@ -282,61 +311,75 @@ tvt.eSIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lamb
   ## First-order derivative check
   thetaS_mat <- cbind(theta_p[,-1,1],theta_pp[,,1])
   thetaI_mat <- cbind(theta_p[,-1,2],theta_pp[,,2])
-  dthetaI_mat <- (thetaS_mat*thetaI_mat)*((c(beta_p))%o%(pi_qbar))-thetaI_mat*replicate(T_fin,c(gamma_p))
+  dthetaI_mat <- (thetaS_mat*thetaI_mat)*((c(beta_p))%o%(pi))-thetaI_mat*replicate(T_fin,c(gamma_p))
   dthetaI <- colMeans(dthetaI_mat)
-  dthetaI_stationary2 <- (1:T_fin)[which.max(dthetaI)]# first second order derivative=0
-  dthetaI_stationary1 <- (dthetaI_stationary2:T_fin)[which.min(dthetaI[dthetaI_stationary2:T_fin]>0)] # first order derivative=0
-  dthetaI_stationary2_date <- chron_ls[dthetaI_stationary2]
-  dthetaI_stationary1_date <- chron_ls[dthetaI_stationary1]
+  dthetaI_tp1 <- (1:T_fin)[which.max(dthetaI)]# first second order derivative=0
+  dthetaI_tp2 <- (dthetaI_tp1:T_fin)[which.min(dthetaI[dthetaI_tp1:T_fin]>0)] # first order derivative=0
+  dthetaI_tp1_date <- chron_ls[dthetaI_tp1]
+  dthetaI_tp2_date <- chron_ls[dthetaI_tp2]
 
 
-  incidence_vec <-  rowSums((thetaS_mat*thetaI_mat)*((c(beta_p))%o%(pi_qbar)))
+  incidence_vec <-  rowSums((thetaS_mat*thetaI_mat)*((c(beta_p))%o%(pi)))
   incidence_mean <-  mean(incidence_vec)
 
   incidence_ci <- quantile(incidence_vec,c(0.025,0.5,0.975))
-  second_order_stationary_vec <- (1:T_fin)[apply(dthetaI_mat,1,which.max)]# first second order derivative=0
+  first_tp_vec <- (1:T_fin)[apply(dthetaI_mat,1,which.max)]# first second order derivative=0
 
-  first_order_stationary_vec <- sapply(1:len,function(l){
-    (second_order_stationary_vec[l]:T_fin)[which.min(dthetaI_mat[l,second_order_stationary_vec[l]:T_fin]>0)]})
+  second_tp_vec <- sapply(1:len,function(l){
+    (first_tp_vec[l]:T_fin)[which.min(dthetaI_mat[l,first_tp_vec[l]:T_fin]>0)]})
  # first order derivative=0
-  second_order_stationary_mean <- mean(second_order_stationary_vec)
-  first_order_stationary_mean <- mean(first_order_stationary_vec)
+  first_tp_mean <- mean(first_tp_vec)
+  second_tp_mean <- mean(second_tp_vec)
 
-  second_order_stationary_ci <- quantile(second_order_stationary_vec, c(0.025,0.5,0.975))
-  first_order_stationary_ci <- quantile(first_order_stationary_vec, c(0.025,0.5,0.975))
+  first_tp_ci <- quantile(first_tp_vec, c(0.025,0.5,0.975))
+  second_tp_ci <- quantile(second_tp_vec, c(0.025,0.5,0.975))
 
-  second_order_change_date <- chron_ls[second_order_stationary_mean]
-  first_order_change_date <- chron_ls[first_order_stationary_mean]
-  second_order_change_date_ci <- chron_ls[second_order_stationary_ci]
-  first_order_change_date_ci <- chron_ls[first_order_stationary_ci]
+  first_tp_date_mean <- chron_ls[first_tp_mean]
+  second_tp_date_mean <- chron_ls[second_tp_mean]
+  first_tp_date_ci <- chron_ls[first_tp_ci]
+  second_tp_date_ci <- chron_ls[second_tp_ci]
 
-  names(second_order_change_date_ci)<-c("2.5%","50%","97.5%")
-  names(first_order_change_date_ci)<-c("2.5%","50%","97.5%")
+  names(first_tp_date_ci)<-c("2.5%","50%","97.5%")
+  names(second_tp_date_ci)<-c("2.5%","50%","97.5%")
 
   if(save_files){
     png(paste0(file_add,casename,"deriv.png"), width = 700, height = 350)
     plot(y=dthetaI,x=chron_ls,type='l',ylab="1st order derivative",main="Infection Proportion")
     abline(h=0,col=2)
     abline(v=begin,col="blue")
-    if(exponential==FALSE & !is.null(change_time) & !is.null(pi_qbar0)) abline(v=change_time_chorn[-c(1,length(change_time_chorn))],col="gray")
+    if(exponential==FALSE & !is.null(change_time) & !is.null(pi0)){
+      abline(v=change_time_chorn[-c(1,length(change_time_chorn))],col="gray")
+    }
+    legend("topright", legend=c("begin","change point"), col=c("blue","gray"),lty=1, title="",bty = "n")
     dev.off()
   }
 
   y_text_ht <- max(rbind(thetaI_band ,Y_band))/2
   plot <- ggplot(data = data_poly, aes(x = x, y = y)) +
     geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +
-    labs(title=substitute(paste(casename,": infection forecast with prior ",beta[0],"=",v1,",",gamma[0], "=",v2," and ", R[0],"=",v3), list(casename=casename,v1=format(beta0,digits=3),v2=format(gamma0,digits=3),v3=format(R0,digits=3))),subtitle = substitute(paste("Posterior: ", beta[p],"=",v1,",",gamma[p], "=",v2," and ", R[0],"=",v3), list(v1=format(beta_p_mean,digits=3),v2=format(gamma_p_mean,digits=3),v3=format(R0_p_mean,digits=3))),x = "time", y = "P(Removed)")+
+    labs(title=substitute(paste(casename,": infection forecast with prior ",beta[0],"=",v1,",",gamma[0], "=",v2," and ", R[0],"=",v3), list(casename=casename,v1=format(beta0,digits=3),v2=format(gamma0,digits=3),v3=format(R0,digits=3))),subtitle = substitute(paste("Posterior ", beta[p],"=",v1,",",gamma[p], "=",v2," and ", R[0],"=",v3), list(v1=format(beta_p_mean,digits=3),v2=format(gamma_p_mean,digits=3),v3=format(R0_p_mean,digits=3))),x = "time", y = "P(Infected)")+
     geom_line(data=data_comp,aes(x=time,y=median),color="red")+geom_vline(xintercept = T_prime,color="blue",show.legend = TRUE)+
-    geom_vline(xintercept = dthetaI_stationary2,color="darkgreen",show.legend = TRUE)+
-    geom_vline(xintercept = dthetaI_stationary1,color="purple",show.legend = TRUE)+
+    geom_vline(xintercept = dthetaI_tp1,color="darkgreen",show.legend = TRUE)+
+    geom_vline(xintercept = dthetaI_tp2,color="purple",show.legend = TRUE)+
     geom_line(data=data_comp,aes(x=time,y=mean),color="darkgray")+
     geom_point(data=data_pre,aes(x=time,y=Y))+theme_bw()+
-    theme( plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust=0.5))+scale_x_continuous(labels= as.character(chron_ls)[seq(1,T_fin,30)],breaks=seq(1,T_fin,30))+scale_fill_discrete(name="Posterior",labels=c(expression(paste(y[t+1:T],' | ',y[1:t],', ',r[1:t])),expression(paste(theta[1:t]^I,' | ',y[1:t],', ',r[1:t]))))+
+    theme( plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+           plot.subtitle = element_text(hjust = 0.5, size = 12),
+           axis.text.x = element_text(angle = 45, hjust = 1),
+           axis.text=element_text(size=15),
+           axis.title=element_text(size=14),
+           legend.title = element_text(size = 15),
+           legend.text = element_text(size=12))+
+    scale_x_continuous(labels= as.character(chron_ls)[seq(1,T_fin,30)],
+          breaks=seq(1,T_fin,30))+
+    scale_fill_discrete(name="Posterior",
+         labels=c(expression(paste(y[t+1:T]^I,' | ',y[1:t]^I,', ',y[1:t]^R)),
+    expression(paste(theta[1:t]^I,' | ',y[1:t]^I,', ',y[1:t]^R))))+
     annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=y_text_ht,color="blue")+
-    annotate(geom="text", label=as.character(chron(dthetaI_stationary2_date,format="mon day")), x=dthetaI_stationary2+12, y=y_text_ht*1.25,color="darkgreen")+
-    annotate(geom="text", label=as.character(chron(dthetaI_stationary1_date,format="mon day")), x=dthetaI_stationary1+12, y=y_text_ht*1.5,color="purple")
+    annotate(geom="text", label=as.character(chron(dthetaI_tp1_date,format="mon day")), x=dthetaI_tp1+12, y=y_text_ht*1.25,color="darkgreen")+
+    annotate(geom="text", label=as.character(chron(dthetaI_tp2_date,format="mon day")), x=dthetaI_tp2+12, y=y_text_ht*1.5,color="purple")
 
-  plot_list <- list(data_poly=data_poly,data_comp=data_comp,T_prime=T_prime,dthetaI_stationary2=dthetaI_stationary2,dthetaI_stationary1=dthetaI_stationary1,data_pre=data_pre,dthetaI_stationary2_date,dthetaI_stationary1_date,y_text_ht)
+ # plot_list <- list(data_poly=data_poly,data_comp=data_comp,T_prime=T_prime,dthetaI_stationary2=dthetaI_stationary2,dthetaI_stationary1=dthetaI_stationary1,data_pre=data_pre,dthetaI_stationary2_date,dthetaI_stationary1_date,y_text_ht)
 
   if(save_files) ggsave(paste0(file_add,casename,"_forecast.png"))
 
@@ -357,20 +400,37 @@ tvt.eSIR <- function (Y,R, pi_qbar0=NULL,change_time=NULL,exponential=FALSE,lamb
   data_poly_R<-data.frame(y=c(thetaR_band$upper,rev(thetaR_band$lower),R_band$upper,rev(R_band$lower)),x=c(1:T_prime,T_prime:1,(T_prime+1):T_fin,T_fin:(T_prime+1)),phase=c(rep('pre',T_prime*2),rep('post',(T_fin-T_prime)*2)),value=c(rep(col2[1],T_prime*2),rep(col2[2],(T_fin-T_prime)*2)))
 
   r_text_ht <- max(rbind(thetaR_band ,R_band))/2
-  plot2 <- ggplot(data = data_poly_R, aes(x = x, y = y)) +geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +labs(title=substitute(paste(casename,": removed forecast with prior ",beta[0],"=",v1,",",gamma[0], "=",v2," and ", R[0],"=",v3), list(casename=casename,v1=format(beta0,digits=3),v2=format(gamma0,digits=3),v3=format(R0,digits=3))),subtitle = substitute(paste("posterior: ", beta[p],"=",v1,",",gamma[p], "=",v2," and ", R[0],"=",v3), list(v1=format(beta_p_mean,digits=3),v2=format(gamma_p_mean,digits=3),v3=format(R0_p_mean,digits=3))),x = "time", y = "P(Infected)")+
-    geom_line(data=data_comp_R,aes(x=time,y=median),color="red",linetype=1)+geom_line(data=data_comp_R,aes(x=time,y=dead),color="black",linetype=1)+
+  plot2 <- ggplot(data = data_poly_R, aes(x = x, y = y)) +
+    geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +
+    labs(title=substitute(paste(casename,
+          ": removed forecast with prior ",beta[0],"=",v1,",",
+          gamma[0], "=",v2," and ", R[0],"=",v3),
+          list(casename=casename,v1=format(beta0,digits=3),
+               v2=format(gamma0,digits=3),v3=format(R0,digits=3))),
+         subtitle = substitute(paste("posterior: ", beta[p],"=",v1,",",
+                gamma[p], "=",v2," and ", R[0],"=",v3),
+      list(v1=format(beta_p_mean,digits=3),v2=format(gamma_p_mean,digits=3),
+          v3=format(R0_p_mean,digits=3))),x = "time", y = "P(Removed)")+
+    geom_line(data=data_comp_R,aes(x=time,y=median),color="red",linetype=1)+
+    geom_line(data=data_comp_R,aes(x=time,y=dead),color="black",linetype=1)+
     geom_vline(xintercept = T_prime,color="blue")+
-    geom_vline(xintercept = dthetaI_stationary2,color="darkgreen")+
-    geom_vline(xintercept = dthetaI_stationary1,color="purple")+
+    geom_vline(xintercept = dthetaI_tp1,color="darkgreen")+
+    geom_vline(xintercept = dthetaI_tp2,color="purple")+
     geom_line(data=data_comp_R,aes(x=time,y=mean),color="darkgray")+
     geom_point(data=data_pre_R,aes(x=time,y=R))+theme_bw()+
-    theme( plot.title = element_text(hjust = 0.5),plot.subtitle = element_text(hjust=0.5))+
+    theme( plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+           plot.subtitle = element_text(hjust = 0.5, size = 12),
+           axis.text.x = element_text(angle = 45, hjust = 1),
+           axis.text=element_text(size=15),
+           axis.title=element_text(size=14),
+           legend.title = element_text(size = 15),
+           legend.text = element_text(size=12))+
     scale_x_continuous(labels= as.character(chron_ls)[seq(1,T_fin,30)],breaks=seq(1,T_fin,30))+
-    scale_fill_discrete(name="Posterior",labels=c(expression(paste(r[t+1:T],' | ',y[1:t],', ',r[1:t])),expression(paste(theta[1:t]^R,' | ',y[1:t],', ',r[1:t]))))+
-    annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=r_text_ht,color="blue")+annotate(geom="text", label=as.character(chron(dthetaI_stationary2_date,format="mon day")), x=dthetaI_stationary2+12, y=r_text_ht*1.25,color="darkgreen")+
-    annotate(geom="text", label=as.character(chron(dthetaI_stationary1_date,format="mon day")), x=dthetaI_stationary1+12, y=r_text_ht*1.5,color="purple")
+    scale_fill_discrete(name="Posterior",labels=c(expression(paste(y[t+1:T]^R,' | ',y[1:t]^I,', ',y[1:t]^R)),expression(paste(theta[1:t]^R,' | ',y[1:t]^I,', ',y[1:t]^R))))+
+    annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=r_text_ht,color="blue")+annotate(geom="text", label=as.character(chron(dthetaI_tp1_date,format="mon day")), x=dthetaI_tp1+12, y=r_text_ht*1.25,color="darkgreen")+
+    annotate(geom="text", label=as.character(chron(dthetaI_tp2_date,format="mon day")), x=dthetaI_tp2+12, y=r_text_ht*1.5,color="purple")+theme(axis.text=element_text(size=12),axis.title=element_text(size=14))
 
-plot2_list <- list(data_poly_R=data_poly_R,data_comp_R=data_comp_R,T_prime=T_prime,dthetaI_stationary2=dthetaI_stationary2,dthetaI_stationary1=dthetaI_stationary1,data_pre_R=data_pre_R,dthetaI_stationary2_date,dthetaI_stationary1_date)
+#plot2_list <- list(data_poly_R=data_poly_R,data_comp_R=data_comp_R,T_prime=T_prime,dthetaI_stationary2=dthetaI_stationary2,dthetaI_stationary1=dthetaI_stationary1,data_pre_R=data_pre_R,dthetaI_stationary2_date,dthetaI_stationary1_date)
 
   if(save_files) ggsave(paste0(file_add,casename,"_forecast2.png"))
 
@@ -383,29 +443,44 @@ out_table<-matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma
   #colnames(out_table)<-c("thetaS_p_mean","thetaI_p_mean","thetaR_p_mean","thetaS_p_ci_low","thetaS_p_ci_med","thetaS_p_ci_up","thetaI_p_ci_low","thetaI_p_ci_med","thetaI_p_ci_up","thetaR_p_ci_low","thetaR_p_ci_med","thetaR_p_ci_up","R0_p_mean","R0_p_ci_low","R0_p_ci_med","R0_p_ci_up","gamma_p_mean","gamma_p_ci_low","gamma_p_ci_med","gamma_p_ci_up","beta_p_mean","beta_p_ci_low","beta_p_ci_med","beta_p_ci_up","k_p_mean","k_p_ci_low","k_p_ci_med","k_p_ci_up","lambdaY_p_mean","lambdaY_p_ci_low","lambdaY_p_ci_med","lambdaY_p_ci_up","lambdaR_p_mean","lambdaR_p_ci_low","lambdaR_p_ci_med","lambdaR_p_ci_up","first_order_change_date","second_order_change_date")
 
   if(save_files) write.csv(out_table,file=paste0(file_add,casename,"_summary.csv"))
-
-  return(list(casename=casename,incidence_mean=incidence_mean,incidence_ci=incidence_ci,out_table=out_table,forecast_infection=plot,forecast_removed=plot2,first_stat_mean=as.character(first_order_change_date),first_stat_ci=as.character(first_order_change_date_ci),second_stat_mean=as.character(second_order_change_date),second_stat_ci=as.character(second_order_change_date_ci),dic_val=dic_val,plot_list=plot_list,plot2_list=plot2_list,theta_p=theta_p,theta_pp=theta_pp,Y_pp=Y_pp,R_pp=R_pp))
+  if(save_mcmc) save(theta_p,theta_pp,Y,Y_pp,R,R_pp,beta_p,gamma_p,R0_p,k_p,lambdaY_p,lambdaR_p, file=paste0(file_add,casename,"_mcmc.RData")) #@
+  return(list(casename=casename,incidence_mean=incidence_mean,incidence_ci=incidence_ci,out_table=out_table,plot_infection=plot,plot_removed=plot2,first_tp_mean=as.character(first_tp_date_mean),first_tp_ci=as.character(first_tp_date_ci),second_tp_mean=as.character(second_tp_date_mean),second_tp_ci=as.character(second_tp_date_ci),dic_val=dic_val))
 }
 
 if(F){
-  NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,1052,1423,2714,3554,4903,5806,7153,9074,11177,13522,16678,19665,22112,24953,27100,29631,31728,33366)
-  RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,252,345,417,561,650,811,1017,1261,1485,1917,2260,2725,3284,3754)
+  NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
+                   1052,1423,2714,3554,4903,5806,7153,9074,11177,
+                13522,16678,19665,22112,24953,27100,29631,31728,33366)
+  RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,
+                   252,345,417,561,650,811,1017,1261,1485,1917,2260,
+                   2725,3284,3754)
   N=58.5e6
   R <- RI_complete/N
   Y <- NI_complete/N- R #Jan13->Feb 11
-  ### Step function of pi_qbar(t)
+  ### Step function of pi(t)
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
-  pi_qbar0 <- c(1.0,0.9,0.5,0.1)
-  res.step <-pi.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,casename="Hubei_step",save_files = T)
-  res.step$forecast_infection
+  pi0<- c(1.0,0.9,0.5,0.1)
+  res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,
+                    pi0=pi0,change_time=change_time,dic=T,casename="Hubei_step",                   save_files = T, save_mcmc=F,
+                    M=5e2,nburnin = 2e2)
+  res.step$plot_infection
+  res.step$plot_removed
+  res.step$dic_val
 
-  ### continuous exponential function of pi_qbar(t)
-  res.exp <- pi.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,pi_qbar0=pi_qbar0,change_time=change_time,exponential=TRUE,lambda0=0.01,casename="Hubei_exp")
-  res.exp$forecast_infection
+  ### continuous exponential function of pi(t)
+  res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,                 exponential=TRUE,dic=F,lambda0=0.05,
+                  casename="Hubei_exp",save_files = F,save_mcmc=F,
+                  M=5e2,nburnin = 2e2)
+  res.exp$plot_infection
+  #res.exp$plot_removed
 
-  ### without pi_qbar(t)
-  res.nopi <- pi.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,casename="Hubei_nopi")
-  res.nopi$forecast_infection
+  ### without pi(t), the standard state-space SIR model without intervention
+  res.nopi <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,
+                       casename="Hubei_nopi",save_files = F,
+                       M=5e2,nburnin = 2e2)
+  res.nopi$plot_infection
+  #res.nopi$plot_removed
+
 }
 
 #' @noRd
