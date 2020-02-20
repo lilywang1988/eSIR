@@ -1,4 +1,7 @@
 R package eSIR: An extended SIR epidemiological model
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>
+
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
 2020-02-19
@@ -249,3 +252,4 @@ License][cc-by].
 [cc-by]: http://creativecommons.org/licenses/by/4.0/
 [cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
 [cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
+
