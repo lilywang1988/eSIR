@@ -57,7 +57,9 @@ By introducing a time-dependent
 *β*
 , we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
 
-The function can be either stepwise or exponential: !![pi functions](man/figures/pi_functions.png)
+The function can be either stepwise or exponential:
+
+![pi functions](man/figures/pi_functions.png)
 
 ![Standard SIR](man/figures/model1.png)
 
@@ -87,7 +89,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   pi0<- c(1.0,0.9,0.5,0.1)
   res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,
-                    pi0=pi0,change_time=change_time,dic=T,casename="Hubei_step",                   save_files = T, save_mcmc=F,M=5e2,nburnin = 2e2)
+                    pi0=pi0,change_time=change_time,dic=T,casename="Hubei_step",                   save_files = T, save_mcmc=F,M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for step-function pi(t)
 #> Compiling model graph
@@ -114,15 +116,15 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 
 ``` r
   res.step$dic_val
-#> Mean deviance:  -1265 
-#> penalty 40.72 
-#> Penalized deviance: -1225
+#> Mean deviance:  -1262 
+#> penalty 40.01 
+#> Penalized deviance: -1222
 
   ### continuous exponential function of pi(t)
   res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
                       T_fin=200,exponential=TRUE,dic=F,lambda0=0.05,
                      casename="Hubei_exp",save_files = F,save_mcmc=F,
-                  M=5e2,nburnin = 2e2)
+                  M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for exponential-function pi(t)
 #> Compiling model graph
@@ -145,7 +147,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   ### without pi(t), the standard state-space SIR model without intervention
   res.nopi <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
                        T_fin=200,casename="Hubei_nopi",save_files = F,
-                       M=5e2,nburnin = 2e2)
+                       M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running without pi(t)
 #> Compiling model graph
@@ -190,7 +192,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
                     phi0=phi0,change_time=change_time,
                     casename="Hubei_q",save_files = T,save_mcmc = F,
-                    M=5e2,nburnin = 2e2)
+                    M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for qh.eSIR
 #> Compiling model graph
@@ -214,7 +216,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 
   #res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
   #                    T_fin=200,casename="Hubei_noq",
-  #                    M=5e2,nburnin = 2e2)
+  #                    M=5e3,nburnin = 2e3)
   #res.noq$plot_infection
 ```
 
@@ -246,3 +248,4 @@ License][cc-by].
 [cc-by]: http://creativecommons.org/licenses/by/4.0/
 [cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
 [cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
+
