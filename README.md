@@ -1,7 +1,7 @@
-R package eSIR: An extended SIR epidemiological model
+R package eSIR: extended state-space SIR epidemiological models
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
-2020-02-19
+2020-02-20
 
 Purpose
 -------
@@ -46,14 +46,14 @@ Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-
 #library(2019-nCov-Data) 
 ```
 
-In Ubuntu (18.04) Linux, please first update R to a version &gt;= 3.6. You many need to install jags package as well by "sudo apt-get install jags" before install devtools by "install.packages("devtools")".
+In Ubuntu (18.04) Linux, please first update R to a version &gt;= 3.6. You many need to install jags package as well by `sudo apt-get install jags` before install devtools by `install.packages("devtools")`.
 
 Model 1 using `tvt.eSIR()`: a SIR model with a time-varying transmission rate
 -----------------------------------------------------------------------------
 
 By introducing a time-dependent
 *π*(*t*)∈\[0, 1\]
- function that multiplies the transmission rate
+ function that modifies the transmission rate
 *β*
 , we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
 
@@ -89,7 +89,8 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   pi0<- c(1.0,0.9,0.5,0.1)
   res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,
-                    pi0=pi0,change_time=change_time,dic=T,casename="Hubei_step",                   save_files = T, save_mcmc=F,M=5e3,nburnin = 2e3)
+                    pi0=pi0,change_time=change_time,dic=T,casename="Hubei_step", 
+            save_files = T, save_mcmc=F,M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for step-function pi(t)
 #> Compiling model graph
@@ -117,8 +118,8 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 ``` r
   res.step$dic_val
 #> Mean deviance:  -1262 
-#> penalty 40.01 
-#> Penalized deviance: -1222
+#> penalty 37.25 
+#> Penalized deviance: -1224
 
   ### continuous exponential function of pi(t)
   res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
@@ -171,7 +172,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 Model 2 using `qh.eSIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
 -------------------------------------------------------------------------------------------------
 
-By introducing a vector of `phi` and its corresponding changing points `change_time`, we introduced a quarantine process that is dependent on a dirac delta function *ϕ*(*t*)∈\[0, 1\]. In other words, only at time points defined by `change_time`, we have certain porportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model than the previous time-varying transmission one is that we do not allow the tranmission rate to change, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
+By introducing a vector of `phi` and its corresponding changing points `change_time`, we introduced a quarantine process that is dependent on a dirac delta function *ϕ*<sub>*t*</sub> ∈ \[0, 1\]. In other words, only at time points defined by `change_time`, we have certain porportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model than the previous time-varying transmission one is that we do not allow the tranmission rate to change, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
 
 ![phi](man/figures/phi_functions.png)
 
@@ -227,9 +228,9 @@ You will obtain the following plot in addition to the traceplots and summart tab
 Outputs and summary table
 -------------------------
 
-To save all the plots (including trace plots) and summary tables, please set `save_files=T`, and if possible, provide a location by setting `file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other intermediate plots will not be saved, but you can still retrieve the forecast plots and summary table based on the return list, e.g., using `res.step$forecast_infection` and `res.step$out_table`.
+To save all the plots (including trace plots) and summary tables, please set `save_files=T`, and if possible, provide a location by setting `file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other intermediate plots will not be saved, but you can still retrieve the forecast plots and summary table based on the return list, e.g., using `res.step$forecast_infection` and `res.step$out_table`. Moreover, if you are interested in plotting the figures on your own, you may set `save_mcmc=T` so that all the MCMC draws will be saved in a `.RData` file too.
 
-For details, please explore our package directly. We have .rd files establisehd, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them.
+For details, please explore our package directly. We have `.rd` files establisehd, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them.
 
 References
 ----------
@@ -248,4 +249,3 @@ License][cc-by].
 [cc-by]: http://creativecommons.org/licenses/by/4.0/
 [cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
 [cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
-
