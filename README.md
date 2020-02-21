@@ -46,20 +46,28 @@ Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-
 #library(2019-nCov-Data) 
 ```
 
-In Ubuntu (18.04) Linux, please first update R to a version &gt;= 3.6. You many need to install jags package as well by `sudo apt-get install jags` before install devtools by `install.packages("devtools")`.
+In Ubuntu (18.04) Linux, please first update R to a version &gt;= 3.6. You may need to install jags package as well by `sudo apt-get install jags` before install devtools by `install.packages("devtools")`.
 
 Model 1 using `tvt.eSIR()`: a SIR model with a time-varying transmission rate
 -----------------------------------------------------------------------------
 
-By introducing a time-dependent
-*π*(*t*)∈\[0, 1\]
- function that modifies the transmission rate
-*β*
-, we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
+By introducing a time-dependent $\pi(t) \in [0,1]$ function that modifies the transmission rate $\beta$, we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
 
 The function can be either stepwise or exponential:
 
-![pi functions](man/figures/pi_functions.png)
+1. $\pi(t) \in[0,1]$ 
+
+2. Step function reflecting the government-initiated macro isolation measures. For example 
+
+   $$\pi(t)=\begin{cases} \pi_{01}, & \text{if} \  t \leq 01/23,  \\ \pi_{01}, & \text{if}\ t \in (01/23, 02/04] \ \text{city blockade}, \\ \pi_{03}, & \text{if} \ t \in (02/04, 02/08] \ \text{enhanced quarantine}, \\ \pi_{04}, & \text{if}\ t > 02/08\ \text{use of new hospital}. \end{cases} $$
+
+3. Continuous function reflecting the gradually increased community-level awareness and responsibility of quarantine or micro isolation measures. For example, 
+
+   $$\pi(t)=exp(-\lambda_0 t)$$ 
+
+   
+
+
 
 ![Standard SIR](man/figures/model1.png)
 
@@ -172,7 +180,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 Model 2 using `qh.eSIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
 -------------------------------------------------------------------------------------------------
 
-By introducing a vector of `phi` and its corresponding changing points `change_time`, we introduced a quarantine process that is dependent on a dirac delta function *ϕ*<sub>*t*</sub> ∈ \[0, 1\]. In other words, only at time points defined by `change_time`, we have certain porportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model than the previous time-varying transmission one is that we do not allow the tranmission rate to change, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
+By introducing a vector of `phi` and its corresponding changing points `change_time`, we introduced a quarantine process that is dependent on a dirac delta function *ϕ*<sub>*t*</sub> ∈ \[0, 1\]. In other words, only at time points defined by `change_time`, we have certain proportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model than the previous time-varying transmission one is that we do not allow the transmission rate to change, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
 
 ![phi](man/figures/phi_functions.png)
 
@@ -221,7 +229,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   #res.noq$plot_infection
 ```
 
-You will obtain the following plot in addition to the traceplots and summart table if you set `save_file=T` in `qh.eSIR`. The blue vertical line denotes the beginning date, and the other three gray lines denote the three change points.
+You will obtain the following plot in addition to the traceplots and summary table if you set `save_file=T` in `qh.eSIR`. The blue vertical line denotes the beginning date, and the other three gray lines denote the three change points.
 
 ![Standard SIR](man/figures/Hubei_qthetaQ_plot.png)
 
@@ -230,7 +238,7 @@ Outputs and summary table
 
 To save all the plots (including trace plots) and summary tables, please set `save_files=T`, and if possible, provide a location by setting `file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other intermediate plots will not be saved, but you can still retrieve the forecast plots and summary table based on the return list, e.g., using `res.step$forecast_infection` and `res.step$out_table`. Moreover, if you are interested in plotting the figures on your own, you may set `save_mcmc=T` so that all the MCMC draws will be saved in a `.RData` file too.
 
-For details, please explore our package directly. We have `.rd` files establisehd, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them.
+For details, please explore our package directly. We have `.rd` files established, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them.
 
 References
 ----------
