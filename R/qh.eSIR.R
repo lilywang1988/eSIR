@@ -8,6 +8,7 @@
 # library(scales) #alpha　function
 # library(ggplot2)
 # library(chron)
+#library(data.table)
 #' Extended state-space SIR with quarantine
 #'
 #' Fit an extended state-space SIR model being reduced by in-home hospitalization.
@@ -36,7 +37,7 @@
 #' @param file_add the string to denote the location of saving output files and tables.
 #'
 #' @param save_mcmc logical, whether save (\code{TRUE}) all the MCMC outputs or not (\code{FALSE}).The output file will be an \code{.RData} file named by the \eqn{casename}. We include arrays of prevalence values of the three compartments with their matrices of posterior draws up to the last date of the collected data as \code{theta_p[,,1]} and afterwards as \code{theta_pp[,,1]} for \eqn{\theta_t^S}, \code{theta_p[,,2]} and \code{theta_pp[,,2]} for \eqn{\theta_t^I}, and \code{theta_p[,,3]} and \code{theta_pp[,,3]} for \eqn{\theta_t^R}. The posterior draws of the prevalence process of the quarantine compartment can be obtained via \code{thetaQ_p} and \code{thetaQ_pp}. Moreover, the input and predicted proportions \code{Y}, \code{Y_pp}, \code{R} and \code{R_pp} can also be retrieved. The prevalence and prediceted proportion matrices have rows for MCMC replicates, and columns for days. The MCMC posterior draws of other parameters including \code{beta}, \code{gamma}, \code{R0}, and variance controllers \code{k_p}, \code{lambdaY_p}, \code{lambdaR_p} are also available.
-#'
+#' @param save_plot_data logical, whether save the plotting data or not.
 #'
 #' @return
 #' \item{casename}{the predefined \code{casename}.}
@@ -45,6 +46,7 @@
 #' \item{out_table}{summary tables including the posterior mean of the prevalance processes of the 3 states compartments (\eqn{\theta_t^S,\theta_t^I,\theta_t^R,\theta_t^H}) at last date of data collected ((\eqn{t^\prime}) decided by the lengths of your input data \code{Y} and \code{R}), and their respective credible inctervals (ci); the respective means and ci's of the reporduction number (R0), removed rate (\eqn{\gamma}), transmission rate  (\eqn{\beta}).}
 #' \item{plot_infection}{plot of summarizing and forecasting for the infection compartment, in which the vertial blue line denotes the last date of data collected (\eqn{t^\prime}), the vertial darkgray line denotes the deacceleration point (first turning point) that the posterior mean first-derivative of infection prevalence \eqn{\dot{\theta}_t^I} achieves the  maximum, the vertical purple line denotes the second turning point that the posterior mean first-derivative infection proportion \eqn{\dot{\theta}_t^I} equals zero, the darkgray line denotes the posterior mean of the infection prevalence \eqn{\theta_t^I} and the red line denotes its posterior median. }
 #' \item{plot_removed}{plot of summarizing and forecasting for the removed compartment with lines similar to those in the \code{plot_infection}. The vertical lines are identical, but the horizontal mean and median correspond to the posterior mean and median of the removed process \eqn{\theta_t^R}. An additional line indicates the estimated death prevalence from the input \code{death_in_R}.}
+#' \item{spaghetti_plot}{20 randomly selected MCMC draws of the first-order derivative of the posterior prevalence of infection, namely \eqn{\dot{\theta}_t^I}. The black curve is the posterior mean of the derivative, and the vertical lines mark times of turning points corresponding respectively to those shown in \code{plot_infection} and \code{plot_removed}. Moreover, the 95\% credible intervals of these turning points are also highlighted by semi-transparent rectangles. }
 #' \item{first_tp_mean}{the date t at which \eqn{\ddot{\theta}_t^I=0}, calculated as the average of the time points with maximum posterior first-order derivatives \eqn{\dot{\theta}_t^I}; this value may be slightly different from the one labeled by the "darkgreen" lines in the two plots \code{plot_infection} and \code{plot_removed}, which indicate the stationary point such that the first-order derivative of the averaged posterior of \eqn{\theta_t^I} reaches its maximum.}
 #' \item{first_tp_mean}{the date t at which \eqn{\ddot{\theta}_t^I=0}, calculated as the average of the time points with maximum posterior first-order derivatives \eqn{\dot{\theta}_t^I}; this value may be slightly different from the one labeled by the "darkgreen" lines in the two plots \code{plot_infection} and \code{plot_removed}, which indicate the stationary point such that the first-order derivative of the averaged posterior of \eqn{\theta_t^I} reaches its maximum.}
 #'
@@ -81,7 +83,7 @@
 #'
 #'
 #' @export
-qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e2,thn=10,nburnin=2e2,dic=FALSE,death_in_R=0.02,casename="qh.eSIR",beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1,file_add=character(0),save_files=FALSE,save_mcmc=FALSE){
+qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e2,thn=10,nburnin=2e2,dic=FALSE,death_in_R=0.02,casename="qh.eSIR",beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1,file_add=character(0),save_files=FALSE,save_mcmc=FALSE,save_plot_data=FALSE){
 
   len <- round(M/thn)*nchain #number of MCMC draws in total
 
@@ -342,20 +344,20 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   dthetaI_tp2_date <- chron_ls[dthetaI_tp2]
 
 
-  incidence_vec <-  rowSums(thetaS_mat*thetaI_mat)*replicate(T_fin,c(beta_p))
-  incidence_mean <-  mean(incidence_vec)
+  incidence_vec <-  rowSums(thetaS_mat*thetaI_mat,na.rm = T)*replicate(T_fin,c(beta_p))
+  incidence_mean <-  mean(incidence_vec,na.rm = T)
 
-  incidence_ci <- quantile(incidence_vec,c(0.025,0.5,0.975))
+  incidence_ci <- quantile(incidence_vec,c(0.025,0.5,0.975),na.rm = T)
   first_tp_vec<- (1:T_fin)[apply(dthetaI_mat,1,which.max)]# first second order derivative=0
 
   second_tp_vec <- sapply(1:len,function(l){
     (first_tp_vec[l]:T_fin)[which.min(dthetaI_mat[l,first_tp_vec[l]:T_fin]>0)]})
   # first order derivative=0
-  first_tp_mean <- mean(first_tp_vec)
-  second_tp_mean <- mean(second_tp_vec)
+  first_tp_mean <- mean(first_tp_vec,na.rm = T)
+  second_tp_mean <- mean(second_tp_vec,na.rm = T)
 
-  first_tp_ci <- quantile(first_tp_vec, c(0.025,0.5,0.975))
-  second_tp_ci <- quantile(second_tp_vec, c(0.025,0.5,0.975))
+  first_tp_ci <- quantile(first_tp_vec, c(0.025,0.5,0.975),na.rm = T)
+  second_tp_ci <- quantile(second_tp_vec, c(0.025,0.5,0.975),na.rm = T)
 
   first_tp_date_mean <- chron_ls[first_tp_mean]
   second_tp_date_mean <- chron_ls[second_tp_mean]
@@ -367,7 +369,7 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
 
   if(save_files){
     png(paste0(file_add,casename,"deriv.png"), width = 700, height = 350)
-    plot(y=dthetaI,x=chron_ls,type='l',ylab="1st order derivative",xlab="date",main="Infection Proportion")
+    plot(y=dthetaI,x=chron_ls,type='l',ylab="1st order derivative",main="Infection prevalence process")
     abline(h=0,col=2)
     if(!is.null(change_time_chorn)) abline(v=change_time_chorn,col="gray")
     abline(v=begin,col="blue")
@@ -375,7 +377,7 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
     dev.off()
 
     png(paste0(file_add,casename,"thetaQ_plot.png"), width = 700, height = 350)
-    plot(y=colMeans(cbind(thetaQ_p,thetaQ_pp)),x=chron_ls,type="l",xlab="date",main="Change of the quarantine proportion")
+    plot(y=colMeans(cbind(thetaQ_p,thetaQ_pp)),x=chron_ls,type="l",xlab="date",main="Quarantine prevalence process")
     abline(v=,col=2)
     if(!is.null(change_time_chorn)) abline(v=change_time_chorn,col="gray")
     abline(v=begin,col="blue")
@@ -383,7 +385,43 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
     dev.off()
   }
 
-  y_text_ht <- max(rbind(thetaI_band ,Y_band))/2
+  ## Prepare the Spaghetti plot
+  sample_dthetaI_mat <- cbind(dthetaI_mat[sample.int(len,20,replace=F),])
+  colnames(sample_dthetaI_mat)<-c(as.character(chron_ls)[-1])
+  sample_dthetaI_mat_long <- reshape2::melt(sample_dthetaI_mat)
+  colnames(sample_dthetaI_mat_long)<-c("id","date","dthetaI")
+  sample_dthetaI_mat_long$date<-(chron(as.character(sample_dthetaI_mat_long$date)))
+
+  dthetaI_mean_data <- data.frame(dthetaI,date=chron_ls[-1])
+  spaghetti_ht <- max(sample_dthetaI_mat)/2
+  spaghetti_plot <- ggplot()+
+    theme_bw()+
+    theme( plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+           plot.subtitle = element_text(hjust = 0.5, size = 12),
+           axis.text.x = element_text(angle = 45, hjust = 1),
+           axis.text=element_text(size=15),
+           axis.title=element_text(size=14))+
+    geom_rect(data=data.frame(xmin = as.numeric(first_tp_date_ci[1]), xmax = as.numeric(first_tp_date_ci[3]), ymin = -Inf, ymax =Inf,ci="first tp"),aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax =ymax),
+              fill = "darkgreen", alpha = 0.15)+
+    geom_rect(data=data.frame(xmin = as.numeric(second_tp_date_ci[1]), xmax = as.numeric(second_tp_date_ci[3],ci="second tp"), ymin = -Inf, ymax =Inf),aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax =ymax),
+              fill = "purple", alpha = 0.15)+
+    geom_line(data = sample_dthetaI_mat_long,aes(x = date, y = dthetaI, group=id,color=id))+
+    scale_color_gradientn(colours = rainbow(5,alpha=0.5))+
+    labs(title="spaghetti plot of infection prevalence process",x = "time", y = "1st order derivative")+
+    geom_line(data=dthetaI_mean_data,aes(x= date,y=dthetaI),color=1)+
+    scale_x_continuous(labels= as.character(chron_ls)[seq(1,T_fin,30)],
+                       breaks=as.numeric(chron_ls[-1][seq(1,T_fin,30)]))+
+    annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=as.numeric(chron_ls[T_prime])+12, y= spaghetti_ht,color="blue")+
+    annotate(geom="text", label=as.character(chron(dthetaI_tp1_date,format="mon day")), x=as.numeric(dthetaI_tp1_date)+12, y= spaghetti_ht*1.25,color="darkgreen")+
+    annotate(geom="text", label=as.character(chron(dthetaI_tp2_date,format="mon day")), x=as.numeric(dthetaI_tp2_date)+12, y= spaghetti_ht*1.5,color="purple")+
+    geom_vline(xintercept = as.numeric(chron_ls[T_prime]),color="blue",show.legend = TRUE)+
+    geom_vline(xintercept = as.numeric(dthetaI_tp1_date),color="darkgreen",show.legend = TRUE)+
+    geom_vline(xintercept = as.numeric(dthetaI_tp2_date),color="purple",show.legend = TRUE)
+  #spaghetti_plot
+
+  if(save_files) ggsave(paste0(file_add,casename,"_spaghetti.png"),width=12,height=10)
+
+  y_text_ht <- max(rbind(thetaI_band ,Y_band),na.rm = T)/2
   plot <- ggplot(data = data_poly, aes(x = x, y = y)) +
     geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +
     labs(title=substitute(paste(casename,": infection forecast with prior ",beta[0],"=",v1,",",gamma[0], "=",v2," and ", R[0],"=",v3), list(casename=casename,v1=format(beta0,digits=3),v2=format(gamma0,digits=3),v3=format(R0,digits=3))),subtitle = substitute(paste("Posterior ", beta[p],"=",v1,",",gamma[p], "=",v2," and ", R[0],"=",v3), list(v1=format(beta_p_mean,digits=3),v2=format(gamma_p_mean,digits=3),v3=format(R0_p_mean,digits=3))),x = "time", y = "P(Infected)")+
@@ -402,17 +440,17 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
     scale_x_continuous(labels= as.character(chron_ls)[seq(1,T_fin,30)],
                        breaks=seq(1,T_fin,30))+
     scale_fill_discrete(name="Posterior",
-                        labels=c(expression(paste(y[t+1:T]^I,' | ',y[1:t]^I,', ',y[1:t]^R)),
-                                 expression(paste(theta[1:t]^I,' | ',y[1:t]^I,', ',y[1:t]^R))))+
-    annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=y_text_ht,color="blue")+
+    labels=c(expression(paste(y[t[0]+1:T]^R,' | ',y[1:t[0]]^I,', ',y[1:t[0]]^R)),
+       expression(paste(theta[1:t[0]]^R,' | ',y[1:t[0]]^I,', ',y[1:t[0]]^R))))+
+  annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=y_text_ht,color="blue")+
     annotate(geom="text", label=as.character(chron(dthetaI_tp1_date,format="mon day")), x=dthetaI_tp1+12, y=y_text_ht*1.25,color="darkgreen")+
     annotate(geom="text", label=as.character(chron(dthetaI_tp2_date,format="mon day")), x=dthetaI_tp2+12, y=y_text_ht*1.5,color="purple")
 
   # plot_list <- list(data_poly=data_poly,data_comp=data_comp,T_prime=T_prime,dthetaI_stationary2=dthetaI_stationary2,dthetaI_stationary1=dthetaI_stationary1,data_pre=data_pre,dthetaI_stationary2_date,dthetaI_stationary1_date,y_text_ht)
 
-  if(save_files) ggsave(paste0(file_add,casename,"_forecast.png"))
+  if(save_files) ggsave(paste0(file_add,casename,"_forecast.png"),width=12,height=10)
 
-  ### Recovery
+  ### Removed
   R_band <- data.frame(t(apply(R_pp,2,quantile,probs=c(0.025,0.5,0.975),na.rm=T)))
   thetaR_band <- data.frame(t(apply(theta_p[,-1,3],2,quantile,probs=c(0.025,0.5,0.975),na.rm=T)))
   R_mean <- c(colMeans(R_pp,na.rm = T))
@@ -428,7 +466,7 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
 
   data_poly_R<-data.frame(y=c(thetaR_band$upper,rev(thetaR_band$lower),R_band$upper,rev(R_band$lower)),x=c(1:T_prime,T_prime:1,(T_prime+1):T_fin,T_fin:(T_prime+1)),phase=c(rep('pre',T_prime*2),rep('post',(T_fin-T_prime)*2)),value=c(rep(col2[1],T_prime*2),rep(col2[2],(T_fin-T_prime)*2)))
 
-  r_text_ht <- max(rbind(thetaR_band ,R_band))/2
+  r_text_ht <- max(rbind(thetaR_band ,R_band),na.rm = T)/2
   plot2 <- ggplot(data = data_poly_R, aes(x = x, y = y)) +
     geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +
     labs(title=substitute(paste(casename,
@@ -463,7 +501,7 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
 
 
 
-  if(save_files) ggsave(paste0(file_add,casename,"_forecast2.png"))
+  if(save_files) ggsave(paste0(file_add,casename,"_forecast2.png"),width=12,height=10)
 
   out_table<-matrix(c(theta_p_mean,theta_p_ci,thetaQ_p_mean,thetaQ_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci),nrow=1)
   #out_table<-matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,k_p_mean,k_p_ci,lambdaY_p_mean,lambdaY_p_ci,lambdaR_p_mean,lambdaR_p_ci,as.character(first_order_change_date),as.character(second_order_change_date)),nrow=1)
@@ -475,7 +513,16 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
 
   if(save_files) write.csv(out_table,file=paste0(file_add,casename,"_summary.csv"))
   if(save_mcmc) save(theta_p,theta_pp,thetaQ_p,thetaQ_pp,Y,Y_pp,R,R_pp,beta_p,gamma_p,R0_p,k_p,lambdaY_p,lambdaR_p, file=paste0(file_add,casename,"_mcmc.RData")) #@
-  return(list(casename=casename,incidence_mean=incidence_mean,incidence_ci=incidence_ci,out_table=out_table,plot_infection=plot,plot_removed=plot2,first_tp_mean=as.character(first_tp_date_mean),first_tp_ci=as.character(first_tp_date_ci),second_tp_mean=as.character(second_tp_date_mean),second_tp_ci=as.character(second_tp_date_ci),dic_val=dic_val))
+  if(save_plot_data){
+    other_plot <-list(T_prime=T_prime,T_fin=T_fin,chron_ls=chron_ls,dthetaI_tp1=dthetaI_tp1,dthetaI_tp2=dthetaI_tp2,dthetaI_tp1_date=dthetaI_tp1_date,dthetaI_tp2_date=dthetaI_tp2_date,beta_p_mean,gamma_p_mean,R0_p_mean)
+    spaghetti_plot_ls <- list(spaghetti_ht=spaghetti_ht,dthetaI_mean_data=dthetaI_mean_data,sample_dthetaI_mat_long=sample_dthetaI_mat_long,first_tp_date_ci=first_tp_date_ci,second_tp_date_ci=second_tp_date_ci)
+    infection_plot_ls <-list( y_text_ht=y_text_ht,data_poly,data_comp,data_pre)
+    removed_plot_ls <-list( r_text_ht=r_text_ht,data_poly_R,data_comp_R,data_pre_R)
+    plot_data_ls <- list(casename=casename,other_plot,spaghetti_plot_ls,infection_plot_ls,removed_plot_ls)
+    save(plot_data_ls,file=paste0(file_add,casename,"_plot_data.RData"))
+  }
+  res<-list(casename=casename,incidence_mean=incidence_mean,incidence_ci=incidence_ci,out_table=out_table,plot_infection=plot,plot_removed=plot2,spaghetti_plot=spaghetti_plot,first_tp_mean=as.character(first_tp_date_mean),first_tp_ci=as.character(first_tp_date_ci),second_tp_mean=as.character(second_tp_date_mean),second_tp_ci=as.character(second_tp_date_ci),dic_val=dic_val)
+  return(res)
 }
 
 

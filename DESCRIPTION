@@ -8,5 +8,5 @@ Maintainer: Lili Wang <lilywang@umich.edu>
 Description: An inplementation of extended state-space SIR models developed by Song Lab at UM school of Public Health
 License: CC BY 4.0
 Encoding: UTF-8
-Depends: rjags, scales, ggplot2, chron, gtools
+Depends: rjags, scales, ggplot2, chron, gtools, data.table
 RoxygenNote: 6.1.1

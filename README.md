@@ -1,7 +1,7 @@
 R package eSIR: extended state-space SIR epidemiological models
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
-2020-02-20
+2020-02-29
 
 Purpose
 -------
@@ -46,7 +46,7 @@ Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-
 #library(2019-nCov-Data) 
 ```
 
-In Ubuntu (18.04) Linux, please first update R to a version &gt;= 3.6. You many need to install jags package as well by `sudo apt-get install jags` before install devtools by `install.packages("devtools")`.
+In Ubuntu (18.04) Linux, please first update R to a version &gt;= 3.6. You may need to install jags package as well by `sudo apt-get install jags` before install devtools by `install.packages("devtools")`.
 
 Model 1 using `tvt.eSIR()`: a SIR model with a time-varying transmission rate
 -----------------------------------------------------------------------------
@@ -74,6 +74,7 @@ library(eSIR)
 #> Loading required package: ggplot2
 #> Loading required package: chron
 #> Loading required package: gtools
+#> Loading required package: data.table
 # Hubei province data Jan13 -> Feb 11
 # cumulative number of infected
 NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
@@ -89,8 +90,8 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   pi0<- c(1.0,0.9,0.5,0.1)
   res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,
-                    pi0=pi0,change_time=change_time,dic=T,casename="Hubei_step", 
-            save_files = T, save_mcmc=F,M=5e3,nburnin = 2e3)
+            pi0=pi0,change_time=change_time,dic=T,casename="Hubei_step",
+            save_files = T, save_mcmc=F,save_plot_data = F,M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for step-function pi(t)
 #> Compiling model graph
@@ -102,8 +103,6 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 #>    Total graph size: 1873
 #> 
 #> Initializing model
-#> Saving 12 x 8 in image
-#> Saving 12 x 8 in image
   res.step$plot_infection
 ```
 
@@ -116,16 +115,22 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 ![](man/figures/README-model1-2.png)
 
 ``` r
+  res.step$spaghetti_plot
+```
+
+![](man/figures/README-model1-3.png)
+
+``` r
   res.step$dic_val
 #> Mean deviance:  -1262 
-#> penalty 37.25 
+#> penalty 38.29 
 #> Penalized deviance: -1224
 
   ### continuous exponential function of pi(t)
   res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
                       T_fin=200,exponential=TRUE,dic=F,lambda0=0.05,
                      casename="Hubei_exp",save_files = F,save_mcmc=F,
-                  M=5e3,nburnin = 2e3)
+                     save_plot_data = F,M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for exponential-function pi(t)
 #> Compiling model graph
@@ -140,14 +145,19 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   res.exp$plot_infection
 ```
 
-![](man/figures/README-model1-3.png)
+![](man/figures/README-model1-4.png)
+
+``` r
+  res.exp$spaghetti_plot
+```
+
+![](man/figures/README-model1-5.png)
 
 ``` r
   #res.exp$plot_removed
 
   ### without pi(t), the standard state-space SIR model without intervention
-  res.nopi <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-                       T_fin=200,casename="Hubei_nopi",save_files = F,
+  res.nopi <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,                              casename="Hubei_nopi",save_files = F,save_plot_data = F,
                        M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running without pi(t)
@@ -163,7 +173,13 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   res.nopi$plot_infection
 ```
 
-![](man/figures/README-model1-4.png)
+![](man/figures/README-model1-6.png)
+
+``` r
+  res.nopi$spaghetti_plot
+```
+
+![](man/figures/README-model1-7.png)
 
 ``` r
   #res.nopi$plot_removed
@@ -191,8 +207,8 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   phi0 <- c(0.1,0.4,0.4)
   res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-                    phi0=phi0,change_time=change_time,
-                    casename="Hubei_q",save_files = T,save_mcmc = F,
+                    phi0=phi0,change_time=change_time,casename="Hubei_q",
+                    save_files = T,save_mcmc = F,save_plot_data = F,
                     M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for qh.eSIR
@@ -205,8 +221,6 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 #>    Total graph size: 2676
 #> 
 #> Initializing model
-#> Saving 12 x 8 in image
-#> Saving 12 x 8 in image
   res.q$plot_infection
 ```
 
