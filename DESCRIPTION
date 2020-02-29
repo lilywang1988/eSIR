@@ -1,7 +1,7 @@
 Package: eSIR
 Type: Package
 Title: Extended state-space SIR models
-Version: 0.1.0
+Version: 0.2.0
 Date: 2020-02-19
 Author: Song Lab (http://www.umich.edu/~songlab/)
 Maintainer: Lili Wang <lilywang@umich.edu>
