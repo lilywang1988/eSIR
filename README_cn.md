@@ -238,9 +238,9 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 
 结果和汇总表
 -------------------------
-要保存所有图（包括轨迹图）和汇总表，请设置`save_files = T`，并在可能的情况下通过设置`file_add="YOUR/FAVORITE/FOLDER"`提供位置。否则，轨迹图和其他中间图将不会保存，但是您仍然可以基于返回列表检索预测图和汇总表，例如，使用`res.step$forecast_infection`和`res.step$out_table`。 此外，如果您有兴趣自己绘制图形，可以设置`save_mcmc = T`，以便所有MCMC图形也都保存在`.RData`文件中。
+要保存所有图（包括轨迹图）和汇总表，请设置`save_files = T`，并在可能的情况下通过设置`file_add="YOUR/FAVORITE/FOLDER"`提供位置。否则，轨迹图和其他中间图将不会保存，但是您仍然可以使用`res.step$forecast_infection`和`res.step$out_table`来找到它们。 此外，如果您有兴趣自己绘制图形，可以设置`save_mcmc = T`，以便所有MCMC图形也都保存在`.RData`文件中。
 
-有关详细信息，请直接浏览我们的软件包。 我们有准备完整的`.rd`文件，请使用`help（tvt.eSIR`或`qh.eSIR`查找它们。
+有关详细信息，请直接浏览我们的软件包。我们有准备完整的`.rd`文件，请使用`?(tvt.eSIR)`或`help(qh.eSIR)`查找它们。
 
 参考文献
 ----------
