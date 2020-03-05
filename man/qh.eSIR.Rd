@@ -9,8 +9,8 @@ qh.eSIR(Y, R, phi0 = NULL, change_time = NULL,
   nadapt = 10000, M = 500, thn = 10, nburnin = 200, dic = FALSE,
   death_in_R = 0.02, casename = "qh.eSIR", beta0 = 0.2586,
   gamma0 = 0.0821, R0 = beta0/gamma0, gamma0_sd = 0.1, R0_sd = 1,
-  file_add = character(0), save_files = FALSE, save_mcmc = FALSE,
-  save_plot_data = FALSE)
+  file_add = character(0), add_death = FALSE, save_files = FALSE,
+  save_mcmc = FALSE, save_plot_data = FALSE, eps = 1e-10)
 }
 \arguments{
 \item{Y}{the time series of daily observed infected compartment proportions.}
@@ -53,9 +53,13 @@ qh.eSIR(Y, R, phi0 = NULL, change_time = NULL,
 
 \item{file_add}{the string to denote the location of saving output files and tables.}
 
+\item{add_death}{logical, whether add the approximate death curve to the plot, default is false.}
+
 \item{save_mcmc}{logical, whether save (\code{TRUE}) all the MCMC outputs or not (\code{FALSE}).The output file will be an \code{.RData} file named by the \eqn{casename}. We include arrays of prevalence values of the three compartments with their matrices of posterior draws up to the last date of the collected data as \code{theta_p[,,1]} and afterwards as \code{theta_pp[,,1]} for \eqn{\theta_t^S}, \code{theta_p[,,2]} and \code{theta_pp[,,2]} for \eqn{\theta_t^I}, and \code{theta_p[,,3]} and \code{theta_pp[,,3]} for \eqn{\theta_t^R}. The posterior draws of the prevalence process of the quarantine compartment can be obtained via \code{thetaQ_p} and \code{thetaQ_pp}. Moreover, the input and predicted proportions \code{Y}, \code{Y_pp}, \code{R} and \code{R_pp} can also be retrieved. The prevalence and prediceted proportion matrices have rows for MCMC replicates, and columns for days. The MCMC posterior draws of other parameters including \code{beta}, \code{gamma}, \code{R0}, and variance controllers \code{k_p}, \code{lambdaY_p}, \code{lambdaR_p} are also available.}
 
 \item{save_plot_data}{logical, whether save the plotting data or not.}
+
+\item{esp}{a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10}
 }
 \value{
 \item{casename}{the predefined \code{casename}.}

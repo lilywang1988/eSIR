@@ -13,11 +13,13 @@ knitr::opts_chunk$set(collapse = TRUE,
 
 ```
 
+Chinese version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
+
 ## Purpose
 
 The outbreak of novel Corona Virus disease (a.k.a. COVID-19), originated in Wuhan, the capital of Hubei Province spreads quickly and affects many cities in China as well as many countries in the world.  The Chinese government has enforced very stringent quarantine and inspection to prevent the worsening spread of COVID-19.  Although various forms of forecast on the turning points of this epidemic within and outside Hubei Province have been published in the media, none of the prediction models has explicitly accounted for the time-varying quarantine protocols. We extended the classical SIR model for infectious disease by incorporating forms of medical isolation (in-home quarantine and hospitalization) in the underlying infectious disease dynamic system.  Using the state-space model for both daily infected and hospitalized incidences and MCMC algorithms, we assess the effectiveness of quarantine protocols for confining COVID-19 spread in both Hubei Province and the other regions of China.  Both predicted turning points and their credible bands may be obtained from the extended SIR under a given quarantine protocol.  R software packages are also made publicly available for interested users.
 
-The standard SIR model has three components: susceptible, infected, and removed (including the recovery and dead). In the following sections, we will introduce the other extended state-space SIR models and their implementation in the package. **All the results provided are based on very short chains.** Please set at least `M=5e5` and `nburnin=2e5` to obtain stable MCMC chains via [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).  
+The standard SIR model has three components: susceptible, infected, and removed (including the recovery and dead). In the following sections, we will introduce the other extended state-space SIR models and their implementation in the package. **The results provided below are based on relatively short chains.** According to our experience, this setting (`M=5e3` and `nburnin=2e3`) should provide acceptable results in terms of the trend and turning points estimation, the estimation of parameters and their credible intervals might not be accurate. Hence, if possible, we would recommend using `M=5e5` and `nburnin=2e5` to obtain stable MCMC chains via [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).  
 
 ![Standard SIR](man/figures/model0.png)
 
@@ -30,6 +32,8 @@ The standard SIR model has three components: susceptible, infected, and removed 
 ![Standard SIR](man/figures/algorithm.png)
 
 ## Preparation
+
+[Download Binary Package](https://github.com/lilywang1988/eSIR/blob/master/install_binary)
 
 To install and use this R package from Github, you will need to first install the R package `devtools`. Please uncomment the codes to install them. `eSIR` depends on three other packages, `rjags` (an interface to the JAGS library), `chron` and `gtools`, which could be installed with `eSIR` if not yet. 
 
@@ -146,7 +150,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   #res.noq$plot_infection
 ```
 
-You will obtain the following plot in addition to the traceplots and summart table if you set `save_file=T` in `qh.eSIR`. The blue vertical line denotes the beginning date, and the other three gray lines denote the three change points. 
+You will obtain the following plot in addition to the traceplots and summary table if you set `save_file=T` in `qh.eSIR`. The blue vertical line denotes the beginning date, and the other three gray lines denote the three change points. 
 
 ![Standard SIR](man/figures/Hubei_qthetaQ_plot.png)
 
@@ -154,7 +158,7 @@ You will obtain the following plot in addition to the traceplots and summart tab
 
 To save all the plots (including trace plots) and summary tables, please set `save_files=T`, and if possible, provide a location by setting `file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other intermediate plots will not be saved, but you can still retrieve the forecast plots and summary table based on the return list, e.g., using `res.step$forecast_infection` and `res.step$out_table`. Moreover, if you are interested in plotting the figures on your own, you may set `save_mcmc=T` so that all the MCMC draws will be saved in a `.RData` file too. 
 
-For details, please explore our package directly. We have `.rd` files establisehd, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them. 
+For details, please explore our package directly. We have `.rd` files established, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them. 
 
 ## References
 

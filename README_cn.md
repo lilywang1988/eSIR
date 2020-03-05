@@ -3,14 +3,14 @@ R package eSIR: extended state-space SIR epidemiological models
 [Song Lab](http://www.umich.edu/~songlab/)
 2020-03-05
 
-Chinese version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
+英文版本: [English](https://github.com/lilywang1988/eSIR/blob/master/README.md)
 
-Purpose
+目的
 -------
 
-The outbreak of novel Corona Virus disease (a.k.a. COVID-19), originated in Wuhan, the capital of Hubei Province spreads quickly and affects many cities in China as well as many countries in the world. The Chinese government has enforced very stringent quarantine and inspection to prevent the worsening spread of COVID-19. Although various forms of forecast on the turning points of this epidemic within and outside Hubei Province have been published in the media, none of the prediction models has explicitly accounted for the time-varying quarantine protocols. We extended the classical SIR model for infectious disease by incorporating forms of medical isolation (in-home quarantine and hospitalization) in the underlying infectious disease dynamic system. Using the state-space model for both daily infected and hospitalized incidences and MCMC algorithms, we assess the effectiveness of quarantine protocols for confining COVID-19 spread in both Hubei Province and the other regions of China. Both predicted turning points and their credible bands may be obtained from the extended SIR under a given quarantine protocol. R software packages are also made publicly available for interested users.
+起源于湖北省省会武汉市的新型冠状病毒病（又名COVID-19）的爆发迅速蔓延，并影响了中国许多城市以及世界许多国家。中国政府已经实施了非常严格的检疫和检查，以防止COVID-19的传播恶化。尽管在媒体上已经发布了关于湖北省内外流行病拐点的各种形式的预测，但是没有一个预测模型明确说明了时变隔离协议。通过将医学隔离形式（家庭隔离和住院）纳入基本的传染病动态系统，我们扩展了传染病的经典SIR模型。使用针对每日感染和住院发病率的状态空间模型以及MCMC算法，我们评估了隔离方案对限制湖北省和中国其他地区传播的COVID-19的有效性。在给定的隔离协议下，可以从扩展的SIR获取预测的转折点及其可信带。 R软件包也向感兴趣的用户公开提供。
 
-The standard SIR model has three components: susceptible, infected, and removed (including the recovery and dead). In the following sections, we will introduce the other extended state-space SIR models and their implementation in the package. **The results provided below are based on relatively short chains.** According to our experience, this setting (`M=5e3` and `nburnin=2e3`) should provide acceptable results in terms of the trend and turning points estimation, the estimation of parameters and their credible intervals might not be accurate. Hence, if possible, we would recommend using `M=5e5` and `nburnin=2e5` to obtain stable MCMC chains via [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
+标准SIR模型包含三个组件：易感，受感染和已删除（包括恢复和死亡）。在以下各节中，我们将在包中介绍其他扩展状态空间SIR模型及其实现。 **以下提供的结果基于相对较短的链。** 根据我们的经验，此设置 (`M=5e3` and `nburnin=2e3`) 应在趋势和转折点估计方面提供可接受的结果， 参数及其可信区间的估计值可能不准确。 因此，如果可能，我们建议使用“ M = 5e5”和“ nburnin = 2e5”来通过以下方式获得稳定的MCMC链 [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
 
 ![Standard SIR](man/figures/model0.png)
 
@@ -22,13 +22,12 @@ The standard SIR model has three components: susceptible, infected, and removed 
 
 ![Standard SIR](man/figures/algorithm.png)
 
-Preparation
+安装准备
 -----------
-[Download Binary Package](https://github.com/lilywang1988/eSIR/blob/master/install_binary)
+[直接下载并直接安装](https://github.com/lilywang1988/eSIR/blob/master/install_binary)
 
-To install and use this R package from Github, you will need to first install the R package `devtools`. Please uncomment the codes to install them. `eSIR` depends on three other packages, `rjags` (an interface to the JAGS library), `chron` and `gtools`, which could be installed with `eSIR` if not yet.
+如果要从Github安装和使用此R软件包，您需要首先安装R软件包`devtools`。 请取消注释代码以安装它们。 eSIR依赖于其他三个软件包：rjags（JAGS库的接口），chron和gtools，如果尚未安装，它们可以与eSIR一起安装。如果尚未安装JAGS-4.x.y.exe，可能会发生错误。(for any x &gt;= 0, y &gt;=0). ** Windows **用户可以从以下位置下载并安装JAGS [here](http://www.sourceforge.net/projects/mcmc-jags/files). ** Mac **用户可以按照以下步骤操作 [casallas/8411082](https://gist.github.com/casallas/8411082).
 
-An error may occur if you have not yet installed JAGS-4.x.y.exe (for any x &gt;= 0, y &gt;=0). **Windows** users may download and install JAGS from [here](http://www.sourceforge.net/projects/mcmc-jags/files). **Mac** users may follow steps at [casallas/8411082](https://gist.github.com/casallas/8411082).
 
 ``` r
 # install.packages("devtools")
@@ -48,19 +47,14 @@ Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-
 # install_github("qingyuanzhao/2019-nCov-Data")
 #library(2019-nCov-Data) 
 ```
+在Ubuntu（18.04）Linux中，请先将R更新到一个版本 &gt;= 3.6 的版本. 您可能还需要在通过`install.packages("devtools")`安装 devtools 之前安装jags软件包，方法是 `sudo apt-get install jags`。
 
-In Ubuntu (18.04) Linux, please first update R to a version &gt;= 3.6. You may need to install jags package as well by `sudo apt-get install jags` before install devtools by `install.packages("devtools")`.
-
-Model 1 using `tvt.eSIR()`: a SIR model with a time-varying transmission rate
+模型1 `tvt.eSIR()`: 具有时变传输速率的SIR模型
 -----------------------------------------------------------------------------
 
-By introducing a time-dependent
-*π*(*t*)∈\[0, 1\]
- function that modifies the transmission rate
-*β*
-, we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
+我们引入一个可以影响 *β* 的时间函数 *π*(*t*)∈\[0, 1\]，我们可以描述一系列时变变化，这些变化是由外部变化（例如政府政策，保护措施和环境变化）或内部变化（例如病原体的变异和进化）引起的。
 
-The function can be either stepwise or exponential:
+该函数可以是逐步的或指数的：
 
 ![pi functions](man/figures/pi_functions.png)
 
@@ -188,10 +182,11 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   #res.nopi$plot_removed
 ```
 
-Model 2 using `qh.eSIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
+模型2 `qh.eSIR()`: 具有随时间变化的隔离的SIR，遵循Dirac Delta函数
 -------------------------------------------------------------------------------------------------
+通过引入向量`phi`及其对应的变化点`change_time`，我们引入了依赖于Dirac delta函数 *ϕ*<sub>*t*</sub> ∈ \[0, 1\]。换句话说，仅在`change_time`定义的时间点，我们才将某些风险（易感）对象的某些部分移至隔离阶段。 该模型与以前的时变传输模型的不同之处在于，我们不允许传输率发生变化，而只是让易感对象的比例降低。
 
-By introducing a vector of `phi` and its corresponding changing points `change_time`, we introduced a quarantine process that is dependent on a dirac delta function *ϕ*<sub>*t*</sub> ∈ \[0, 1\]. In other words, only at time points defined by `change_time`, we have certain porportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model than the previous time-varying transmission one is that we do not allow the tranmission rate to change, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
+![Standard SIR](man/figures/model2.png)
 
 ![phi](man/figures/phi_functions.png)
 
@@ -237,32 +232,19 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   #                    M=5e3,nburnin = 2e3)
   #res.noq$plot_infection
 ```
-
-You will obtain the following plot in addition to the traceplots and summary table if you set `save_file=T` in `qh.eSIR`. The blue vertical line denotes the beginning date, and the other three gray lines denote the three change points.
+如果在`qh.eSIR`中设置`save_file = T`，除了traceplots和summary表之外，还将获得以下图表。 蓝色垂直线表示开始日期，而其他三个灰色线表示三个更改点。
 
 ![Standard SIR](man/figures/Hubei_qthetaQ_plot.png)
 
-Outputs and summary table
+结果和汇总表
 -------------------------
+要保存所有图（包括轨迹图）和汇总表，请设置`save_files = T`，并在可能的情况下通过设置`file_add="YOUR/FAVORITE/FOLDER"`提供位置。否则，轨迹图和其他中间图将不会保存，但是您仍然可以基于返回列表检索预测图和汇总表，例如，使用`res.step$forecast_infection`和`res.step$out_table`。 此外，如果您有兴趣自己绘制图形，可以设置`save_mcmc = T`，以便所有MCMC图形也都保存在`.RData`文件中。
 
-To save all the plots (including trace plots) and summary tables, please set `save_files=T`, and if possible, provide a location by setting `file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other intermediate plots will not be saved, but you can still retrieve the forecast plots and summary table based on the return list, e.g., using `res.step$forecast_infection` and `res.step$out_table`. Moreover, if you are interested in plotting the figures on your own, you may set `save_mcmc=T` so that all the MCMC draws will be saved in a `.RData` file too.
+有关详细信息，请直接浏览我们的软件包。 我们有准备完整的`.rd`文件，请使用`help（tvt.eSIR`或`qh.eSIR`查找它们。
 
-For details, please explore our package directly. We have `.rd` files established, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them.
-
-References
+参考文献
 ----------
 
 1.  Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del Valle, S. Y. (2017). Forecasting seasonal influenza with a state-space SIR model. The annals of applied statistics, 11(1), 202.
 
 2.  Mkhatshwa, T., & Mummert, A. (2010). Modeling super-spreading events for infectious diseases: case study SARS. arXiv preprint arXiv:1007.0908.
-
-Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
-
-This work is licensed under a [Creative Commons Attribution 4.0 International
-License][cc-by].
-
-[![CC BY 4.0][cc-by-image]][cc-by]
-
-[cc-by]: http://creativecommons.org/licenses/by/4.0/
-[cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
-[cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
