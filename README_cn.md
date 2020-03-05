@@ -1,4 +1,4 @@
-R package eSIR: extended state-space SIR epidemiological models
+R包eSIR：扩展的状态空间SIR流行病学模型
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
 2020-03-05
@@ -24,9 +24,9 @@ R package eSIR: extended state-space SIR epidemiological models
 
 安装准备
 -----------
-[直接下载并直接安装](https://github.com/lilywang1988/eSIR/blob/master/install_binary)
+[直接下载并安装](https://github.com/lilywang1988/eSIR/blob/master/install_binary)
 
-如果要从Github安装和使用此R软件包，您需要首先安装R软件包`devtools`。 请取消注释代码以安装它们。 eSIR依赖于其他三个软件包：rjags（JAGS库的接口），chron和gtools，如果尚未安装，它们可以与eSIR一起安装。如果尚未安装JAGS-4.x.y.exe，可能会发生错误。(for any x &gt;= 0, y &gt;=0). ** Windows **用户可以从以下位置下载并安装JAGS [here](http://www.sourceforge.net/projects/mcmc-jags/files). ** Mac **用户可以按照以下步骤操作 [casallas/8411082](https://gist.github.com/casallas/8411082).
+如果要从Github安装和使用此R软件包，您需要首先安装R软件包`devtools`。 请取消注释代码以安装它们。 eSIR依赖于其他三个软件包：rjags（JAGS库的接口），chron和gtools，如果尚未安装，它们可以与eSIR一起安装。如果尚未安装JAGS-4.x.y.exe，可能会发生错误。(for any x &gt;= 0, y &gt;=0). **Windows** 用户可以从以下位置下载并安装JAGS [here](http://www.sourceforge.net/projects/mcmc-jags/files). **Mac** 用户可以按照以下步骤操作 [casallas/8411082](https://gist.github.com/casallas/8411082).
 
 
 ``` r
@@ -38,7 +38,7 @@ R package eSIR: extended state-space SIR epidemiological models
 library(eSIR) 
 ```
 
-Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5). Alternatively, we notice some convenient access to COVID-19 data from [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) and [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
+我们的数据来自于丁香医生 [dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5). 或者，还有其他的数据源，比如 [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) 和 [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
 
 ``` r
 # Data of COVID-19 can be found in the following R packages: 
