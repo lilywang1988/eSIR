@@ -38,7 +38,7 @@ R包eSIR：扩展的状态空间SIR流行病学模型
 library(eSIR) 
 ```
 
-我们的数据来自于丁香医生 [dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5). 或者，还有其他的数据源，比如 [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) 和 [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
+我们的数据来自于丁香医生 [dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5). 其他我们知道的数据源包括 [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) 和 [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
 
 ``` r
 # Data of COVID-19 can be found in the following R packages: 
