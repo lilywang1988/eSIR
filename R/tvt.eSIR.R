@@ -9,7 +9,7 @@
 # library(ggplot2)
 # library(chron)
 #library(data.table)
-#library(stats)
+library(stats)
 #' Fit extended state-space SIR model with time-varying transmission rates
 #'
 #' Fit extended state-space SIR model with prespecified changes in the transmission rate, either stepwise or continuous, accomodating time-varying quaratine protocols.
@@ -43,7 +43,7 @@
 #' @param save_mcmc logical, whether save (\code{TRUE}) all the MCMC outputs or not (\code{FALSE}).The output file will be an \code{.RData} file named by the \eqn{casename}. We include arrays of prevalence values of the three compartments with their matrices of posterior draws up to the last date of the collected data as \code{theta_p[,,1]} and afterwards as \code{theta_pp[,,1]} for \eqn{\theta_t^S}, \code{theta_p[,,2]} and \code{theta_pp[,,2]} for \eqn{\theta_t^I}, and \code{theta_p[,,3]} and \code{theta_pp[,,3]} for \eqn{\theta_t^R}. Moreover, the input and predicted proportions \code{Y}, \code{Y_pp}, \code{R} and \code{R_pp} can also be retrieved. The prevalence and prediceted proportion matrices have rows for MCMC replicates, and columns for days. The MCMC posterior draws of other parameters including \code{beta_p}, \code{gamma_p}, \code{R0_p}, and variance controllers \code{k_p}, \code{lambdaY_p}, \code{lambdaR_p} are also available.
 #' @param save_plot_data logical, whether save the plotting data or not.
 #' @param add_death logical, whether add the approximate death curve to the plot, default is false.
-#' @param esp a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10
+#' @esp a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10
 #'
 #' @return
 #' \item{casename}{the predefined \code{casename}.}
@@ -168,8 +168,8 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
                    R[t-1] ~ dbeta(lambdaR*theta[t,3],lambdaR*(1-theta[t,3]))
                   }
                   theta[1,1] <-  1- theta[1,2]- theta[1,3]
-                  theta[1,2] ~ dbeta(",1,",",1/max(Y[1],1/N),")
-                  theta[1,3] ~ dbeta(",1,",",1/max(R[1],1/N),")
+                  theta[1,2] ~ dbeta(",1,",",1/Y[1],")
+                  theta[1,3] ~ dbeta(",1,",",1/R[1],")
                   gamma ~  dlnorm(",lognorm_gamma_parm[1],",",1/lognorm_gamma_parm[2],")
                   R0 ~ dlnorm(",lognorm_R0_parm[1],",",1/lognorm_R0_parm[2],")
                   beta <- R0*gamma
@@ -327,7 +327,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
   dthetaI_mat_post <- (theta_pp[,,1]*theta_pp[,,2])*((c(beta_p))%o%(pi[(T_prime+1):T_fin]))-theta_pp[,,2]*replicate(T_fin-T_prime,c(gamma_p))
   dthetaI_mat_pre <- t(apply(theta_p[,,2],1,function(v){diff(smooth(v))}))
   dthetaI_mat <-cbind(dthetaI_mat_pre,dthetaI_mat_post)
-
+  
   dthetaI <- colMeans(dthetaI_mat,na.rm=T)
   dthetaI_tp1 <- (1:T_fin)[which.max(dthetaI)]# first second order derivative=0
   dthetaI_tp2 <- (dthetaI_tp1:T_fin)[which.min(dthetaI[dthetaI_tp1:T_fin]>0)] # first order derivative=0
@@ -338,7 +338,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
   #}
   dthetaI_tp1_date <- chron_ls[dthetaI_tp1]
   dthetaI_tp2_date <- chron_ls[dthetaI_tp2]
-
+  
 
   incidence_vec <-  rowSums((thetaS_mat[,]*thetaI_mat[,])*((c(beta_p))%o%(pi)),na.rm = T)
   incidence_mean <-  mean(incidence_vec,na.rm = T)
@@ -404,7 +404,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
     #if(dthetaI_tp1>T_prime)
     spaghetti_plot<-spaghetti_plot+
     geom_rect(data=data.frame(xmin = as.numeric(first_tp_date_ci[1]), xmax = as.numeric(first_tp_date_ci[3]), ymin = -Inf, ymax =Inf,ci="first tp"),aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax =ymax), fill = "darkgreen", alpha = 0.15)
-   #if(dthetaI_tp2>T_prime)
+   #if(dthetaI_tp2>T_prime) 
    spaghetti_plot<-spaghetti_plot+
      geom_rect(data=data.frame(xmin = as.numeric(second_tp_date_ci[1]), xmax = as.numeric(second_tp_date_ci[3],ci="second tp"), ymin = -Inf, ymax =Inf),aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax =ymax),fill = "purple", alpha = 0.15)
   if(dthetaI_tp2_date>dthetaI_tp1_date) {spaghetti_plot<-spaghetti_plot+geom_vline(xintercept = as.numeric(dthetaI_tp2_date),color="purple",show.legend = TRUE)+
@@ -486,7 +486,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
      labels=c(expression(paste(y[t[0]+1:T]^R,' | ',y[1:t[0]]^I,', ',y[1:t[0]]^R)),
       expression(paste(theta[1:t[0]]^R,' | ',y[1:t[0]]^I,', ',y[1:t[0]]^R))))+
     annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=r_text_ht,color="blue")+annotate(geom="text", label=as.character(chron(dthetaI_tp1_date,format="mon day")), x=dthetaI_tp1+12, y=r_text_ht*1.25,color="darkgreen")
-
+  
   if(dthetaI_tp2>dthetaI_tp1) {plot2 <-plot2+geom_vline(xintercept = dthetaI_tp2,color="purple",show.legend = TRUE)+annotate(geom="text", label=as.character(chron(dthetaI_tp2_date,format="mon day")), x=dthetaI_tp2+12, y=r_text_ht*1.5,color="purple")
   }
   if(add_death) plot2 <- plot2+geom_line(data=data_comp_R,aes(x=time,y=dead),color="black",linetype=1)+geom_line(data=data_comp_R,aes(x=time,y=dead_med),color="black",linetype=2)

@@ -9,7 +9,7 @@
 # library(ggplot2)
 # library(chron)
 #library(data.table)
-#library(stats)
+library(stats)
 #' Extended state-space SIR with quarantine
 #'
 #' Fit an extended state-space SIR model being reduced by in-home hospitalization.
@@ -40,8 +40,8 @@
 #' @param save_mcmc logical, whether save (\code{TRUE}) all the MCMC outputs or not (\code{FALSE}).The output file will be an \code{.RData} file named by the \eqn{casename}. We include arrays of prevalence values of the three compartments with their matrices of posterior draws up to the last date of the collected data as \code{theta_p[,,1]} and afterwards as \code{theta_pp[,,1]} for \eqn{\theta_t^S}, \code{theta_p[,,2]} and \code{theta_pp[,,2]} for \eqn{\theta_t^I}, and \code{theta_p[,,3]} and \code{theta_pp[,,3]} for \eqn{\theta_t^R}. The posterior draws of the prevalence process of the quarantine compartment can be obtained via \code{thetaQ_p} and \code{thetaQ_pp}. Moreover, the input and predicted proportions \code{Y}, \code{Y_pp}, \code{R} and \code{R_pp} can also be retrieved. The prevalence and prediceted proportion matrices have rows for MCMC replicates, and columns for days. The MCMC posterior draws of other parameters including \code{beta}, \code{gamma}, \code{R0}, and variance controllers \code{k_p}, \code{lambdaY_p}, \code{lambdaR_p} are also available.
 #' @param save_plot_data logical, whether save the plotting data or not.
 #' @param add_death logical, whether add the approximate death curve to the plot, default is false.
-#' @param esp a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10
-#'
+#' @esp a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10
+#' 
 #' @return
 #' \item{casename}{the predefined \code{casename}.}
 #' \item{incidence_mean}{mean incidence.}
@@ -87,7 +87,7 @@
 #'
 #' @export
 qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e2,thn=10,nburnin=2e2,dic=FALSE,death_in_R=0.02,casename="qh.eSIR",beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1,file_add=character(0),add_death=FALSE,save_files=FALSE,save_mcmc=FALSE,save_plot_data=FALSE,eps=1e-10){
-
+  
   len <- round(M/thn)*nchain #number of MCMC draws in total
 
   T_prime <- length(Y)
@@ -160,8 +160,8 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
                           theta_Q[1] <- 0
                           theta_H[1] <- 0
                           theta_temp[1,1] <-  1- theta_temp[1,2]- theta_temp[1,3]- theta_Q[1]- theta_H[1]
-                          theta_temp[1,2] ~ dbeta(",1,",",1/max(Y[1],1/N),")
-                          theta_temp[1,3] ~ dbeta(",1,",",1/max(R[1],1/N),")
+                          theta_temp[1,2] ~ dbeta(",1,",",1/Y[1],")
+                          theta_temp[1,3] ~ dbeta(",1,",",1/R[1],")
                           theta[1,1] <- theta_temp[1,1]
                           theta[1,2] <- theta_temp[1,2]
                           theta[1,3] <- theta_temp[1,3]
@@ -335,9 +335,9 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   data_pre <- data.frame(time=1:T_prime,Y)
   data_post <-data.frame(time=1:T_prime,thetaI_band)
   data_fore <- data.frame(time=(T_prime+1):T_fin,Y_band,Y_mean)
-
+  
   data_comp<-data.frame(time=1:T_fin,rbind(thetaI_band ,Y_band), phase=c(rep('pre',nrow(thetaI_band)),rep('post',nrow(Y_band))),mean=thetaI_mean,median=thetaI_median)
-
+  
   data_poly<-data.frame(y=c(thetaI_band$upper,rev(thetaI_band$lower),Y_band$upper,rev(Y_band$lower)),x=c(1:T_prime,T_prime:1,(T_prime+1):T_fin,T_fin:(T_prime+1)),phase=c(rep('pre',T_prime*2),rep('post',(T_fin-T_prime)*2)),value=c(rep(col2[1],T_prime*2),rep(col2[2],(T_fin-T_prime)*2)))
 
   ## First-order derivative check
@@ -347,8 +347,8 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   #dthetaI_mat <- (thetaS_mat*thetaI_mat)*replicate(T_fin,c(beta_p))-thetaI_mat*replicate(T_fin,c(gamma_p))-thetaI_mat*t(replicate(len,c(gamma_H_vec))) # old verstion, incorrected, need to be changed as below. This correction is made on Mar 3, 2020
   #dthetaI_mat <- (thetaS_mat*thetaI_mat)*replicate(T_fin,c(beta_p))-thetaI_mat*replicate(T_fin,c(gamma_p))-thetaI_mat*t(replicate(len,c(gamma_H_vec)))-thetaS_mat*t(replicate(len,c(phi_vec))) # this is the corrected old version, seems to be correct!
  # dthetaI_mat <- apply(thetaI_mat,1,diff) # this is to circumvent the difficulty of obtaining the differential equation among posterior theta's
-
-  dthetaI_mat_post <- (theta_pp[,,1]*theta_pp[,,2])*replicate(T_fin-T_prime,c(beta_p))-theta_pp[,,2]*replicate(T_fin-T_prime,c(gamma_p))-theta_pp[,,1]*t(replicate(len,c(phi_vec[(T_prime+1):T_fin])))-theta_pp[,,2]*t(replicate(len,c(gamma_H_vec[(T_prime+1):T_fin])))
+  
+  dthetaI_mat_post <- (theta_pp[,,1]*theta_pp[,,2])*replicate(T_fin-T_prime,c(beta_p))-theta_pp[,,2]*replicate(T_fin-T_prime,c(gamma_p))-theta_pp[,,1]*t(replicate(len,c(phi_vec[(T_prime+1):T_fin])))-theta_pp[,,2]*t(replicate(len,c(gamma_H_vec[(T_prime+1):T_fin]))) 
   dthetaI_mat_pre <- t(apply(theta_p[,,2],1,function(v){diff(smooth(v))}))
   dthetaI_mat <-cbind(dthetaI_mat_pre,dthetaI_mat_post)
 
@@ -440,7 +440,7 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   if(dthetaI_tp2_date>dthetaI_tp1_date) {spaghetti_plot<-spaghetti_plot+
     geom_vline(xintercept = as.numeric(dthetaI_tp2_date),color="purple",show.legend = TRUE)+
     annotate(geom="text", label=as.character(chron(dthetaI_tp2_date,format="mon day")), x=as.numeric(dthetaI_tp2_date)+12, y= spaghetti_ht*1.5,color="purple")}
-
+  
   if(save_files) ggsave(paste0(file_add,casename,"_spaghetti.png"),width=12,height=10)
 ##############
   y_text_ht <- max(rbind(thetaI_band ,Y_band),na.rm = T)/2
@@ -482,11 +482,11 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   data_pre_R <- data.frame(time=1:T_prime,R) # previous data
   data_post_R <-data.frame(time=1:T_prime,thetaR_band) # posterior of theta^R
   data_fore_R <- data.frame(time=(T_prime+1):T_fin,R_band,R_mean) # The forecast of R after T_prime
-
+  
   data_comp_R<-data.frame(time=1:T_fin,rbind(thetaR_band ,R_band), phase=c(rep('pre',nrow(thetaR_band)),rep('post',nrow(R_band))),mean=thetaR_mean,median=thetaR_med,dead=thetaR_mean*death_in_R,dead_med=thetaR_med*death_in_R) # the filled area--polygon
-
+  
   data_poly_R<-data.frame(y=c(thetaR_band$upper,rev(thetaR_band$lower),R_band$upper,rev(R_band$lower)),x=c(1:T_prime,T_prime:1,(T_prime+1):T_fin,T_fin:(T_prime+1)),phase=c(rep('pre',T_prime*2),rep('post',(T_fin-T_prime)*2)),value=c(rep(col2[1],T_prime*2),rep(col2[2],(T_fin-T_prime)*2)))
-
+  
   r_text_ht <- max(rbind(thetaR_band ,R_band),na.rm = T)/2
   plot2 <- ggplot(data = data_poly_R, aes(x = x, y = y)) +
     geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +
@@ -516,7 +516,7 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
                         labels=c(expression(paste(y[t[0]+1:T]^R,' | ',y[1:t[0]]^I,', ',y[1:t[0]]^R)),
                                  expression(paste(theta[1:t[0]]^R,' | ',y[1:t[0]]^I,', ',y[1:t[0]]^R))))+
     annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=r_text_ht,color="blue")+annotate(geom="text", label=as.character(chron(dthetaI_tp1_date,format="mon day")), x=dthetaI_tp1+12, y=r_text_ht*1.25,color="darkgreen")
-
+  
   if(dthetaI_tp2>dthetaI_tp1) {plot2 <-plot2+geom_vline(xintercept = dthetaI_tp2,color="purple",show.legend = TRUE)+annotate(geom="text", label=as.character(chron(dthetaI_tp2_date,format="mon day")), x=dthetaI_tp2+12, y=r_text_ht*1.5,color="purple")
   }
   if(add_death) plot2 <- plot2+geom_line(data=data_comp_R,aes(x=time,y=dead),color="black",linetype=1)+geom_line(data=data_comp_R,aes(x=time,y=dead_med),color="black",linetype=2)
