@@ -40,8 +40,8 @@ library(stats)
 #' @param save_mcmc logical, whether save (\code{TRUE}) all the MCMC outputs or not (\code{FALSE}).The output file will be an \code{.RData} file named by the \eqn{casename}. We include arrays of prevalence values of the three compartments with their matrices of posterior draws up to the last date of the collected data as \code{theta_p[,,1]} and afterwards as \code{theta_pp[,,1]} for \eqn{\theta_t^S}, \code{theta_p[,,2]} and \code{theta_pp[,,2]} for \eqn{\theta_t^I}, and \code{theta_p[,,3]} and \code{theta_pp[,,3]} for \eqn{\theta_t^R}. The posterior draws of the prevalence process of the quarantine compartment can be obtained via \code{thetaQ_p} and \code{thetaQ_pp}. Moreover, the input and predicted proportions \code{Y}, \code{Y_pp}, \code{R} and \code{R_pp} can also be retrieved. The prevalence and prediceted proportion matrices have rows for MCMC replicates, and columns for days. The MCMC posterior draws of other parameters including \code{beta}, \code{gamma}, \code{R0}, and variance controllers \code{k_p}, \code{lambdaY_p}, \code{lambdaR_p} are also available.
 #' @param save_plot_data logical, whether save the plotting data or not.
 #' @param add_death logical, whether add the approximate death curve to the plot, default is false.
-#' @esp a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10
-#' 
+#' @param esp a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10
+#'
 #' @return
 #' \item{casename}{the predefined \code{casename}.}
 #' \item{incidence_mean}{mean incidence.}
@@ -87,7 +87,8 @@ library(stats)
 #'
 #' @export
 qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e2,thn=10,nburnin=2e2,dic=FALSE,death_in_R=0.02,casename="qh.eSIR",beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1,file_add=character(0),add_death=FALSE,save_files=FALSE,save_mcmc=FALSE,save_plot_data=FALSE,eps=1e-10){
-  
+
+  beta0 <- R0*gamma0
   len <- round(M/thn)*nchain #number of MCMC draws in total
 
   T_prime <- length(Y)
@@ -138,12 +139,14 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
                           Km[t-1,12] <- gamma*(theta[t-1,2]+Km[t-1,7])
                           Km[t-1,8] <- -Km[t-1,4]-Km[t-1,12]
 
-                          theta_Q[t] <- theta_Q[t-1]+phi_vec[t-1]*theta[t-1,1]
-                          theta_H[t] <- theta_H[t-1]+gamma_H_vec[t-1]*theta[t-1,2]
 
                           alpha_temp[t-1,1] <- max(theta[t-1,1]+(Km[t-1,1]+2*Km[t-1,2]+2*Km[t-1,3]+Km[t-1,4])/6-phi_vec[t-1]*theta[t-1,1],0)
                           alpha_temp[t-1,2] <- max(theta[t-1,2]+(Km[t-1,5]+2*Km[t-1,6]+2*Km[t-1,7]+Km[t-1,8])/6-gamma_H_vec[t-1]*theta[t-1,2],0)
                           alpha_temp[t-1,3] <- theta[t-1,3]+(Km[t-1,9]+2*Km[t-1,10]+2*Km[t-1,11]+Km[t-1,12])/6
+
+
+                          theta_Q[t] <- theta_Q[t-1]+min(phi_vec[t-1]*theta[t-1,1],theta[t-1,1]+(Km[t-1,1]+2*Km[t-1,2]+2*Km[t-1,3]+Km[t-1,4])/6)
+                          theta_H[t] <- theta_H[t-1]+min(gamma_H_vec[t-1]*theta[t-1,2],theta[t-1,2]+(Km[t-1,5]+2*Km[t-1,6]+2*Km[t-1,7]+Km[t-1,8])/6)
 
                           v[t-1] <- (1-theta_Q[t]-theta_H[t])
 
@@ -306,6 +309,8 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
       thetaQ_pp[l,t] <- thetaltQ <- thetaltQ+ min(phi_vec[t+T_prime]*thetalt1,thetalt1+(Km[1]+2*Km[2]+2*Km[3]+Km[4])/6)
       thetaH_pp[l,t] <- thetaltH <- thetaltH+ min(gamma_H_vec[t+T_prime]*thetalt2,thetalt2+(Km[5]+2*Km[6]+2*Km[7]+Km[8])/6)
 
+
+
       v_pp[l,t] <- 1-thetaQ_pp[l,t]-thetaH_pp[l,t]
 
       alpha[1] <- ifelse(v_pp[l,t]>0,alpha_temp[1]/v_pp[l,t],0)
@@ -335,20 +340,21 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   data_pre <- data.frame(time=1:T_prime,Y)
   data_post <-data.frame(time=1:T_prime,thetaI_band)
   data_fore <- data.frame(time=(T_prime+1):T_fin,Y_band,Y_mean)
-  
+
   data_comp<-data.frame(time=1:T_fin,rbind(thetaI_band ,Y_band), phase=c(rep('pre',nrow(thetaI_band)),rep('post',nrow(Y_band))),mean=thetaI_mean,median=thetaI_median)
-  
+
   data_poly<-data.frame(y=c(thetaI_band$upper,rev(thetaI_band$lower),Y_band$upper,rev(Y_band$lower)),x=c(1:T_prime,T_prime:1,(T_prime+1):T_fin,T_fin:(T_prime+1)),phase=c(rep('pre',T_prime*2),rep('post',(T_fin-T_prime)*2)),value=c(rep(col2[1],T_prime*2),rep(col2[2],(T_fin-T_prime)*2)))
 
   ## First-order derivative check
   thetaS_mat <- cbind(theta_p[,-1,1],theta_pp[,,1])
   thetaI_mat <- cbind(theta_p[,-1,2],theta_pp[,,2])
+  thetaR_mat <- cbind(theta_p[,-1,3],theta_pp[,,3])
 
   #dthetaI_mat <- (thetaS_mat*thetaI_mat)*replicate(T_fin,c(beta_p))-thetaI_mat*replicate(T_fin,c(gamma_p))-thetaI_mat*t(replicate(len,c(gamma_H_vec))) # old verstion, incorrected, need to be changed as below. This correction is made on Mar 3, 2020
   #dthetaI_mat <- (thetaS_mat*thetaI_mat)*replicate(T_fin,c(beta_p))-thetaI_mat*replicate(T_fin,c(gamma_p))-thetaI_mat*t(replicate(len,c(gamma_H_vec)))-thetaS_mat*t(replicate(len,c(phi_vec))) # this is the corrected old version, seems to be correct!
  # dthetaI_mat <- apply(thetaI_mat,1,diff) # this is to circumvent the difficulty of obtaining the differential equation among posterior theta's
-  
-  dthetaI_mat_post <- (theta_pp[,,1]*theta_pp[,,2])*replicate(T_fin-T_prime,c(beta_p))-theta_pp[,,2]*replicate(T_fin-T_prime,c(gamma_p))-theta_pp[,,1]*t(replicate(len,c(phi_vec[(T_prime+1):T_fin])))-theta_pp[,,2]*t(replicate(len,c(gamma_H_vec[(T_prime+1):T_fin]))) 
+
+  dthetaI_mat_post <- (theta_pp[,,1]*theta_pp[,,2])*replicate(T_fin-T_prime,c(beta_p))-theta_pp[,,2]*replicate(T_fin-T_prime,c(gamma_p))-theta_pp[,,1]*t(replicate(len,c(phi_vec[(T_prime+1):T_fin])))-theta_pp[,,2]*t(replicate(len,c(gamma_H_vec[(T_prime+1):T_fin])))
   dthetaI_mat_pre <- t(apply(theta_p[,,2],1,function(v){diff(smooth(v))}))
   dthetaI_mat <-cbind(dthetaI_mat_pre,dthetaI_mat_post)
 
@@ -360,6 +366,85 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   #if(dthetaI_tp2<T_prime) {dthetaI_tp2=which.min(diff(colMeans(thetaI_mat))>0)
   #message("The turning point 2 was observed and obtained from prevalence! The CI of turning point 2 may not be valid!")
  # }
+
+  dthetaI_tp1_rd<-max(round(dthetaI_tp1),1)
+  if(dthetaI_tp1_rd>T_prime) {
+    thetatI_tp1_vec<-thetaI_mat[,dthetaI_tp1_rd]
+    thetaI_tp1_mean <-mean(thetatI_tp1_vec,na.rm = T)
+    thetaI_tp1_ci <-quantile(thetatI_tp1_vec,c(0.025,0.5,0.975),na.rm = T)
+    Y_tp1_vec<-Y_pp[,dthetaI_tp1_rd-T_prime]
+    Y_tp1_mean <-mean(Y_tp1_vec,na.rm = T)
+    Y_tp1_ci <- quantile(Y_tp1_vec,c(0.025,0.5,0.975),na.rm = T)
+
+    thetatR_tp1_vec<-thetaR_mat[,dthetaI_tp1_rd]
+    thetaR_tp1_mean <-mean(thetatR_tp1_vec,na.rm = T)
+    thetaR_tp1_ci <-quantile(thetatR_tp1_vec,c(0.025,0.5,0.975),na.rm = T)
+    R_tp1_vec<-R_pp[,dthetaI_tp1_rd-T_prime]
+    R_tp1_mean <-mean(R_tp1_vec,na.rm = T)
+    R_tp1_ci <- quantile(R_tp1_vec,c(0.025,0.5,0.975),na.rm = T)
+  }else{
+    thetatI_tp1_vec<-thetaI_mat[,dthetaI_tp1_rd]
+    thetaI_tp1_mean <-mean(thetatI_tp1_vec,na.rm = T)
+    thetaI_tp1_ci <-quantile(thetatI_tp1_vec,c(0.025,0.5,0.975),na.rm = T)
+    Y_tp1_vec<-NA
+    Y_tp1_mean <-mean(Y_tp1_vec,na.rm = T)
+    Y_tp1_ci <- quantile(Y_tp1_vec,c(0.025,0.5,0.975),na.rm = T)
+
+    thetatR_tp1_vec<-thetaR_mat[,dthetaI_tp1_rd]
+    thetaR_tp1_mean <-mean(thetatR_tp1_vec,na.rm = T)
+    thetaR_tp1_ci <-quantile(thetatR_tp1_vec,c(0.025,0.5,0.975),na.rm = T)
+    R_tp1_vec<-R_pp[,dthetaI_tp1_rd-T_prime]
+    R_tp1_mean <-mean(R_tp1_vec,na.rm = T)
+    R_tp1_ci <- quantile(R_tp1_vec,c(0.025,0.5,0.975),na.rm = T)
+  }
+  dthetaI_tp2_rd<-max(round(dthetaI_tp2),1)
+  if(dthetaI_tp1_rd==dthetaI_tp2_rd){
+    thetatI_tp2_vec<-NA
+    thetaI_tp2_mean <-mean(thetatI_tp2_vec,na.rm = T)
+    thetaI_tp2_ci <-quantile(thetatI_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+    Y_tp2_vec<-NA
+    Y_tp2_mean <-mean(Y_tp2_vec,na.rm = T)
+    Y_tp2_ci <- quantile(Y_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+
+    thetatR_tp2_vec<-NA
+    thetaR_tp2_mean <-mean(thetatR_tp2_vec,na.rm = T)
+    thetaR_tp2_ci <-quantile(thetatR_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+    R_tp2_vec<-NA
+    R_tp2_mean <-mean(R_tp2_vec,na.rm = T)
+    R_tp2_ci <- quantile(R_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+  }else if(dthetaI_tp2_rd>T_prime) {
+    thetatI_tp2_vec<-thetaI_mat[,dthetaI_tp2_rd]
+    thetaI_tp2_mean <-mean(thetatI_tp2_vec,na.rm = T)
+    thetaI_tp2_ci <-quantile(thetatI_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+    Y_tp2_vec<-Y_pp[,dthetaI_tp2_rd-T_prime]
+    Y_tp2_mean <-mean(Y_tp2_vec,na.rm = T)
+    Y_tp2_ci <- quantile(Y_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+
+    thetatR_tp2_vec<-thetaR_mat[,dthetaI_tp2_rd]
+    thetaR_tp2_mean <-mean(thetatR_tp2_vec,na.rm = T)
+    thetaR_tp2_ci <-quantile(thetatR_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+    R_tp2_vec<-R_pp[,dthetaI_tp2_rd-T_prime]
+    R_tp2_mean <-mean(R_tp2_vec,na.rm = T)
+    R_tp2_ci <- quantile(R_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+  }else{
+    thetatI_tp2_vec<-thetaI_mat[,dthetaI_tp2_rd]
+    thetaI_tp2_mean <-mean(thetatI_tp2_vec,na.rm = T)
+    thetaI_tp2_ci <-quantile(thetatI_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+    Y_tp2_vec<-NA
+    Y_tp2_mean <-mean(Y_tp2_vec,na.rm = T)
+    Y_tp2_ci <- quantile(Y_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+
+    thetatR_tp2_vec<-thetaR_mat[,dthetaI_tp2_rd]
+    thetaR_tp2_mean <-mean(thetatR_tp2_vec,na.rm = T)
+    thetaR_tp2_ci <-quantile(thetatR_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+    R_tp2_vec<-NA
+    R_tp2_mean <-mean(R_tp2_vec,na.rm = T)
+    R_tp2_ci <- quantile(R_tp2_vec,c(0.025,0.5,0.975),na.rm = T)
+  }
+  thetaR_max_vec <- thetaR_mat[,T_fin]
+  thetaR_max_mean <- mean(thetaR_max_vec)
+  thetaR_max_ci <- quantile(thetaR_max_vec,c(0.025,0.5,0.975),na.rm = T)
+
   dthetaI_tp1_date <- chron_ls[dthetaI_tp1]
   dthetaI_tp2_date <- chron_ls[dthetaI_tp2]
 
@@ -372,20 +457,33 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
 
   second_tp_vec <- sapply(1:len,function(l){
     (first_tp_vec[l]:T_fin)[which.min(dthetaI_mat[l,first_tp_vec[l]:T_fin]>0)]})
+
+  end_p_vec <-sapply(1:len,function(l){
+    if(sum(thetaI_mat[l,first_tp_vec[l]:T_fin]<=eps)>0){
+      (first_tp_vec[l]:T_fin)[which.max(thetaI_mat[l,first_tp_vec[l]:T_fin]<=eps)]
+    }else{ T_fin } })
+
+
   # first order derivative=0
   first_tp_mean <- mean(first_tp_vec,na.rm = T)
   second_tp_mean <- mean(second_tp_vec,na.rm = T)
+  end_p_mean <- mean(end_p_vec,na.rm = T)
 
   first_tp_ci <- quantile(first_tp_vec, c(0.025,0.5,0.975),na.rm = T)
   second_tp_ci <- quantile(second_tp_vec, c(0.025,0.5,0.975),na.rm = T)
+  end_p_ci <- quantile(end_p_vec, c(0.025,0.5,0.975),na.rm = T)
 
   first_tp_date_mean <- chron_ls[first_tp_mean]
   second_tp_date_mean <- chron_ls[second_tp_mean]
+  end_p_date_mean <- chron_ls[end_p_mean]
+
   first_tp_date_ci <- chron_ls[first_tp_ci]
   second_tp_date_ci <- chron_ls[second_tp_ci]
+  end_p_date_ci <- chron_ls[end_p_ci]
 
   names(first_tp_date_ci)<-c("2.5%","50%","97.5%")
   names(second_tp_date_ci)<-c("2.5%","50%","97.5%")
+  names(end_p_date_ci)<-c("2.5%","50%","97.5%")
 
   if(save_files){
     png(paste0(file_add,casename,"deriv.png"), width = 700, height = 350)
@@ -440,7 +538,7 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   if(dthetaI_tp2_date>dthetaI_tp1_date) {spaghetti_plot<-spaghetti_plot+
     geom_vline(xintercept = as.numeric(dthetaI_tp2_date),color="purple",show.legend = TRUE)+
     annotate(geom="text", label=as.character(chron(dthetaI_tp2_date,format="mon day")), x=as.numeric(dthetaI_tp2_date)+12, y= spaghetti_ht*1.5,color="purple")}
-  
+
   if(save_files) ggsave(paste0(file_add,casename,"_spaghetti.png"),width=12,height=10)
 ##############
   y_text_ht <- max(rbind(thetaI_band ,Y_band),na.rm = T)/2
@@ -482,11 +580,11 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   data_pre_R <- data.frame(time=1:T_prime,R) # previous data
   data_post_R <-data.frame(time=1:T_prime,thetaR_band) # posterior of theta^R
   data_fore_R <- data.frame(time=(T_prime+1):T_fin,R_band,R_mean) # The forecast of R after T_prime
-  
+
   data_comp_R<-data.frame(time=1:T_fin,rbind(thetaR_band ,R_band), phase=c(rep('pre',nrow(thetaR_band)),rep('post',nrow(R_band))),mean=thetaR_mean,median=thetaR_med,dead=thetaR_mean*death_in_R,dead_med=thetaR_med*death_in_R) # the filled area--polygon
-  
+
   data_poly_R<-data.frame(y=c(thetaR_band$upper,rev(thetaR_band$lower),R_band$upper,rev(R_band$lower)),x=c(1:T_prime,T_prime:1,(T_prime+1):T_fin,T_fin:(T_prime+1)),phase=c(rep('pre',T_prime*2),rep('post',(T_fin-T_prime)*2)),value=c(rep(col2[1],T_prime*2),rep(col2[2],(T_fin-T_prime)*2)))
-  
+
   r_text_ht <- max(rbind(thetaR_band ,R_band),na.rm = T)/2
   plot2 <- ggplot(data = data_poly_R, aes(x = x, y = y)) +
     geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +
@@ -516,7 +614,7 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
                         labels=c(expression(paste(y[t[0]+1:T]^R,' | ',y[1:t[0]]^I,', ',y[1:t[0]]^R)),
                                  expression(paste(theta[1:t[0]]^R,' | ',y[1:t[0]]^I,', ',y[1:t[0]]^R))))+
     annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=r_text_ht,color="blue")+annotate(geom="text", label=as.character(chron(dthetaI_tp1_date,format="mon day")), x=dthetaI_tp1+12, y=r_text_ht*1.25,color="darkgreen")
-  
+
   if(dthetaI_tp2>dthetaI_tp1) {plot2 <-plot2+geom_vline(xintercept = dthetaI_tp2,color="purple",show.legend = TRUE)+annotate(geom="text", label=as.character(chron(dthetaI_tp2_date,format="mon day")), x=dthetaI_tp2+12, y=r_text_ht*1.5,color="purple")
   }
   if(add_death) plot2 <- plot2+geom_line(data=data_comp_R,aes(x=time,y=dead),color="black",linetype=1)+geom_line(data=data_comp_R,aes(x=time,y=dead_med),color="black",linetype=2)
@@ -527,11 +625,17 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   if(save_files) ggsave(paste0(file_add,casename,"_forecast2.png"),width=12,height=10)
 
   out_table<-matrix(c(theta_p_mean,theta_p_ci,thetaQ_p_mean,thetaQ_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci),nrow=1)
+
+  out_table1<-　data.frame(matrix(c(theta_p_mean,theta_p_ci,thetaQ_p_mean,thetaQ_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,incidence_mean=incidence_mean,incidence_ci=incidence_ci,thetaI_tp1_mean=thetaI_tp1_mean,thetaI_tp1_ci=thetaI_tp1_ci,thetaR_tp1_mean=thetaR_tp1_mean,thetaR_tp1_ci=thetaR_tp1_ci,Y_tp1_mean=Y_tp1_mean,Y_tp1_ci=Y_tp1_ci,R_tp1_mean=R_tp1_mean,R_tp1_ci=R_tp1_ci,thetaI_tp2_mean=thetaI_tp2_mean,thetaI_tp2_ci=thetaI_tp2_ci,thetaR_tp2_mean=thetaR_tp2_mean,thetaR_tp2_ci=thetaR_tp2_ci,Y_tp2_mean=Y_tp2_mean,Y_tp2_ci=Y_tp2_ci,R_tp2_mean=R_tp2_mean,R_tp2_ci=R_tp2_c,thetaR_max_mean,thetaR_max_ci),nrow=1))
+
+  out_table2<- data.frame(matrix(c(dthetaI_tp1_date=as.character(dthetaI_tp1_date),first_tp_mean=as.character(first_tp_date_mean),first_tp_ci=as.character(first_tp_date_ci),dthetaI_tp2_date=as.character(dthetaI_tp2_date),second_tp_mean=as.character(second_tp_date_mean),second_tp_ci=as.character(second_tp_date_ci),end_p_date_mean=as.character(end_p_date_mean),end_p_date_ci=as.character(end_p_date_ci),begin_str=begin_str),nrow=1))
+
+  out_table<-cbind(out_table1,out_table2)
   #out_table<-matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,k_p_mean,k_p_ci,lambdaY_p_mean,lambdaY_p_ci,lambdaR_p_mean,lambdaR_p_ci,as.character(first_order_change_date),as.character(second_order_change_date)),nrow=1)
 
 
-  colnames(out_table)<-c("thetaS_p_mean","thetaI_p_mean","thetaR_p_mean","thetaS_p_ci_low","thetaS_p_ci_med","thetaS_p_ci_up","thetaI_p_ci_low","thetaI_p_ci_med","thetaI_p_ci_up","thetaR_p_ci_low","thetaR_p_ci_med","thetaR_p_ci_up","thetaQ_p_mean","thetaQ_p_ci_low","thetaQ_p_ci_med","thetaQ_p_ci_up","R0_p_mean","R0_p_ci_low","R0_p_ci_med","R0_p_ci_up","gamma_p_mean","gamma_p_ci_low","gamma_p_ci_med","gamma_p_ci_up","beta_p_mean","beta_p_ci_low","beta_p_ci_med","beta_p_ci_up")
 
+  colnames(out_table)<-c("thetaS_last_obs_p_mean","thetaI_last_obs_p_mean","thetaR_last_obs_p_mean","thetaS_last_obs_p_ci_low","thetaS_last_obs_p_ci_med","thetaS_last_obs_p_ci_up","thetaI_last_obs_p_ci_low","thetaI_last_obs_p_ci_med","thetaI_last_obs_p_ci_up","thetaR_last_obs_p_ci_low","thetaR_last_obs_p_ci_med","thetaR_last_obs_p_ci_up","thetaQ_last_obs_p_mean","thetaQ_last_obs_p_ci_low","thetaQ_last_obs_p_ci_med","thetaQ_last_obs_p_ci_up","R0_p_mean","R0_p_ci_low","R0_p_ci_med","R0_p_ci_up","gamma_p_mean","gamma_p_ci_low","gamma_p_ci_med","gamma_p_ci_up","beta_p_mean","beta_p_ci_low","beta_p_ci_med","beta_p_ci_up","incidence_mean","incidence_ci_low","incidence_ci_median","incidence_ci_up","thetaI_tp1_mean","thetaI_tp1_ci_low","thetaI_tp1_ci_med","thetaI_tp1_ci_up","thetaR_tp1_mean","thetaR_tp1_ci_low","thetaR_tp1_ci_med","thetaR_tp1_ci_up","Y_tp1_mean","Y_tp1_ci_low","Y_tp1_ci_med","Y_tp1_ci_up","R_tp1_mean","R_tp1_ci_low","R_tp1_ci_med","R_tp1_ci_up","thetaI_tp2_mean","thetaI_tp2_ci_low","thetaI_tp2_ci_med","thetaI_tp2_ci_up","thetaR_tp2_mean","thetaR_tp2_ci_low","thetaR_tp2_ci_med","thetaR_tp2_ci_up","Y_tp2_mean","Y_tp2_ci_low","Y_tp2_ci_med","Y_tp2_ci_up","R_tp2_mean","R_tp2_ci_low","R_tp2_ci_med","R_tp2_ci_up","thetaR_max_mean","thetaR_max_ci_low","thetaR_max_ci_med","thetaR_max_ci_up","dthetaI_tp1_date","first_tp_mean","first_tp_ci_low","first_tp_ci_med","first_tp_ci_up","dthetaI_tp2_date","second_tp_mean","second_tp_ci_low","second_tp_ci_med","second_tp_ci_up","end_p_mean","end_p_ci_low","end_p_ci_med","end_p_ci_up","begin_str")
   #colnames(out_table)<-c("thetaS_p_mean","thetaI_p_mean","thetaR_p_mean","thetaS_p_ci_low","thetaS_p_ci_med","thetaS_p_ci_up","thetaI_p_ci_low","thetaI_p_ci_med","thetaI_p_ci_up","thetaR_p_ci_low","thetaR_p_ci_med","thetaR_p_ci_up","R0_p_mean","R0_p_ci_low","R0_p_ci_med","R0_p_ci_up","gamma_p_mean","gamma_p_ci_low","gamma_p_ci_med","gamma_p_ci_up","beta_p_mean","beta_p_ci_low","beta_p_ci_med","beta_p_ci_up","k_p_mean","k_p_ci_low","k_p_ci_med","k_p_ci_up","lambdaY_p_mean","lambdaY_p_ci_low","lambdaY_p_ci_med","lambdaY_p_ci_up","lambdaR_p_mean","lambdaR_p_ci_low","lambdaR_p_ci_med","lambdaR_p_ci_up","first_order_change_date","second_order_change_date")
 
   if(save_files) write.csv(out_table,file=paste0(file_add,casename,"_summary.csv"))
