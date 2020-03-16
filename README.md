@@ -1,7 +1,7 @@
 R package eSIR: extended state-space SIR epidemiological models
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
-2020-03-05
+2020-03-16
 
 Chinese version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
 
@@ -24,6 +24,7 @@ The standard SIR model has three components: susceptible, infected, and removed 
 
 Preparation
 -----------
+
 [Download Binary Package](https://github.com/lilywang1988/eSIR/blob/master/install_binary)
 
 To install and use this R package from Github, you will need to first install the R package `devtools`. Please uncomment the codes to install them. `eSIR` depends on three other packages, `rjags` (an interface to the JAGS library), `chron` and `gtools`, which could be installed with `eSIR` if not yet.
@@ -126,8 +127,8 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 ``` r
   res.step$dic_val
 #> Mean deviance:  -1262 
-#> penalty 37.98 
-#> Penalized deviance: -1224
+#> penalty 38.76 
+#> Penalized deviance: -1223
 
   ### continuous exponential function of pi(t)
   res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
@@ -221,7 +222,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 #> Graph information:
 #>    Observed stochastic nodes: 60
 #>    Unobserved stochastic nodes: 37
-#>    Total graph size: 2676
+#>    Total graph size: 2736
 #> 
 #> Initializing model
   res.q$plot_infection
@@ -252,12 +253,11 @@ For details, please explore our package directly. We have `.rd` files establishe
 References
 ----------
 
-1. Song, P. X., Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., ... & Eisenberg, M. (2020). An epidemiological forecast model and software assessing interventions on COVID-19 epidemic in China. medRxiv.
+1.  Song, P. X., Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., ... & Eisenberg, M. (2020). An epidemiological forecast model and software assessing interventions on COVID-19 epidemic in China. medRxiv.
 
-2. Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del Valle, S. Y. (2017). Forecasting seasonal influenza with a state-space SIR model. The annals of applied statistics, 11(1), 202.
+2.  Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del Valle, S. Y. (2017). Forecasting seasonal influenza with a state-space SIR model. The annals of applied statistics, 11(1), 202.
 
-3. Mkhatshwa, T., & Mummert, A. (2010). Modeling super-spreading events for infectious diseases: case study SARS. arXiv preprint arXiv:1007.0908.
-
+3.  Mkhatshwa, T., & Mummert, A. (2010). Modeling super-spreading events for infectious diseases: case study SARS. arXiv preprint arXiv:1007.0908.
 
 Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
 

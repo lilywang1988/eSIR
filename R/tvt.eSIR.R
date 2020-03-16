@@ -411,6 +411,10 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
   thetaR_max_mean <- mean(thetaR_max_vec)
   thetaR_max_ci <- quantile(thetaR_max_vec,c(0.025,0.5,0.975),na.rm = T)
 
+  cumInf_vec <- thetaR_mat[,T_fin]+thetaI_mat[,T_fin]
+  cumInf_mean <- mean(cumInf_vec)
+  cumInf_ci <- quantile(cumInf_vec,c(0.025,0.5,0.975),na.rm = T)
+
 
   #if(dthetaI_tp1<T_prime) {dthetaI_tp1=which.max(diff(colMeans(thetaI_mat)))
    #                        message("The turning point 1 was observed and obtained from prevalence! The CI of turning point 1 may not be valid!")}
@@ -508,7 +512,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
   if(save_files) ggsave(paste0(file_add,casename,"_spaghetti.png"),width=12,height=10)
 ###################
   y_text_ht <- max(rbind(thetaI_band ,Y_band),na.rm = T)/2
-  plot <- ggplot(data = data_poly, aes(x = x, y = y)) +
+  plot1 <- ggplot(data = data_poly, aes(x = x, y = y)) +
     geom_polygon(alpha = 0.5,aes(fill=value, group=phase)) +
     labs(title=substitute(paste(casename,": infection forecast with prior ",beta[0],"=",v1,",",gamma[0], "=",v2," and ", R[0],"=",v3), list(casename=casename,v1=format(beta0,digits=3),v2=format(gamma0,digits=3),v3=format(R0,digits=3))),subtitle = substitute(paste("Posterior ", beta[p],"=",v1,",",gamma[p], "=",v2," and ", R[0],"=",v3), list(v1=format(beta_p_mean,digits=3),v2=format(gamma_p_mean,digits=3),v3=format(R0_p_mean,digits=3))),x = "time", y = "P(Infected)")+
     geom_line(data=data_comp,aes(x=time,y=median),color="red")+
@@ -530,7 +534,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
       expression(paste(theta[1:t[0]]^I,' | ',y[1:t[0]]^I,', ',y[1:t[0]]^R))))+
     annotate(geom="text", label=as.character(chron(chron_ls[T_prime]),format="mon day"), x=T_prime+12, y=y_text_ht,color="blue")+
     annotate(geom="text", label=as.character(chron(dthetaI_tp1_date,format="mon day")), x=dthetaI_tp1+12, y=y_text_ht*1.25,color="darkgreen")
-  if(dthetaI_tp2>dthetaI_tp1) {plot <-plot+geom_vline(xintercept = dthetaI_tp2,color="purple",show.legend = TRUE)+annotate(geom="text", label=as.character(chron(dthetaI_tp2_date,format="mon day")), x=dthetaI_tp2+12, y=y_text_ht*1.5,color="purple")
+  if(dthetaI_tp2>dthetaI_tp1) {plot1 <-plot1+geom_vline(xintercept = dthetaI_tp2,color="purple",show.legend = TRUE)+annotate(geom="text", label=as.character(chron(dthetaI_tp2_date,format="mon day")), x=dthetaI_tp2+12, y=y_text_ht*1.5,color="purple")
   }
  # plot_list <- list(data_poly=data_poly,data_comp=data_comp,T_prime=T_prime,dthetaI_stationary2=dthetaI_stationary2,dthetaI_stationary1=dthetaI_stationary1,data_pre=data_pre,dthetaI_stationary2_date,dthetaI_stationary1_date,y_text_ht)
 
@@ -589,7 +593,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
 
   if(save_files) ggsave(paste0(file_add,casename,"_forecast2.png"),width=12,height=10)
 
-out_table1<-　data.frame(matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,incidence_mean=incidence_mean,incidence_ci=incidence_ci,thetaI_tp1_mean=thetaI_tp1_mean,thetaI_tp1_ci=thetaI_tp1_ci,thetaR_tp1_mean=thetaR_tp1_mean,thetaR_tp1_ci=thetaR_tp1_ci,Y_tp1_mean=Y_tp1_mean,Y_tp1_ci=Y_tp1_ci,R_tp1_mean=R_tp1_mean,R_tp1_ci=R_tp1_ci,thetaI_tp2_mean=thetaI_tp2_mean,thetaI_tp2_ci=thetaI_tp2_ci,thetaR_tp2_mean=thetaR_tp2_mean,thetaR_tp2_ci=thetaR_tp2_ci,Y_tp2_mean=Y_tp2_mean,Y_tp2_ci=Y_tp2_ci,R_tp2_mean=R_tp2_mean,R_tp2_ci=R_tp2_ci,thetaR_max_mean,thetaR_max_ci),nrow=1))
+out_table1<-　data.frame(matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,incidence_mean=incidence_mean,incidence_ci=incidence_ci,thetaI_tp1_mean=thetaI_tp1_mean,thetaI_tp1_ci=thetaI_tp1_ci,thetaR_tp1_mean=thetaR_tp1_mean,thetaR_tp1_ci=thetaR_tp1_ci,Y_tp1_mean=Y_tp1_mean,Y_tp1_ci=Y_tp1_ci,R_tp1_mean=R_tp1_mean,R_tp1_ci=R_tp1_ci,thetaI_tp2_mean=thetaI_tp2_mean,thetaI_tp2_ci=thetaI_tp2_ci,thetaR_tp2_mean=thetaR_tp2_mean,thetaR_tp2_ci=thetaR_tp2_ci,Y_tp2_mean=Y_tp2_mean,Y_tp2_ci=Y_tp2_ci,R_tp2_mean=R_tp2_mean,R_tp2_ci=R_tp2_ci,thetaR_max_mean,thetaR_max_ci,cumInf_mean=cumInf_mean,cumInf_ci=cumInf_ci),nrow=1))
 
 out_table2<- data.frame(matrix(c(dthetaI_tp1_date=as.character(dthetaI_tp1_date),first_tp_mean=as.character(first_tp_date_mean),first_tp_ci=as.character(first_tp_date_ci),dthetaI_tp2_date=as.character(dthetaI_tp2_date),second_tp_mean=as.character(second_tp_date_mean),second_tp_ci=as.character(second_tp_date_ci),end_p_date_mean=as.character(end_p_date_mean),end_p_date_ci=as.character(end_p_date_ci),begin_str=begin_str),nrow=1))
 
@@ -597,7 +601,7 @@ out_table<-cbind(out_table1,out_table2)
 #out_table<-matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,k_p_mean,k_p_ci,lambdaY_p_mean,lambdaY_p_ci,lambdaR_p_mean,lambdaR_p_ci,as.character(first_order_change_date),as.character(second_order_change_date)),nrow=1)
 
 
-  colnames(out_table)<-c("thetaS_last_obs_p_mean","thetaI_last_obs_p_mean","thetaR_last_obs_p_mean","thetaS_last_obs_p_ci_low","thetaS_last_obs_p_ci_med","thetaS_last_obs_p_ci_up","thetaI_last_obs_p_ci_low","thetaI_last_obs_p_ci_med","thetaI_last_obs_p_ci_up","thetaR_last_obs_p_ci_low","thetaR_last_obs_p_ci_med","thetaR_last_obs_p_ci_up","R0_p_mean","R0_p_ci_low","R0_p_ci_med","R0_p_ci_up","gamma_p_mean","gamma_p_ci_low","gamma_p_ci_med","gamma_p_ci_up","beta_p_mean","beta_p_ci_low","beta_p_ci_med","beta_p_ci_up","incidence_mean","incidence_ci_low","incidence_ci_median","incidence_ci_up","thetaI_tp1_mean","thetaI_tp1_ci_low","thetaI_tp1_ci_med","thetaI_tp1_ci_up","thetaR_tp1_mean","thetaR_tp1_ci_low","thetaR_tp1_ci_med","thetaR_tp1_ci_up","Y_tp1_mean","Y_tp1_ci_low","Y_tp1_ci_med","Y_tp1_ci_up","R_tp1_mean","R_tp1_ci_low","R_tp1_ci_med","R_tp1_ci_up","thetaI_tp2_mean","thetaI_tp2_ci_low","thetaI_tp2_ci_med","thetaI_tp2_ci_up","thetaR_tp2_mean","thetaR_tp2_ci_low","thetaR_tp2_ci_med","thetaR_tp2_ci_up","Y_tp2_mean","Y_tp2_ci_low","Y_tp2_ci_med","Y_tp2_ci_up","R_tp2_mean","R_tp2_ci_low","R_tp2_ci_med","R_tp2_ci_up","thetaR_max_mean","thetaR_max_ci_low","thetaR_max_ci_med","thetaR_max_ci_up","dthetaI_tp1_date","first_tp_mean","first_tp_ci_low","first_tp_ci_med","first_tp_ci_up","dthetaI_tp2_date","second_tp_mean","second_tp_ci_low","second_tp_ci_med","second_tp_ci_up","end_p_mean","end_p_ci_low","end_p_ci_med","end_p_ci_up","begin_str")
+  colnames(out_table)<-c("thetaS_last_obs_p_mean","thetaI_last_obs_p_mean","thetaR_last_obs_p_mean","thetaS_last_obs_p_ci_low","thetaS_last_obs_p_ci_med","thetaS_last_obs_p_ci_up","thetaI_last_obs_p_ci_low","thetaI_last_obs_p_ci_med","thetaI_last_obs_p_ci_up","thetaR_last_obs_p_ci_low","thetaR_last_obs_p_ci_med","thetaR_last_obs_p_ci_up","R0_p_mean","R0_p_ci_low","R0_p_ci_med","R0_p_ci_up","gamma_p_mean","gamma_p_ci_low","gamma_p_ci_med","gamma_p_ci_up","beta_p_mean","beta_p_ci_low","beta_p_ci_med","beta_p_ci_up","incidence_mean","incidence_ci_low","incidence_ci_median","incidence_ci_up","thetaI_tp1_mean","thetaI_tp1_ci_low","thetaI_tp1_ci_med","thetaI_tp1_ci_up","thetaR_tp1_mean","thetaR_tp1_ci_low","thetaR_tp1_ci_med","thetaR_tp1_ci_up","Y_tp1_mean","Y_tp1_ci_low","Y_tp1_ci_med","Y_tp1_ci_up","R_tp1_mean","R_tp1_ci_low","R_tp1_ci_med","R_tp1_ci_up","thetaI_tp2_mean","thetaI_tp2_ci_low","thetaI_tp2_ci_med","thetaI_tp2_ci_up","thetaR_tp2_mean","thetaR_tp2_ci_low","thetaR_tp2_ci_med","thetaR_tp2_ci_up","Y_tp2_mean","Y_tp2_ci_low","Y_tp2_ci_med","Y_tp2_ci_up","R_tp2_mean","R_tp2_ci_low","R_tp2_ci_med","R_tp2_ci_up","thetaR_max_mean","thetaR_max_ci_low","thetaR_max_ci_med","thetaR_max_ci_up","cumInf_mean","cumInf_ci_low","cumInf_ci_med","cumInf_ci_up","dthetaI_tp1_date","first_tp_mean","first_tp_ci_low","first_tp_ci_med","first_tp_ci_up","dthetaI_tp2_date","second_tp_mean","second_tp_ci_low","second_tp_ci_med","second_tp_ci_up","end_p_mean","end_p_ci_low","end_p_ci_med","end_p_ci_up","begin_str")
 
   #colnames(out_table)<-c("thetaS_p_mean","thetaI_p_mean","thetaR_p_mean","thetaS_p_ci_low","thetaS_p_ci_med","thetaS_p_ci_up","thetaI_p_ci_low","thetaI_p_ci_med","thetaI_p_ci_up","thetaR_p_ci_low","thetaR_p_ci_med","thetaR_p_ci_up","R0_p_mean","R0_p_ci_low","R0_p_ci_med","R0_p_ci_up","gamma_p_mean","gamma_p_ci_low","gamma_p_ci_med","gamma_p_ci_up","beta_p_mean","beta_p_ci_low","beta_p_ci_med","beta_p_ci_up","k_p_mean","k_p_ci_low","k_p_ci_med","k_p_ci_up","lambdaY_p_mean","lambdaY_p_ci_low","lambdaY_p_ci_med","lambdaY_p_ci_up","lambdaR_p_mean","lambdaR_p_ci_low","lambdaR_p_ci_med","lambdaR_p_ci_up","first_order_change_date","second_order_change_date")
 
@@ -611,7 +615,7 @@ out_table<-cbind(out_table1,out_table2)
     plot_data_ls <- list(casename=casename,other_plot=other_plot,spaghetti_plot_ls=spaghetti_plot_ls,infection_plot_ls=infection_plot_ls,removed_plot_ls=removed_plot_ls)
     save(plot_data_ls,file=paste0(file_add,casename,"_plot_data.RData"))
   }
-  res<-list(casename=casename,incidence_mean=incidence_mean,incidence_ci=incidence_ci,out_table=out_table,plot_infection=plot,plot_removed=plot2,spaghetti_plot=spaghetti_plot,first_tp_mean=as.character(first_tp_date_mean),first_tp_ci=as.character(first_tp_date_ci),second_tp_mean=as.character(second_tp_date_mean),second_tp_ci=as.character(second_tp_date_ci),dic_val=dic_val)
+  res<-list(casename=casename,incidence_mean=incidence_mean,incidence_ci=incidence_ci,out_table=out_table,plot_infection=plot1,plot_removed=plot2,spaghetti_plot=spaghetti_plot,first_tp_mean=as.character(first_tp_date_mean),first_tp_ci=as.character(first_tp_date_ci),second_tp_mean=as.character(second_tp_date_mean),second_tp_ci=as.character(second_tp_date_ci),dic_val=dic_val)
   return(res)
 }
 
