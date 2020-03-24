@@ -43,13 +43,13 @@ An error may occur if you have not yet installed JAGS-4.x.y.exe (for any x >= 0,
 ``` r
 # install.packages("devtools")
 # library(devtools)
-
-#for information and covariance calculation; sample size computation using Hasegawa proposal
 # install_github("lilywang1988/eSIR")
 library(eSIR) 
 ```
 
-Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5). Alternatively, we notice some convenient access to COVID-19 data from [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) and [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
+Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5). Alternatively, we notice some convenient access to COVID-19 data from [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) and [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data). 
+
+For data outside China, we use [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) data. Another package [coronavirus](https://github.com/RamiKrispin/coronavirus) has its GitHub version udpated daily, which is also quite useful. 
 
 ``` r
 # Data of COVID-19 can be found in the following R packages: 

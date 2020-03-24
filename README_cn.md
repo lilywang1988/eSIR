@@ -32,8 +32,6 @@ R包eSIR：扩展的状态空间SIR流行病学模型
 ``` r
 # install.packages("devtools")
 # library(devtools)
-
-#for information and covariance calculation; sample size computation using Hasegawa proposal
 # install_github("lilywang1988/eSIR")
 library(eSIR) 
 ```
