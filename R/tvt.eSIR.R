@@ -167,10 +167,9 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
                    theta[t,1:3] ~ ddirch(k*alpha[t-1,1:3])
                    Y[t-1] ~ dbeta(lambdaY*theta[t,2],lambdaY*(1-theta[t,2]))
                    R[t-1] ~ dbeta(lambdaR*theta[t,3],lambdaR*(1-theta[t,3]))
-                  }
-                  theta[1,1] <-  1- theta[1,2]- theta[1,3]
-                  theta[1,2] ~ dbeta(",1,",",1/Y[1],")
-                  theta[1,3] ~ dbeta(",1,",",1/R[1],")
+                   }
+                  theta0[1:3]<-c(",1-Y[1]-R[1],",",Y[1],",", R[1],")
+                  theta[1,1:3] ~ ddirch(theta0[1:3])
                   gamma ~  dlnorm(",lognorm_gamma_parm[1],",",1/lognorm_gamma_parm[2],")
                   R0 ~ dlnorm(",lognorm_R0_parm[1],",",1/lognorm_R0_parm[2],")
                   beta <- R0*gamma

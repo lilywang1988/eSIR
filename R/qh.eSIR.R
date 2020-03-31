@@ -162,12 +162,8 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
                           }
                           theta_Q[1] <- 0
                           theta_H[1] <- 0
-                          theta_temp[1,1] <-  1- theta_temp[1,2]- theta_temp[1,3]- theta_Q[1]- theta_H[1]
-                          theta_temp[1,2] ~ dbeta(",1,",",1/Y[1],")
-                          theta_temp[1,3] ~ dbeta(",1,",",1/R[1],")
-                          theta[1,1] <- theta_temp[1,1]
-                          theta[1,2] <- theta_temp[1,2]
-                          theta[1,3] <- theta_temp[1,3]
+                          theta0[1:3]<-c(",1-Y[1]-R[1],",",Y[1],",", R[1],")
+                          theta[1,1:3] ~ ddirch(theta0[1:3])
                           gamma ~  dlnorm(",lognorm_gamma_parm[1],",",1/lognorm_gamma_parm[2],")
                           R0 ~ dlnorm(",lognorm_R0_parm[1],",",1/lognorm_R0_parm[2],")
                           beta <- R0*gamma
@@ -502,10 +498,9 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
 
     png(paste0(file_add,casename,"thetaQ_plot.png"), width = 700, height = 350)
     plot(y=colMeans(cbind(thetaQ_p,thetaQ_pp)),x=chron_ls,type="l",xlab="date",main="Quarantine prevalence process")
-    abline(v=,col=2)
     if(!is.null(change_time_chorn)) abline(v=change_time_chorn,col="gray")
-    abline(v=begin,col="blue")
-    legend("topright", legend=c("begin","change point"), col=c("blue","gray"),lty=1, title="",bty = "n")
+    abline(v=chron_ls[T_prime],col="blue")
+    legend("topright", legend=c("Last observation","change point"), col=c("blue","gray"),lty=1, title="",bty = "n")
     dev.off()
   }
 

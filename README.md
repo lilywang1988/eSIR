@@ -1,7 +1,7 @@
 R package eSIR: extended state-space SIR epidemiological models
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
-2020-03-16
+2020-03-31
 
 Chinese version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
 
@@ -40,7 +40,7 @@ library(eSIR)
 
 Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5). Alternatively, we notice some convenient access to COVID-19 data from [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) and [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
 
-For data outside China, we use [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) data. Another package [coronavirus](https://github.com/RamiKrispin/coronavirus) has its GitHub version udpated daily, which is also quite useful. 
+For data outside China, we use [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) data. Another package [coronavirus](https://github.com/RamiKrispin/coronavirus) has its GitHub version udpated daily, which is also quite useful.
 
 ``` r
 # Data of COVID-19 can be found in the following R packages: 
@@ -127,8 +127,8 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 ``` r
   res.step$dic_val
 #> Mean deviance:  -1262 
-#> penalty 38.76 
-#> Penalized deviance: -1223
+#> penalty 38.22 
+#> Penalized deviance: -1224
 
   ### continuous exponential function of pi(t)
   res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
@@ -259,6 +259,7 @@ References
 
 3.  Mkhatshwa, T., & Mummert, A. (2010). Modeling super-spreading events for infectious diseases: case study SARS. arXiv preprint arXiv:1007.0908.
 
+-----------
 Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
 
 This work is licensed under a [Creative Commons Attribution 4.0 International
