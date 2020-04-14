@@ -1,12 +1,27 @@
 Package: eSIR
 Type: Package
 Title: Extended state-space SIR models
-Version: 0.2.6
+Version: 0.2.7
 Date: 2020-03-31
-Author: Song Lab (http://www.umich.edu/~songlab/)
-Maintainer: Lili Wang <lilywang@umich.edu>
-Description: An implementation of extended state-space SIR models developed by Song Lab at UM school of Public Health
+Authors@R:c(
+    person("Lili", "Wang", email = "lilywang@umich.edu", role = c("aut", "cre"), comment = "Song Lab <http://www.umich.edu/~songlab/>"),
+    person("Paul", "Egeler", email = "paul.egeler@spectrumhealth.org", role = "ctb", comment = "Spectrum Health Office of Research and Education")
+    )
+Description: An implementation of extended state-space SIR models developed by
+    Song Lab at UM school of Public Health.
 License: CC BY 4.0
 Encoding: UTF-8
-Depends: rjags, scales, ggplot2, chron, gtools, data.table, stats
-RoxygenNote: 6.1.1
+Imports:
+    rjags,
+    scales,
+    ggplot2,
+    chron,
+    gtools,
+    data.table,
+    stats,
+    grDevices,
+    graphics,
+    reshape2,
+    coda,
+    utils
+RoxygenNote: 7.1.0

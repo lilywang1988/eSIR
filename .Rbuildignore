@@ -1,0 +1,7 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE.md$
+^README.Rmd$
+^README_cn.md$
+^eSIR.pdf$
+^install_binary$
