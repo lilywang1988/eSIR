@@ -158,8 +158,8 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
                           theta_H[1] <- 0
                           theta0[1:3]<-c(",1-Y[1]-R[1],",",Y[1],",", R[1],")
                           theta[1,1:3] ~ ddirch(theta0[1:3])
-                          gamma ~  dlnorm(",lognorm_gamma_parm[1],",",1/lognorm_gamma_parm[2],")
-                          R0 ~ dlnorm(",lognorm_R0_parm[1],",",1/lognorm_R0_parm[2],")
+                          gamma ~  dlnorm(",lognorm_gamma_parm$mu,",",1/lognorm_gamma_parm$var,")
+                          R0 ~ dlnorm(",lognorm_R0_parm$mu,",",1/lognorm_R0_parm$var,")
                           beta <- R0*gamma
                           k ~  dgamma(2,0.0001)
                           lambdaY ~ dgamma(2,0.0001)
