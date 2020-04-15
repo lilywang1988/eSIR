@@ -163,8 +163,8 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
                    }
                   theta0[1:3]<-c(",1-Y[1]-R[1],",",Y[1],",", R[1],")
                   theta[1,1:3] ~ ddirch(theta0[1:3])
-                  gamma ~  dlnorm(",lognorm_gamma_parm[1],",",1/lognorm_gamma_parm[2],")
-                  R0 ~ dlnorm(",lognorm_R0_parm[1],",",1/lognorm_R0_parm[2],")
+                  gamma ~  dlnorm(",lognorm_gamma_parm$mu,",",1/lognorm_gamma_parm$var,")
+                  R0 ~ dlnorm(",lognorm_R0_parm$var,",",1/lognorm_R0_parm$var,")
                   beta <- R0*gamma
                   k ~  dgamma(2,0.0001)
                   lambdaY ~ dgamma(2,0.0001)
@@ -645,17 +645,5 @@ if ( FALSE ) {
   res.nopi$plot_infection
   #res.nopi$plot_removed
 
-}
-
-#' @noRd
-gg_color_hue <- function(n) {
-  hues = seq(15, 375, length = n + 1)
-  hcl(h = hues, l = 65, c = 100)[1:n]
-}
-#' @noRd
-lognorm.parm<-function(mu0,var0){
-  var <- log(var0/mu0^2+1)
-  mu <- log(mu0)-var/2
-  return(round(c(mu,var),3))
 }
 
