@@ -3,13 +3,6 @@
 # Correspondence : Peter X.K. Song, Ph.D. (pxsong@umich.edu)
 # Creator: Lili Wang, M.S. (lilywang@umich.edu)
 # Model 1: An extended SIR model with a time-varying transmission rate modifier pi(t)
-# library(rjags)
-# library(gtools) #rdirichlet(n, alpha)
-# library(scales) #alpha　function
-# library(ggplot2)
-# library(chron)
-#library(data.table)
-library(stats)
 #' Fit extended state-space SIR model with time-varying transmission rates
 #'
 #' Fit extended state-space SIR model with prespecified changes in the transmission rate, either stepwise or continuous, accomodating time-varying quaratine protocols.
@@ -42,8 +35,9 @@ library(stats)
 #' @param save_files logical, whether save (\code{TRUE}) results or not (\code{FALSE}). This enables to save summary tables, trace plots, and plots of the posterior means of the first-order derivatives of the infection prevalence process \eqn{\theta_t^I}.
 #' @param save_mcmc logical, whether save (\code{TRUE}) all the MCMC outputs or not (\code{FALSE}).The output file will be an \code{.RData} file named by the \eqn{casename}. We include arrays of prevalence values of the three compartments with their matrices of posterior draws up to the last date of the collected data as \code{theta_p[,,1]} and afterwards as \code{theta_pp[,,1]} for \eqn{\theta_t^S}, \code{theta_p[,,2]} and \code{theta_pp[,,2]} for \eqn{\theta_t^I}, and \code{theta_p[,,3]} and \code{theta_pp[,,3]} for \eqn{\theta_t^R}. Moreover, the input and predicted proportions \code{Y}, \code{Y_pp}, \code{R} and \code{R_pp} can also be retrieved. The prevalence and prediceted proportion matrices have rows for MCMC replicates, and columns for days. The MCMC posterior draws of other parameters including \code{beta_p}, \code{gamma_p}, \code{R0_p}, and variance controllers \code{k_p}, \code{lambdaY_p}, \code{lambdaR_p} are also available.
 #' @param save_plot_data logical, whether save the plotting data or not.
+#' @param save_files logical, whether to save plots to file.
 #' @param add_death logical, whether add the approximate death curve to the plot, default is false.
-#' @param esp a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10
+#' @param eps a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10
 #'
 #' @return
 #' \item{casename}{the predefined \code{casename}.}
@@ -58,8 +52,9 @@ library(stats)
 #'\item{first_tp_ci}{fwith \code{first_tp_mean}, it reports the corresponding credible interval and median.}
 #' \item{second_tp_mean}{the date t at which \eqn{\theta_t^I=0}, calculated as the average of the stationary points of all of posterior first-order derivatives \eqn{\dot{\theta}_t^I}; this value may be slightly different from the one labeled by the "pruple" lines in the plots of \code{plot_infection} and \code{plot_removed}. The latter indicate stationary t at which the first-order derivative of the averaged posterior of \eqn{\theta_t^I} equals zero.}
 #' \item{second_tp_ci}{with \code{second_tp_mean}, it reports the corresponding credible interval and median.}
-#' \item{dic_val}{the output of \code{dic.sample()} in  \code{\link[rjags]{dic.sample}}, computing deviance information criterion for model comparison.}
+#' \item{dic_val}{the output of \code{dic.samples()} in  \code{\link[rjags]{dic.samples}}, computing deviance information criterion for model comparison.}
 #' @examples
+#' \dontrun{
 #' NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 #'                   1052,1423,2714,3554,4903,5806,7153,9074,11177,
 #'                13522,16678,19665,22112,24953,27100,29631,31728,33366)
@@ -94,9 +89,7 @@ library(stats)
 #'                 M=5e2,nburnin = 2e2)
 #' res.nopi$plot_infection
 #' #res.nopi$plot_removed
-#'
-#'
-#'
+#' }
 #' @export
 tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=NULL,begin_str="01/13/2020",T_fin=200,nchain=4,nadapt=1e4,M=5e2,thn=10,nburnin=2e2,dic=FALSE,death_in_R=0.02,beta0=0.2586,gamma0=0.0821,R0=beta0/gamma0,gamma0_sd=0.1, R0_sd=1,casename="tvt.eSIR",file_add=character(0),add_death=FALSE,save_files=FALSE,save_mcmc=FALSE,save_plot_data=FALSE,eps=1e-10){
 
@@ -141,7 +134,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
   }
 
   ################ MCMC ##########
-  model1.string <-　paste0("
+  model1.string <- paste0("
              model{
                    for(t in 2:(T_prime+1)){
                    Km[t-1,1] <- -beta*pi[t-1]*theta[t-1,1]*theta[t-1,2]
@@ -170,8 +163,8 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
                    }
                   theta0[1:3]<-c(",1-Y[1]-R[1],",",Y[1],",", R[1],")
                   theta[1,1:3] ~ ddirch(theta0[1:3])
-                  gamma ~  dlnorm(",lognorm_gamma_parm[1],",",1/lognorm_gamma_parm[2],")
-                  R0 ~ dlnorm(",lognorm_R0_parm[1],",",1/lognorm_R0_parm[2],")
+                  gamma ~  dlnorm(",lognorm_gamma_parm$mu,",",1/lognorm_gamma_parm$var,")
+                  R0 ~ dlnorm(",lognorm_R0_parm$var,",",1/lognorm_R0_parm$var,")
                   beta <- R0*gamma
                   k ~  dgamma(2,0.0001)
                   lambdaY ~ dgamma(2,0.0001)
@@ -592,7 +585,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
 
   if(save_files) ggsave(paste0(file_add,casename,"_forecast2.png"),width=12,height=10)
 
-out_table1<-　data.frame(matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,incidence_mean=incidence_mean,incidence_ci=incidence_ci,thetaI_tp1_mean=thetaI_tp1_mean,thetaI_tp1_ci=thetaI_tp1_ci,thetaR_tp1_mean=thetaR_tp1_mean,thetaR_tp1_ci=thetaR_tp1_ci,Y_tp1_mean=Y_tp1_mean,Y_tp1_ci=Y_tp1_ci,R_tp1_mean=R_tp1_mean,R_tp1_ci=R_tp1_ci,thetaI_tp2_mean=thetaI_tp2_mean,thetaI_tp2_ci=thetaI_tp2_ci,thetaR_tp2_mean=thetaR_tp2_mean,thetaR_tp2_ci=thetaR_tp2_ci,Y_tp2_mean=Y_tp2_mean,Y_tp2_ci=Y_tp2_ci,R_tp2_mean=R_tp2_mean,R_tp2_ci=R_tp2_ci,thetaR_max_mean,thetaR_max_ci,cumInf_mean=cumInf_mean,cumInf_ci=cumInf_ci),nrow=1))
+out_table1<- data.frame(matrix(c(theta_p_mean,theta_p_ci,R0_p_mean,R0_p_ci,gamma_p_mean,gamma_p_ci,beta_p_mean,beta_p_ci,incidence_mean=incidence_mean,incidence_ci=incidence_ci,thetaI_tp1_mean=thetaI_tp1_mean,thetaI_tp1_ci=thetaI_tp1_ci,thetaR_tp1_mean=thetaR_tp1_mean,thetaR_tp1_ci=thetaR_tp1_ci,Y_tp1_mean=Y_tp1_mean,Y_tp1_ci=Y_tp1_ci,R_tp1_mean=R_tp1_mean,R_tp1_ci=R_tp1_ci,thetaI_tp2_mean=thetaI_tp2_mean,thetaI_tp2_ci=thetaI_tp2_ci,thetaR_tp2_mean=thetaR_tp2_mean,thetaR_tp2_ci=thetaR_tp2_ci,Y_tp2_mean=Y_tp2_mean,Y_tp2_ci=Y_tp2_ci,R_tp2_mean=R_tp2_mean,R_tp2_ci=R_tp2_ci,thetaR_max_mean,thetaR_max_ci,cumInf_mean=cumInf_mean,cumInf_ci=cumInf_ci),nrow=1))
 
 out_table2<- data.frame(matrix(c(dthetaI_tp1_date=as.character(dthetaI_tp1_date),first_tp_mean=as.character(first_tp_date_mean),first_tp_ci=as.character(first_tp_date_ci),dthetaI_tp2_date=as.character(dthetaI_tp2_date),second_tp_mean=as.character(second_tp_date_mean),second_tp_ci=as.character(second_tp_date_ci),end_p_date_mean=as.character(end_p_date_mean),end_p_date_ci=as.character(end_p_date_ci),begin_str=begin_str),nrow=1))
 
@@ -618,7 +611,7 @@ out_table<-cbind(out_table1,out_table2)
   return(res)
 }
 
-if(F){
+if ( FALSE ) {
   NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
                    1052,1423,2714,3554,4903,5806,7153,9074,11177,
                 13522,16678,19665,22112,24953,27100,29631,31728,33366)
@@ -652,17 +645,5 @@ if(F){
   res.nopi$plot_infection
   #res.nopi$plot_removed
 
-}
-
-#' @noRd
-gg_color_hue <- function(n) {
-  hues = seq(15, 375, length = n + 1)
-  hcl(h = hues, l = 65, c = 100)[1:n]
-}
-#' @noRd
-lognorm.parm<-function(mu0,var0){
-  var <- log(var0/mu0^2+1)
-  mu <- log(mu0)-var/2
-  return(round(c(mu,var),3))
 }
 

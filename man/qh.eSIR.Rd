@@ -4,13 +4,33 @@
 \alias{qh.eSIR}
 \title{Extended state-space SIR with quarantine}
 \usage{
-qh.eSIR(Y, R, phi0 = NULL, change_time = NULL,
-  begin_str = "01/13/2020", T_fin = 200, nchain = 4,
-  nadapt = 10000, M = 500, thn = 10, nburnin = 200, dic = FALSE,
-  death_in_R = 0.02, casename = "qh.eSIR", beta0 = 0.2586,
-  gamma0 = 0.0821, R0 = beta0/gamma0, gamma0_sd = 0.1, R0_sd = 1,
-  file_add = character(0), add_death = FALSE, save_files = FALSE,
-  save_mcmc = FALSE, save_plot_data = FALSE, eps = 1e-10)
+qh.eSIR(
+  Y,
+  R,
+  phi0 = NULL,
+  change_time = NULL,
+  begin_str = "01/13/2020",
+  T_fin = 200,
+  nchain = 4,
+  nadapt = 10000,
+  M = 500,
+  thn = 10,
+  nburnin = 200,
+  dic = FALSE,
+  death_in_R = 0.02,
+  casename = "qh.eSIR",
+  beta0 = 0.2586,
+  gamma0 = 0.0821,
+  R0 = beta0/gamma0,
+  gamma0_sd = 0.1,
+  R0_sd = 1,
+  file_add = character(0),
+  add_death = FALSE,
+  save_files = FALSE,
+  save_mcmc = FALSE,
+  save_plot_data = FALSE,
+  eps = 1e-10
+)
 }
 \arguments{
 \item{Y}{the time series of daily observed infected compartment proportions.}
@@ -55,11 +75,13 @@ qh.eSIR(Y, R, phi0 = NULL, change_time = NULL,
 
 \item{add_death}{logical, whether add the approximate death curve to the plot, default is false.}
 
+\item{save_files}{logical, whether to save plots to file.}
+
 \item{save_mcmc}{logical, whether save (\code{TRUE}) all the MCMC outputs or not (\code{FALSE}).The output file will be an \code{.RData} file named by the \eqn{casename}. We include arrays of prevalence values of the three compartments with their matrices of posterior draws up to the last date of the collected data as \code{theta_p[,,1]} and afterwards as \code{theta_pp[,,1]} for \eqn{\theta_t^S}, \code{theta_p[,,2]} and \code{theta_pp[,,2]} for \eqn{\theta_t^I}, and \code{theta_p[,,3]} and \code{theta_pp[,,3]} for \eqn{\theta_t^R}. The posterior draws of the prevalence process of the quarantine compartment can be obtained via \code{thetaQ_p} and \code{thetaQ_pp}. Moreover, the input and predicted proportions \code{Y}, \code{Y_pp}, \code{R} and \code{R_pp} can also be retrieved. The prevalence and prediceted proportion matrices have rows for MCMC replicates, and columns for days. The MCMC posterior draws of other parameters including \code{beta}, \code{gamma}, \code{R0}, and variance controllers \code{k_p}, \code{lambdaY_p}, \code{lambdaR_p} are also available.}
 
 \item{save_plot_data}{logical, whether save the plotting data or not.}
 
-\item{esp}{a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10}
+\item{eps}{a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10}
 }
 \value{
 \item{casename}{the predefined \code{casename}.}
@@ -75,7 +97,7 @@ qh.eSIR(Y, R, phi0 = NULL, change_time = NULL,
 \item{first_tp_ci}{fwith \code{first_tp_mean}, it reports the corresponding credible interval and median.}
 \item{second_tp_mean}{the date t at which \eqn{\theta_t^I=0}, calculated as the average of the stationary points of all of posterior first-order derivatives \eqn{\dot{\theta}_t^I}; this value may be slightly different from the one labeled by the "pruple" lines in the plots of \code{plot_infection} and \code{plot_removed}. The latter indicate stationary t at which the first-order derivative of the averaged posterior of \eqn{\theta_t^I} equals zero.}
 \item{second_tp_ci}{with \code{second_tp_mean}, it reports the corresponding credible interval and median.}
-\item{dic_val}{the output of \code{dic.sample()} in \code{\link[rjags]{dic.sample}}, computing deviance information criterion for model comparison.}
+\item{dic_val}{the output of \code{dic.samples()} in \code{\link[rjags]{dic.samples}}, computing deviance information criterion for model comparison.}
 }
 \description{
 Fit an extended state-space SIR model being reduced by in-home hospitalization.
@@ -84,6 +106,7 @@ Fit an extended state-space SIR model being reduced by in-home hospitalization.
 In this function we allow it to characterize time-varying proportions of susceptible due to government-enforced stringent in-home isolation. We expanded the SIR model by adding a quarantine compartment with a time-varying rate of quarantine \eqn{\phi_t}, the chance of a susceptible person  being willing to take in-home isolation at time t.
 }
 \examples{
+\dontrun{
 NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
              1052,1423,2714,3554,4903,5806,7153,9074,11177,
              13522,16678,19665,22112,24953,27100,29631,31728,33366)
@@ -107,6 +130,5 @@ res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
                     T_fin=200,casename="Hubei_noq",
                     M=5e2,nburnin = 2e2)
 res.noq$plot_infection
-
-
+}
 }
