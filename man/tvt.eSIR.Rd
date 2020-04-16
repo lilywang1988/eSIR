@@ -4,14 +4,35 @@
 \alias{tvt.eSIR}
 \title{Fit extended state-space SIR model with time-varying transmission rates}
 \usage{
-tvt.eSIR(Y, R, pi0 = NULL, change_time = NULL, exponential = FALSE,
-  lambda0 = NULL, begin_str = "01/13/2020", T_fin = 200,
-  nchain = 4, nadapt = 10000, M = 500, thn = 10, nburnin = 200,
-  dic = FALSE, death_in_R = 0.02, beta0 = 0.2586, gamma0 = 0.0821,
-  R0 = beta0/gamma0, gamma0_sd = 0.1, R0_sd = 1,
-  casename = "tvt.eSIR", file_add = character(0), add_death = FALSE,
-  save_files = FALSE, save_mcmc = FALSE, save_plot_data = FALSE,
-  eps = 1e-10)
+tvt.eSIR(
+  Y,
+  R,
+  pi0 = NULL,
+  change_time = NULL,
+  exponential = FALSE,
+  lambda0 = NULL,
+  begin_str = "01/13/2020",
+  T_fin = 200,
+  nchain = 4,
+  nadapt = 10000,
+  M = 500,
+  thn = 10,
+  nburnin = 200,
+  dic = FALSE,
+  death_in_R = 0.02,
+  beta0 = 0.2586,
+  gamma0 = 0.0821,
+  R0 = beta0/gamma0,
+  gamma0_sd = 0.1,
+  R0_sd = 1,
+  casename = "tvt.eSIR",
+  file_add = character(0),
+  add_death = FALSE,
+  save_files = FALSE,
+  save_mcmc = FALSE,
+  save_plot_data = FALSE,
+  eps = 1e-10
+)
 }
 \arguments{
 \item{Y}{the time series of daily observed infected compartment proportions.}
@@ -60,15 +81,13 @@ tvt.eSIR(Y, R, pi0 = NULL, change_time = NULL, exponential = FALSE,
 
 \item{add_death}{logical, whether add the approximate death curve to the plot, default is false.}
 
-\item{save_files}{logical, whether save (\code{TRUE}) results or not (\code{FALSE}). This enables to save summary tables, trace plots, and plots of the posterior means of the first-order derivatives of the infection prevalence process \eqn{\theta_t^I}.}
+\item{save_files}{logical, whether to save plots to file.}
 
 \item{save_mcmc}{logical, whether save (\code{TRUE}) all the MCMC outputs or not (\code{FALSE}).The output file will be an \code{.RData} file named by the \eqn{casename}. We include arrays of prevalence values of the three compartments with their matrices of posterior draws up to the last date of the collected data as \code{theta_p[,,1]} and afterwards as \code{theta_pp[,,1]} for \eqn{\theta_t^S}, \code{theta_p[,,2]} and \code{theta_pp[,,2]} for \eqn{\theta_t^I}, and \code{theta_p[,,3]} and \code{theta_pp[,,3]} for \eqn{\theta_t^R}. Moreover, the input and predicted proportions \code{Y}, \code{Y_pp}, \code{R} and \code{R_pp} can also be retrieved. The prevalence and prediceted proportion matrices have rows for MCMC replicates, and columns for days. The MCMC posterior draws of other parameters including \code{beta_p}, \code{gamma_p}, \code{R0_p}, and variance controllers \code{k_p}, \code{lambdaY_p}, \code{lambdaR_p} are also available.}
 
 \item{save_plot_data}{logical, whether save the plotting data or not.}
 
 \item{eps}{a non-zero controller so that all the input \code{Y} and \code{R} values would be bounded above 0 (at least \code{eps}). Its default value is 1e-10}
-
-\item{save_files}{logical, whether to save plots to file.}
 }
 \value{
 \item{casename}{the predefined \code{casename}.}

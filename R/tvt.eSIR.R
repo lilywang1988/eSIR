@@ -431,7 +431,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
   dthetaI_tp2_date <- chron_ls[dthetaI_tp2]
 
 
-  incidence_vec <- 1-thetaS_mat[,T_prime]
+  incidence_vec <- 1-thetaS_mat[,T_fin]
   incidence_mean <-  mean(incidence_vec,na.rm = T)
 
   incidence_ci <- quantile(incidence_vec,c(0.025,0.5,0.975),na.rm = T)

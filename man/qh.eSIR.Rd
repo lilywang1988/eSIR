@@ -4,13 +4,33 @@
 \alias{qh.eSIR}
 \title{Extended state-space SIR with quarantine}
 \usage{
-qh.eSIR(Y, R, phi0 = NULL, change_time = NULL,
-  begin_str = "01/13/2020", T_fin = 200, nchain = 4,
-  nadapt = 10000, M = 500, thn = 10, nburnin = 200, dic = FALSE,
-  death_in_R = 0.02, casename = "qh.eSIR", beta0 = 0.2586,
-  gamma0 = 0.0821, R0 = beta0/gamma0, gamma0_sd = 0.1, R0_sd = 1,
-  file_add = character(0), add_death = FALSE, save_files = FALSE,
-  save_mcmc = FALSE, save_plot_data = FALSE, eps = 1e-10)
+qh.eSIR(
+  Y,
+  R,
+  phi0 = NULL,
+  change_time = NULL,
+  begin_str = "01/13/2020",
+  T_fin = 200,
+  nchain = 4,
+  nadapt = 10000,
+  M = 500,
+  thn = 10,
+  nburnin = 200,
+  dic = FALSE,
+  death_in_R = 0.02,
+  casename = "qh.eSIR",
+  beta0 = 0.2586,
+  gamma0 = 0.0821,
+  R0 = beta0/gamma0,
+  gamma0_sd = 0.1,
+  R0_sd = 1,
+  file_add = character(0),
+  add_death = FALSE,
+  save_files = FALSE,
+  save_mcmc = FALSE,
+  save_plot_data = FALSE,
+  eps = 1e-10
+)
 }
 \arguments{
 \item{Y}{the time series of daily observed infected compartment proportions.}

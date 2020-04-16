@@ -444,7 +444,7 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   dthetaI_tp1_date <- chron_ls[dthetaI_tp1]
   dthetaI_tp2_date <- chron_ls[dthetaI_tp2]
 
-  incidence_vec <- thetaI_mat[,T_prime]+ thetaR_mat[,T_prime]
+  incidence_vec <- thetaI_mat[,T_fin]+ thetaR_mat[,T_fin]
   incidence_mean <-  mean(incidence_vec,na.rm = T)
 
   incidence_ci <- quantile(incidence_vec,c(0.025,0.5,0.975),na.rm = T)
