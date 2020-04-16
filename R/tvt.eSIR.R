@@ -135,57 +135,70 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
 
   ################ MCMC ##########
   model1.string <- paste0("
-             model{
-                   for(t in 2:(T_prime+1)){
-                   Km[t-1,1] <- -beta*pi[t-1]*theta[t-1,1]*theta[t-1,2]
-                   Km[t-1,9] <- gamma*theta[t-1,2]
-                   Km[t-1,5] <- -Km[t-1,1]-Km[t-1,9]
+  model{
+     for(t in 2:(T_prime+1)){
+       Km[t-1,1] <- -beta*pi[t-1]*theta[t-1,1]*theta[t-1,2]
+       Km[t-1,9] <- gamma*theta[t-1,2]
+       Km[t-1,5] <- -Km[t-1,1]-Km[t-1,9]
 
-                   Km[t-1,2] <- -beta*pi[t-1]*(theta[t-1,1]+0.5*Km[t-1,1])*(theta[t-1,2]+0.5*Km[t-1,5])
-                   Km[t-1,10] <- gamma*(theta[t-1,2]+0.5*Km[t-1,5])
-                   Km[t-1,6] <- -Km[t-1,2]-Km[t-1,10]
+       Km[t-1,2] <- -beta*pi[t-1]*(theta[t-1,1]+0.5*Km[t-1,1])*(theta[t-1,2]+0.5*Km[t-1,5])
+       Km[t-1,10] <- gamma*(theta[t-1,2]+0.5*Km[t-1,5])
+       Km[t-1,6] <- -Km[t-1,2]-Km[t-1,10]
 
-                   Km[t-1,3] <- -beta*pi[t-1]*(theta[t-1,1]+0.5*Km[t-1,2])*(theta[t-1,2]+0.5*Km[t-1,6])
-                   Km[t-1,11] <- gamma*(theta[t-1,2]+0.5*Km[t-1,6])
-                   Km[t-1,7] <- -Km[t-1,3]-Km[t-1,11]
+       Km[t-1,3] <- -beta*pi[t-1]*(theta[t-1,1]+0.5*Km[t-1,2])*(theta[t-1,2]+0.5*Km[t-1,6])
+       Km[t-1,11] <- gamma*(theta[t-1,2]+0.5*Km[t-1,6])
+       Km[t-1,7] <- -Km[t-1,3]-Km[t-1,11]
 
-                   Km[t-1,4] <- -beta*pi[t-1]*(theta[t-1,1]+Km[t-1,3])*(theta[t-1,2]+Km[t-1,7])
-                   Km[t-1,12] <- gamma*(theta[t-1,2]+Km[t-1,7])
-                   Km[t-1,8] <- -Km[t-1,4]-Km[t-1,12]
+       Km[t-1,4] <- -beta*pi[t-1]*(theta[t-1,1]+Km[t-1,3])*(theta[t-1,2]+Km[t-1,7])
+       Km[t-1,12] <- gamma*(theta[t-1,2]+Km[t-1,7])
+       Km[t-1,8] <- -Km[t-1,4]-Km[t-1,12]
 
-                   alpha[t-1,1] <- theta[t-1,1]+(Km[t-1,1]+2*Km[t-1,2]+2*Km[t-1,3]+Km[t-1,4])/6
-                   alpha[t-1,2] <- theta[t-1,2]+(Km[t-1,5]+2*Km[t-1,6]+2*Km[t-1,7]+Km[t-1,8])/6
-                   alpha[t-1,3] <- theta[t-1,3]+(Km[t-1,9]+2*Km[t-1,10]+2*Km[t-1,11]+Km[t-1,12])/6
+       alpha[t-1,1] <- theta[t-1,1]+(Km[t-1,1]+2*Km[t-1,2]+2*Km[t-1,3]+Km[t-1,4])/6
+       alpha[t-1,2] <- theta[t-1,2]+(Km[t-1,5]+2*Km[t-1,6]+2*Km[t-1,7]+Km[t-1,8])/6
+       alpha[t-1,3] <- theta[t-1,3]+(Km[t-1,9]+2*Km[t-1,10]+2*Km[t-1,11]+Km[t-1,12])/6
 
-                   theta[t,1:3] ~ ddirch(k*alpha[t-1,1:3])
-                   Y[t-1] ~ dbeta(lambdaY*theta[t,2],lambdaY*(1-theta[t,2]))
-                   R[t-1] ~ dbeta(lambdaR*theta[t,3],lambdaR*(1-theta[t,3]))
-                   }
-                  theta0[1:3]<-c(",1-Y[1]-R[1],",",Y[1],",", R[1],")
-                  theta[1,1:3] ~ ddirch(theta0[1:3])
-                  gamma ~  dlnorm(",lognorm_gamma_parm$mu,",",1/lognorm_gamma_parm$var,")
-                  R0 ~ dlnorm(",lognorm_R0_parm$var,",",1/lognorm_R0_parm$var,")
-                  beta <- R0*gamma
-                  k ~  dgamma(2,0.0001)
-                  lambdaY ~ dgamma(2,0.0001)
-                  lambdaR ~ dgamma(2,0.0001)
-               }
-            ")
+       theta[t,1:3] ~ ddirch(k*alpha[t-1,1:3])
+       Y[t-1] ~ dbeta(lambdaY*theta[t,2],lambdaY*(1-theta[t,2]))
+       R[t-1] ~ dbeta(lambdaR*theta[t,3],lambdaR*(1-theta[t,3]))
+     }
+    theta0[1:3]<-c(",1-Y[1]-R[1],",",Y[1],",", R[1],")
+    theta[1,1:3] ~ ddirch(theta0[1:3])
+    gamma ~  dlnorm(", lognorm_gamma_parm$mu, ",", 1 / lognorm_gamma_parm$var,")
+    R0 ~ dlnorm(", lognorm_R0_parm$mu, ",", 1 / lognorm_R0_parm$var,")
+    beta <- R0*gamma
+    k ~  dgamma(2,0.0001)
+    lambdaY ~ dgamma(2,0.0001)
+    lambdaR ~ dgamma(2,0.0001)
+  }
+")
 
   model.spec <- textConnection(model1.string)
 
-  posterior <- jags.model(model.spec,data=list('Y'=Y,'R'=R,'T_prime'=T_prime,'pi'=pi),n.chains =nchain, n.adapt = nadapt)
+  posterior <- jags.model(
+    model.spec,
+    data = list(
+      'Y' = Y,
+      'R' = R,
+      'T_prime' = T_prime,
+      'pi' = pi
+      ),
+    n.chains = nchain,
+    n.adapt = nadapt
+  )
 
-  update(posterior,nburnin) #burn-in
+  update(posterior, nburnin) #burn-in
 
-  jags_sample <-jags.samples(posterior,c('theta','gamma','R0','beta','Y','lambdaY','lambdaR','k'),
-                             n.iter=M*nchain,thin=thn)
+  jags_sample <- jags.samples(
+    posterior,
+    c('theta','gamma','R0','beta','Y','lambdaY','lambdaR','k'),
+    n.iter = M*nchain,
+    thin = thn
+  )
 
-  if(dic) {
-    dic_val <-dic.samples(posterior,n.iter=M*nchain,thin=thn)
-   # message(paste0("DIC is: ", dic_val))
-  } else dic_val=NULL
-
+  if(dic)
+    dic_val <- dic.samples(posterior, n.iter = M*nchain, thin = thn)
+  else
+    dic_val <- NULL
 
   if(save_files) {
     png(paste0(file_add,casename,"theta_p.png"), width = 700, height = 900)
