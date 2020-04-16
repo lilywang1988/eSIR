@@ -38,7 +38,7 @@
 #'
 #' @return
 #' \item{casename}{the predefined \code{casename}.}
-#' \item{incidence_mean}{mean incidence.}
+#' \item{incidence_mean}{mean cumulative incidence, the mean prevalence of cumulative confirmed cases at the end of the study.}
 #' \item{incidence_ci}{2.5\%, 50\%, and 97.5\% quantiles of the incidences.}
 #' \item{out_table}{summary tables including the posterior mean of the prevalance processes of the 3 states compartments (\eqn{\theta_t^S,\theta_t^I,\theta_t^R,\theta_t^H}) at last date of data collected ((\eqn{t^\prime}) decided by the lengths of your input data \code{Y} and \code{R}), and their respective credible inctervals (ci); the respective means and ci's of the reporduction number (R0), removed rate (\eqn{\gamma}), transmission rate  (\eqn{\beta}).}
 #' \item{plot_infection}{plot of summarizing and forecasting for the infection compartment, in which the vertial blue line denotes the last date of data collected (\eqn{t^\prime}), the vertial darkgray line denotes the deacceleration point (first turning point) that the posterior mean first-derivative of infection prevalence \eqn{\dot{\theta}_t^I} achieves the  maximum, the vertical purple line denotes the second turning point that the posterior mean first-derivative infection proportion \eqn{\dot{\theta}_t^I} equals zero, the darkgray line denotes the posterior mean of the infection prevalence \eqn{\theta_t^I} and the red line denotes its posterior median. }
@@ -444,11 +444,11 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   dthetaI_tp1_date <- chron_ls[dthetaI_tp1]
   dthetaI_tp2_date <- chron_ls[dthetaI_tp2]
 
-
-  incidence_vec <-  rowSums(thetaS_mat[,]*thetaI_mat[,],na.rm = T)*replicate(T_fin,c(beta_p))
+  incidence_vec <- thetaI_mat[,T_prime]+ thetaR_mat[,T_prime]
   incidence_mean <-  mean(incidence_vec,na.rm = T)
 
   incidence_ci <- quantile(incidence_vec,c(0.025,0.5,0.975),na.rm = T)
+
   first_tp_vec<- (1:T_fin)[apply(dthetaI_mat,1,which.max)]# first second order derivative=0
 
   second_tp_vec <- sapply(1:len,function(l){

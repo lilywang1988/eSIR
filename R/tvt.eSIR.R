@@ -41,7 +41,7 @@
 #'
 #' @return
 #' \item{casename}{the predefined \code{casename}.}
-#' \item{incidence_mean}{mean incidence.}
+#' \item{incidence_mean}{mean cumulative incidence, the mean prevalence of cumulative confirmed cases at the end of the study.}
 #' \item{incidence_ci}{2.5\%, 50\%, and 97.5\% quantiles of the incidences.}
 #' \item{out_table}{summary tables including the posterior mean of the prevalance processes of the 3 states compartments (\eqn{\theta_t^S,\theta_t^I,\theta_t^R}) at last date of data collected ((\eqn{t^\prime}) decided by the lengths of your input data \code{Y} and \code{R}), and their respective credible inctervals (ci); the respective means and ci's of the reporduction number (R0), removed rate (\eqn{\gamma}), transmission rate  (\eqn{\beta}).}
 #' \item{plot_infection}{plot of summarizing and forecasting for the infection compartment, in which the vertial blue line denotes the last date of data collected (\eqn{t^\prime}), the vertial darkgray line denotes the deacceleration point (first turning point) that the posterior mean first-derivative of infection prevalence \eqn{\dot{\theta}_t^I} achieves the  maximum, the vertical purple line denotes the second turning point that the posterior mean first-derivative infection proportion \eqn{\dot{\theta}_t^I} equals zero, the darkgray line denotes the posterior mean of the infection prevalence \eqn{\theta_t^I} and the red line denotes its posterior median. }
@@ -195,10 +195,11 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
     thin = thn
   )
 
-  if(dic)
+  {if(dic)
     dic_val <- dic.samples(posterior, n.iter = M*nchain, thin = thn)
   else
     dic_val <- NULL
+  }
 
   if(save_files) {
     png(paste0(file_add,casename,"theta_p.png"), width = 700, height = 900)
@@ -430,10 +431,11 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
   dthetaI_tp2_date <- chron_ls[dthetaI_tp2]
 
 
-  incidence_vec <-  rowSums((thetaS_mat[,]*thetaI_mat[,])*((c(beta_p))%o%(pi)),na.rm = T)
+  incidence_vec <- 1-thetaS_mat[,T_prime]
   incidence_mean <-  mean(incidence_vec,na.rm = T)
 
   incidence_ci <- quantile(incidence_vec,c(0.025,0.5,0.975),na.rm = T)
+
   first_tp_vec <- (1:T_fin)[apply(dthetaI_mat,1,which.max)]# first second order derivative=0
 
   second_tp_vec <- sapply(1:len,function(l){
@@ -638,12 +640,11 @@ if ( FALSE ) {
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   pi0<- c(1.0,0.9,0.5,0.1)
   res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,
-                    pi0=pi0,change_time=change_time,dic=T,casename="Hubei_step",                   save_files = T, save_mcmc=F,
+                    pi0=pi0,change_time=change_time,dic=F,casename="Hubei_step",                   save_files = F, save_mcmc=F,
                     M=5e2,nburnin = 2e2)
   res.step$plot_infection
   res.step$plot_removed
   res.step$dic_val
-
   ### continuous exponential function of pi(t)
   res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,                 exponential=TRUE,dic=F,lambda0=0.05,
                   casename="Hubei_exp",save_files = F,save_mcmc=F,

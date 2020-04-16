@@ -72,7 +72,7 @@ tvt.eSIR(Y, R, pi0 = NULL, change_time = NULL, exponential = FALSE,
 }
 \value{
 \item{casename}{the predefined \code{casename}.}
-\item{incidence_mean}{mean incidence.}
+\item{incidence_mean}{mean cumulative incidence, the mean prevalence of cumulative confirmed cases at the end of the study.}
 \item{incidence_ci}{2.5\%, 50\%, and 97.5\% quantiles of the incidences.}
 \item{out_table}{summary tables including the posterior mean of the prevalance processes of the 3 states compartments (\eqn{\theta_t^S,\theta_t^I,\theta_t^R}) at last date of data collected ((\eqn{t^\prime}) decided by the lengths of your input data \code{Y} and \code{R}), and their respective credible inctervals (ci); the respective means and ci's of the reporduction number (R0), removed rate (\eqn{\gamma}), transmission rate  (\eqn{\beta}).}
 \item{plot_infection}{plot of summarizing and forecasting for the infection compartment, in which the vertial blue line denotes the last date of data collected (\eqn{t^\prime}), the vertial darkgray line denotes the deacceleration point (first turning point) that the posterior mean first-derivative of infection prevalence \eqn{\dot{\theta}_t^I} achieves the  maximum, the vertical purple line denotes the second turning point that the posterior mean first-derivative infection proportion \eqn{\dot{\theta}_t^I} equals zero, the darkgray line denotes the posterior mean of the infection prevalence \eqn{\theta_t^I} and the red line denotes its posterior median. }

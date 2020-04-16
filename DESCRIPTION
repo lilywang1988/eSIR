@@ -1,8 +1,8 @@
 Package: eSIR
 Type: Package
 Title: Extended state-space SIR models
-Version: 0.2.7
-Date: 2020-03-31
+Version: 0.2.8
+Date: 2020-04-16
 Authors@R:c(
     person("Lili", "Wang", email = "lilywang@umich.edu", role = c("aut", "cre")),
     person("Song Lab", role = "aut", comment = "<http://www.umich.edu/~songlab/>"),
