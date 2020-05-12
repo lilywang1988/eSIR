@@ -1,7 +1,7 @@
 R package eSIR: extended state-space SIR epidemiological models
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
-2020-03-31
+2020-05-11
 
 Chinese version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
 
@@ -25,7 +25,7 @@ The standard SIR model has three components: susceptible, infected, and removed 
 Preparation
 -----------
 
-[Download Binary Package](https://github.com/lilywang1988/eSIR/blob/master/install_binary)
+[Download packages directly](https://github.com/lilywang1988/eSIR/blob/master/install_pkg)
 
 To install and use this R package from Github, you will need to first install the R package `devtools`. Please uncomment the codes to install them. `eSIR` depends on three other packages, `rjags` (an interface to the JAGS library), `chron` and `gtools`, which could be installed with `eSIR` if not yet.
 
@@ -65,20 +65,11 @@ The function can be either stepwise or exponential:
 
 ![pi functions](man/figures/pi_functions.png)
 
-![Standard SIR](man/figures/model1.png)
+![tvt SIR](man/figures/model1.png)
 
 ``` r
 set.seed(20192020)
 library(eSIR)
-#> Loading required package: rjags
-#> Loading required package: coda
-#> Linked to JAGS 4.3.0
-#> Loaded modules: basemod,bugs
-#> Loading required package: scales
-#> Loading required package: ggplot2
-#> Loading required package: chron
-#> Loading required package: gtools
-#> Loading required package: data.table
 # Hubei province data Jan13 -> Feb 11
 # cumulative number of infected
 NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
@@ -93,7 +84,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   ### Step function of pi(t)
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   pi0<- c(1.0,0.9,0.5,0.1)
-  res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,
+  res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,
             pi0=pi0,change_time=change_time,dic=T,casename="Hubei_step",
             save_files = T, save_mcmc=F,save_plot_data = F,M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
@@ -103,8 +94,8 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 #>    Allocating nodes
 #> Graph information:
 #>    Observed stochastic nodes: 60
-#>    Unobserved stochastic nodes: 37
-#>    Total graph size: 1873
+#>    Unobserved stochastic nodes: 36
+#>    Total graph size: 1875
 #> 
 #> Initializing model
   res.step$plot_infection
@@ -126,9 +117,9 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 
 ``` r
   res.step$dic_val
-#> Mean deviance:  -1262 
-#> penalty 38.22 
-#> Penalized deviance: -1224
+#> Mean deviance:  -1259 
+#> penalty 38.32 
+#> Penalized deviance: -1220
 
   ### continuous exponential function of pi(t)
   res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
@@ -142,8 +133,8 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 #>    Allocating nodes
 #> Graph information:
 #>    Observed stochastic nodes: 60
-#>    Unobserved stochastic nodes: 37
-#>    Total graph size: 1873
+#>    Unobserved stochastic nodes: 36
+#>    Total graph size: 1875
 #> 
 #> Initializing model
   res.exp$plot_infection
@@ -170,8 +161,8 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 #>    Allocating nodes
 #> Graph information:
 #>    Observed stochastic nodes: 60
-#>    Unobserved stochastic nodes: 37
-#>    Total graph size: 1873
+#>    Unobserved stochastic nodes: 36
+#>    Total graph size: 1875
 #> 
 #> Initializing model
   res.nopi$plot_infection
@@ -210,7 +201,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 
   change_time <- c("01/23/2020","02/04/2020","02/08/2020")
   phi0 <- c(0.1,0.4,0.4)
-  res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
+  res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",
                     phi0=phi0,change_time=change_time,casename="Hubei_q",
                     save_files = T,save_mcmc = F,save_plot_data = F,
                     M=5e3,nburnin = 2e3)
@@ -221,7 +212,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 #>    Allocating nodes
 #> Graph information:
 #>    Observed stochastic nodes: 60
-#>    Unobserved stochastic nodes: 37
+#>    Unobserved stochastic nodes: 36
 #>    Total graph size: 2736
 #> 
 #> Initializing model
@@ -242,6 +233,68 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 You will obtain the following plot in addition to the traceplots and summary table if you set `save_file=T` in `qh.eSIR`. The blue vertical line denotes the beginning date, and the other three gray lines denote the three change points.
 
 ![Standard SIR](man/figures/Hubei_qthetaQ_plot.png)
+
+Model 3 using `eSAIR`: SIR with time-varying immunization with antibody positivity
+----------------------------------------------------------------------------------
+
+To address the under-reporting issue associated with the available public databases and to build the self-immunization into the infection dynamics, we then further extend the previous eSIR model to an eSAIR model by adding an antibody (A) compartment. As is shown in the bottom thread of the following figure, this A compartment accounts for the probability of being self-immunized with antibodies to COVID-19, denoted by *θ*<sub>*t*</sub><sup>*A*</sup>; see equation as follows too, where *α*(*t*) is a function describing the proportion of people moving from the susceptible compartment to the antibody compartment over time. Compartment A helps circumvent limitations of data collection, especially embracing individuals who were infected but self-cured at home with no confirmation by viral RT-PCR diagnostic tests. This new eSAIR model characterizes the underlying population-level dynamics of the pandemic. The following system of ordinary differential equations defines collectively the continuous-time dynamics for the eSAIR model, which governs the law of movements among four compartments of Susceptible, Self-immunized, Infected and Removed.
+
+![SAIR](man/figures/eSAIR_compartment.png)
+
+![SAIR ODE](man/figures/SAIR_ODE.png)
+
+In the example below, we implemented this function onto New York state data assuming that by April 29, 20% of the population have been self-immunized with antibody positivity.
+
+``` r
+NI_complete <- c( 1,2,11,23,31,76,106,142,150,220,327,
+                  421,613,615,967,1578,3038,5704,8403,
+                  11727,15800,20884,25681,30841,37877,
+                  44876,52410,59648,66663,75833,83948,
+                  92506,102987,113833,123160,131815,
+                  139875,151061,161779,172348,181026,
+                  189033,195749,203020,214454,223691,
+                  230597,237474,243382,248416,253519,
+                  258222,263460,271590,282143,288045,
+                  291996,295106,299691,304372,308314)
+  RI_complete <- c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 
+                   20, 26, 38, 52, 200, 311, 468, 662,
+                   893, 1144, 1547, 2144, 2931, 3900, 
+                   5133, 6201, 7657, 9483, 11536, 
+                   13915, 16276, 18781, 21110, 23424,
+                   26469, 29784, 32899, 35785, 37730, 
+                   39207, 40703, 42164, 43488, 44723, 
+                   45887, 47473, 47686, 48769, 49572,
+                   50221, 52161, 52917, 54115, 54613,
+                   55473, 55816, 56809, 57265, 58525)
+  N=8.399e6
+  R <- RI_complete/N
+  
+  Y <- NI_complete/N- R 
+
+  change_time <- c("04/29/2020")
+  alpha0 <- c(0.2) # 20% of the susceptible population were found immunized
+  res.antibody <- eSAIR(Y,R,begin_str="03/01/2020",
+                    alpha0=alpha0,change_time=change_time,
+                    casename="New_York_antibody",save_files = F,save_mcmc = F,
+                    M=5e2,nburnin = 2e2)
+#> The follow-up is from 03/01/20 to 09/16/20 and the last observed date is 04/30/20.
+#> Running for eSAIR
+#> Compiling model graph
+#>    Resolving undeclared variables
+#>    Allocating nodes
+#> Graph information:
+#>    Observed stochastic nodes: 122
+#>    Unobserved stochastic nodes: 67
+#>    Total graph size: 5123
+#> 
+#> Initializing model
+#> Warning in jags.model(model.spec, data = list(Y = Y, R = R, T_prime =
+#> T_prime, : Adaptation incomplete
+#> NOTE: Stopping adaptation
+  res.antibody$plot_infection
+```
+
+![](man/figures/README-model%203-1.png)
 
 Outputs and summary table
 -------------------------
