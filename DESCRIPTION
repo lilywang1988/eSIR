@@ -1,28 +1,31 @@
 Package: eSIR
 Type: Package
 Title: Extended state-space SIR models
-Version: 0.2.8
-Date: 2020-04-16
+Version: 0.3.0
+Date: 2020-05-11
 Authors@R:c(
     person("Lili", "Wang", email = "lilywang@umich.edu", role = c("aut", "cre")),
     person("Song Lab", role = "aut", comment = "<http://www.umich.edu/~songlab/>"),
     person("Paul", "Egeler", email = "paul.egeler@spectrumhealth.org", role = "ctb", comment = "Spectrum Health Office of Research and Education")
     )
 Description: An implementation of extended state-space SIR models developed by
-    Song Lab at UM school of Public Health.
+    Song Lab at UM school of Public Health. There are several functions available
+    by 1) including a time-varying transmission modifier, 2) adding a time-dependent
+    quarantine compartment, 3) adding a time-dependent antibody-immunization compartment. 
 License: CC BY 4.0
 Encoding: UTF-8
 Imports:
-    rjags,
-    scales,
-    ggplot2,
-    chron,
-    gtools,
-    data.table,
-    stats,
-    grDevices,
-    graphics,
-    reshape2,
-    coda,
-    utils
+    coda (>= 0.19.3),
+    chron (>= 2.3.54),
+    data.table (>= 1.12.0),
+    ggplot2 (>= 3.2.1),
+    grDevices (>= 3.5.2),
+    graphics (>= 3.5.2),
+    gtools (>= 3.8.1),
+    scales (>= 1.1.0),
+    stats (>= 3.5.2),
+    reshape2 (>= 1.4.3),
+    rjags (>= 4.10),
+    utils (>= 3.5.2)
+Depends: R (>= 3.5.2)
 RoxygenNote: 7.1.0
