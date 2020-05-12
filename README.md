@@ -72,21 +72,22 @@ set.seed(20192020)
 library(eSIR)
 # Hubei province data Jan13 -> Feb 11
 # cumulative number of infected
-NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
-                   1052,1423,2714,3554,4903,5806,7153,9074,11177,
+NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
+                   1052, 1423, 2714, 3554, 4903, 5806, 7153, 9074, 11177,
                 13522,16678,19665,22112,24953,27100,29631,31728,33366)
-  RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,
-                   252,345,417,561,650,811,1017,1261,1485,1917,2260,
-                   2725,3284,3754)
-  N=58.5e6
-  R <- RI_complete/N
-  Y <- NI_complete/N- R #Jan13->Feb 11
+  RI_complete <- c(1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94, 
+                   121, 152, 213, 252, 345, 417, 561, 650, 811, 
+                   1017, 1261, 1485, 1917, 2260, 2725,3284,3754)
+  N <- 58.5e6
+  R <- RI_complete / N
+  Y <- NI_complete / N - R #Jan13->Feb 11
   ### Step function of pi(t)
-  change_time <- c("01/23/2020","02/04/2020","02/08/2020")
-  pi0<- c(1.0,0.9,0.5,0.1)
-  res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",T_fin=200,
-            pi0=pi0,change_time=change_time,dic=T,casename="Hubei_step",
-            save_files = T, save_mcmc=F,save_plot_data = F,M=5e3,nburnin = 2e3)
+  change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
+  pi0<- c(1.0, 0.9, 0.5, 0.1)
+  res.step <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200,
+            pi0 = pi0, change_time = change_time, dic = T, 
+            casename = "Hubei_step", save_files = T, save_mcmc=F,
+            save_plot_data = F, M = 5e3, nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for step-function pi(t)
 #> Compiling model graph
@@ -98,6 +99,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 #>    Total graph size: 1875
 #> 
 #> Initializing model
+  
   res.step$plot_infection
 ```
 
@@ -117,15 +119,15 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 
 ``` r
   res.step$dic_val
-#> Mean deviance:  -1259 
-#> penalty 38.32 
-#> Penalized deviance: -1220
+#> Mean deviance:  -1258 
+#> penalty 40.34 
+#> Penalized deviance: -1218
 
   ### continuous exponential function of pi(t)
-  res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-                      T_fin=200,exponential=TRUE,dic=F,lambda0=0.05,
-                     casename="Hubei_exp",save_files = F,save_mcmc=F,
-                     save_plot_data = F,M=5e3,nburnin = 2e3)
+  res.exp <- tvt.eSIR(Y, R, begin_str="01/13/2020", death_in_R = 0.4,
+                      T_fin = 200, exponential = TRUE, dic=F, lambda0 = 0.05,
+                     casename = "Hubei_exp", save_files = F, save_mcmc = F,
+                     save_plot_data = F, M = 5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for exponential-function pi(t)
 #> Compiling model graph
@@ -137,6 +139,7 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
 #>    Total graph size: 1875
 #> 
 #> Initializing model
+  
   res.exp$plot_infection
 ```
 
@@ -152,7 +155,9 @@ NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
   #res.exp$plot_removed
 
   ### without pi(t), the standard state-space SIR model without intervention
-  res.nopi <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,T_fin=200,                              casename="Hubei_nopi",save_files = F,save_plot_data = F,
+  res.nopi <- tvt.eSIR(Y, R, begin_str = "01/13/2020", death_in_R = 0.4, 
+                       T_fin = 200, casename = "Hubei_nopi",
+                       save_files = F,save_plot_data = F,
                        M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running without pi(t)
@@ -189,22 +194,25 @@ By introducing a vector of `phi` and its corresponding changing points `change_t
 
 ``` r
 set.seed(20192020)
-NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
-                    1052,1423,2714,3554,4903,5806,7153,9074,11177,
-                    13522,16678,19665,22112,24953,27100,29631,31728,33366)
-  RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,
-                   252,345,417,561,650,811,1017,1261,1485,1917,2260,
-                   2725,3284,3754)
-  N=58.5e6
-  R <- RI_complete/N
-  Y <- NI_complete/N- R #Jan13->Feb 11
+NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444,
+                  549, 729, 1052, 1423, 2714, 3554, 4903, 5806,
+                  7153, 9074, 11177, 13522, 16678, 19665, 22112,
+                  24953, 27100, 29631, 31728, 33366)
+  RI_complete <- c(1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 
+                   71, 94, 121, 152, 213, 252, 345, 417, 561,
+                   650, 811, 1017, 1261, 1485, 1917, 2260,
+                   2725, 3284, 3754)
+  N <- 58.5e6
+  R <- RI_complete / N
+  Y <- NI_complete / N - R #Jan13->Feb 11
 
-  change_time <- c("01/23/2020","02/04/2020","02/08/2020")
-  phi0 <- c(0.1,0.4,0.4)
-  res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",
-                    phi0=phi0,change_time=change_time,casename="Hubei_q",
-                    save_files = T,save_mcmc = F,save_plot_data = F,
-                    M=5e3,nburnin = 2e3)
+  change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
+  phi0 <- c(0.1, 0.4, 0.4)
+  res.q <- qh.eSIR(Y, R, begin_str = "01/13/2020",
+                    phi0 = phi0,change_time = change_time, 
+                   casename = "Hubei_q", save_files = T,
+                   save_mcmc = F,save_plot_data = F,
+                    M = 5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for qh.eSIR
 #> Compiling model graph
@@ -234,8 +242,8 @@ You will obtain the following plot in addition to the traceplots and summary tab
 
 ![Standard SIR](man/figures/Hubei_qthetaQ_plot.png)
 
-Model 3 using `eSAIR`: SIR with time-varying immunization with antibody positivity
-----------------------------------------------------------------------------------
+Model 3 using `eSAIR`: SIR with time-varying subset of population immunized with antibody positivity
+----------------------------------------------------------------------------------------------------
 
 To address the under-reporting issue associated with the available public databases and to build the self-immunization into the infection dynamics, we then further extend the previous eSIR model to an eSAIR model by adding an antibody (A) compartment. As is shown in the bottom thread of the following figure, this A compartment accounts for the probability of being self-immunized with antibodies to COVID-19, denoted by *θ*<sub>*t*</sub><sup>*A*</sup>; see equation as follows too, where *α*(*t*) is a function describing the proportion of people moving from the susceptible compartment to the antibody compartment over time. Compartment A helps circumvent limitations of data collection, especially embracing individuals who were infected but self-cured at home with no confirmation by viral RT-PCR diagnostic tests. This new eSAIR model characterizes the underlying population-level dynamics of the pandemic. The following system of ordinary differential equations defines collectively the continuous-time dynamics for the eSAIR model, which governs the law of movements among four compartments of Susceptible, Self-immunized, Infected and Removed.
 
@@ -246,16 +254,16 @@ To address the under-reporting issue associated with the available public databa
 In the example below, we implemented this function onto New York state data assuming that by April 29, 20% of the population have been self-immunized with antibody positivity.
 
 ``` r
-NI_complete <- c( 1,2,11,23,31,76,106,142,150,220,327,
-                  421,613,615,967,1578,3038,5704,8403,
-                  11727,15800,20884,25681,30841,37877,
-                  44876,52410,59648,66663,75833,83948,
-                  92506,102987,113833,123160,131815,
-                  139875,151061,161779,172348,181026,
-                  189033,195749,203020,214454,223691,
-                  230597,237474,243382,248416,253519,
-                  258222,263460,271590,282143,288045,
-                  291996,295106,299691,304372,308314)
+NI_complete <- c( 1, 2, 11, 23, 31, 76, 106, 142, 150, 220, 327,
+                  421, 613, 615, 967, 1578, 3038, 5704, 8403,
+                  11727, 15800, 20884, 25681, 30841, 37877,
+                  44876, 52410, 59648, 66663, 75833, 83948,
+                  92506, 102987, 113833, 123160, 131815,
+                  139875, 151061, 161779, 172348, 181026,
+                  189033, 195749, 203020, 214454, 223691,
+                  230597, 237474, 243382, 248416, 253519,
+                  258222, 263460, 271590, 282143, 288045,
+                  291996, 295106, 299691, 304372, 308314)
   RI_complete <- c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 
                    20, 26, 38, 52, 200, 311, 468, 662,
                    893, 1144, 1547, 2144, 2931, 3900, 
@@ -266,17 +274,17 @@ NI_complete <- c( 1,2,11,23,31,76,106,142,150,220,327,
                    45887, 47473, 47686, 48769, 49572,
                    50221, 52161, 52917, 54115, 54613,
                    55473, 55816, 56809, 57265, 58525)
-  N=8.399e6
-  R <- RI_complete/N
+  N <- 8.399e6
+  R <- RI_complete / N
   
-  Y <- NI_complete/N- R 
+  Y <- NI_complete / N - R 
 
   change_time <- c("04/29/2020")
   alpha0 <- c(0.2) # 20% of the susceptible population were found immunized
-  res.antibody <- eSAIR(Y,R,begin_str="03/01/2020",
-                    alpha0=alpha0,change_time=change_time,
-                    casename="New_York_antibody",save_files = F,save_mcmc = F,
-                    M=5e2,nburnin = 2e2)
+  res.antibody <- eSAIR(Y, R, begin_str = "03/01/2020",
+                    alpha0 = alpha0, change_time = change_time,
+                    casename = "New_York_antibody", save_files = F, 
+                    save_mcmc = F, M=5e2, nburnin = 2e2)
 #> The follow-up is from 03/01/20 to 09/16/20 and the last observed date is 04/30/20.
 #> Running for eSAIR
 #> Compiling model graph
