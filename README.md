@@ -1,7 +1,16 @@
 R package eSIR: extended state-space SIR epidemiological models
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
-2020-05-11
+2020-05-14
+
+**Notice**: We add the US data (up to May 2nd, 2020) summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We thank [Kanping Yang](kangpiny@umich.edu) for helping us collect the recovery data from the web page.
+
+``` r
+data("confirmed") # From JHU CSSE
+data("death") # From JHU CSSE
+data("recovered") # partly from 1Point3Acres
+data("USA_state_N") #population in each state
+```
 
 Chinese version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
 
@@ -120,7 +129,7 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
 ``` r
   res.step$dic_val
 #> Mean deviance:  -1258 
-#> penalty 40.34 
+#> penalty 40.06 
 #> Penalized deviance: -1218
 
   ### continuous exponential function of pi(t)
@@ -296,9 +305,6 @@ NI_complete <- c( 1, 2, 11, 23, 31, 76, 106, 142, 150, 220, 327,
 #>    Total graph size: 5123
 #> 
 #> Initializing model
-#> Warning in jags.model(model.spec, data = list(Y = Y, R = R, T_prime =
-#> T_prime, : Adaptation incomplete
-#> NOTE: Stopping adaptation
   res.antibody$plot_infection
 ```
 
@@ -319,7 +325,6 @@ References
 2.  Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del Valle, S. Y. (2017). Forecasting seasonal influenza with a state-space SIR model. The annals of applied statistics, 11(1), 202.
 
 3.  Mkhatshwa, T., & Mummert, A. (2010). Modeling super-spreading events for infectious diseases: case study SARS. arXiv preprint arXiv:1007.0908.
-
 -----------
 Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
 
