@@ -1,8 +1,8 @@
 Package: eSIR
 Type: Package
 Title: Extended state-space SIR models
-Version: 0.3.0
-Date: 2020-05-11
+Version: 0.3.1
+Date: 2020-05-14
 Authors@R:c(
     person("Lili", "Wang", email = "lilywang@umich.edu", role = c("aut", "cre")),
     person("Song Lab", role = "aut", comment = "<http://www.umich.edu/~songlab/>"),
@@ -29,3 +29,4 @@ Imports:
     utils (>= 3.5.2)
 Depends: R (>= 3.5.2)
 RoxygenNote: 7.1.0
+LazyData: true

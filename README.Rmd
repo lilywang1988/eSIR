@@ -13,6 +13,17 @@ knitr::opts_chunk$set(collapse = TRUE,
 
 ```
 
+**Notice**: We add the US data (up to May 2nd, 2020) summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We thank [Kanping Yang](kangpiny@umich.edu) for helping us collect the recovery data from the web page.
+
+```{r load data, eval = FALSE}
+data("confirmed") # From JHU CSSE
+data("death") # From JHU CSSE
+data("recovered") # partly from 1Point3Acres
+data("USA_state_N") #population in each state
+
+```
+
+
 Chinese version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
 
 ## Purpose
