@@ -3,7 +3,7 @@ R package eSIR: extended state-space SIR epidemiological models
 [Song Lab](http://www.umich.edu/~songlab/)
 2020-05-14
 
-**Notice**: We add the US data (up to May 2nd, 2020) summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We thank [Kangping Yang](kangpiny@umich.edu) for helping us collect the recovery data from the web page.
+**Notice**: We add the US data (up to May 2nd, 2020) summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We thank [Kangping Yang](kangpiny@umich.edu) for helping us collect the recovery data from the web page. We will update the data every Friday evening. 
 
 ``` r
 data("confirmed") # From JHU CSSE
