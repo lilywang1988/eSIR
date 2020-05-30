@@ -449,7 +449,7 @@ eSAIR<-function (Y,R, alpha0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
     (first_tp_vec[l]:T_fin)[which.min(dthetaI_mat[l,first_tp_vec[l]:T_fin]>0)]})
 
   end_p_vec <-sapply(1:len,function(l){
-    if(sum(thetaI_mat[l,first_tp_vec[l]:T_fin]<=eps)>0){
+    if(any(thetaI_mat[l,first_tp_vec[l]:T_fin]<=eps, na.rm = TRUE)){
       (first_tp_vec[l]:T_fin)[which.max(thetaI_mat[l,first_tp_vec[l]:T_fin]<=eps)]
     }else{ T_fin } })
 
