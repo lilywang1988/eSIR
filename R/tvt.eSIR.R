@@ -442,7 +442,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
     (first_tp_vec[l]:T_fin)[which.min(dthetaI_mat[l,first_tp_vec[l]:T_fin]>0)]})
 
   end_p_vec <-sapply(1:len,function(l){
-    if(sum(thetaI_mat[l,first_tp_vec[l]:T_fin]<=eps)>0){
+    if(any(thetaI_mat[l,first_tp_vec[l]:T_fin]<=eps, na.rm = TRUE)){
       (first_tp_vec[l]:T_fin)[which.max(thetaI_mat[l,first_tp_vec[l]:T_fin]<=eps)]
   }else{ T_fin } })
 
@@ -630,6 +630,7 @@ if ( FALSE ) {
   NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
                    1052,1423,2714,3554,4903,5806,7153,9074,11177,
                 13522,16678,19665,22112,24953,27100,29631,31728,33366)
+
   RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,
                    252,345,417,561,650,811,1017,1261,1485,1917,2260,
                    2725,3284,3754)

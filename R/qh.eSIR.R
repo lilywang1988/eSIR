@@ -455,7 +455,7 @@ qh.eSIR<-function (Y,R, phi0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
     (first_tp_vec[l]:T_fin)[which.min(dthetaI_mat[l,first_tp_vec[l]:T_fin]>0)]})
 
   end_p_vec <-sapply(1:len,function(l){
-    if(sum(thetaI_mat[l,first_tp_vec[l]:T_fin]<=eps)>0){
+    if(any(thetaI_mat[l,first_tp_vec[l]:T_fin]<=eps, na.rm = TRUE)){
       (first_tp_vec[l]:T_fin)[which.max(thetaI_mat[l,first_tp_vec[l]:T_fin]<=eps)]
     }else{ T_fin } })
 
@@ -663,7 +663,7 @@ if ( FALSE ) {
   phi0 <- c(0.1,0.4,0.4)
   res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
                     phi0=phi0,change_time=change_time,
-                    casename="Hubei_q",save_files = T,save_mcmc = F,
+                    casename="Hubei_q",save_files = F,save_mcmc = F,
                     M=5e2,nburnin = 2e2)
   res.q$plot_infection
   #res.q$plot_removed
