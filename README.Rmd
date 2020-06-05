@@ -13,7 +13,11 @@ knitr::opts_chunk$set(collapse = TRUE,
 
 ```
 
-**Notice**: We add the US data (up to May 2nd, 2020) summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We thank [Kangping Yang](kangpiny@umich.edu) for helping us collect the recovery data from the web page. We will update the data every Friday evening. 
+**Notice**: 
+
+1. Since version 0.3.1, we added the US data (up to June 4th, 2020) summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We will update the data every Thursday or Friday evening. 
+
+2. Since version 0.3.3, we added Gelman-Rubin statistic for convergence check using [gelman.diag](https://www.rdocumentation.org/packages/coda/versions/0.19-3/topics/gelman.diag) from [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html). Their values substantially larger than 1 imply a failure of convergence of the MCMC chains. 
 
 
 ```{r load data, eval = FALSE}
@@ -162,7 +166,7 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444,
                    save_mcmc = F,save_plot_data = F,
                     M = 5e3,nburnin = 2e3)
   res.q$plot_infection
-  #res.q$plot_removed
+  res.q$gelman_diag_list
 
   #res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
   #                    T_fin=200,casename="Hubei_noq",
@@ -230,9 +234,14 @@ To save all the plots (including trace plots) and summary tables, please set `sa
 
 For details, please explore our package directly. We have `.rd` files established, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them. 
 
+## Acknowledgements
+This package is created and maintained by [Lili Wang](lilywang@umich.edu), contributed by [Fei Wang](https://github.com/feiwsteven), [Lu Tang](https://github.com/ClumsyBear), and [Paul Egeler](https://github.com/pegeler). We also thank [Kangping Yang](kangpiny@umich.edu) for helping us collect the recovery data from the web page. 
+
+
 ## References
+
 1. Song, P. X., Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., ... & Eisenberg, M. (2020). An epidemiological forecast model and software assessing interventions on COVID-19 epidemic in China. medRxiv.
 
 2. Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del Valle, S. Y. (2017). Forecasting seasonal influenza with a state-space SIR model. The annals of applied statistics, 11(1), 202.
 
-3. Mkhatshwa, T., & Mummert, A. (2010). Modeling super-spreading events for infectious diseases: case study SARS. arXiv preprint arXiv:1007.0908.
+3. Gelman, A., & Rubin, D. B. (1992). Inference from iterative simulation using multiple sequences. Statistical science, 7(4), 457-472.
