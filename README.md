@@ -10,7 +10,14 @@ R package eSIR: extended state-space SIR epidemiological models
     GitHub](https://github.com/CSSEGISandData/COVID-19) and
     [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states
     have complete recovery data. We will update the data every Thursday
-    or Friday evening.
+    or Friday evening. Using following codes for the data:
+
+``` r
+data("confirmed") # From JHU CSSE
+data("death") # From JHU CSSE
+data("recovered") # partly from 1Point3Acres
+data("USA_state_N") #population in each state
+```
 
 2.  Since version 0.3.3, we added Gelman-Rubin statistic for convergence
     check using
@@ -26,13 +33,6 @@ res$gelman_diag_list
 ```
 
 <!-- end list -->
-
-``` r
-data("confirmed") # From JHU CSSE
-data("death") # From JHU CSSE
-data("recovered") # partly from 1Point3Acres
-data("USA_state_N") #population in each state
-```
 
 Chinese
 version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
