@@ -50,7 +50,7 @@
 #' \item{second_tp_mean}{the date t at which \eqn{\theta_t^I=0}, calculated as the average of the stationary points of all of posterior first-order derivatives \eqn{\dot{\theta}_t^I}; this value may be slightly different from the one labeled by the "pruple" lines in the plots of \code{plot_infection} and \code{plot_removed}. The latter indicate stationary t at which the first-order derivative of the averaged posterior of \eqn{\theta_t^I} equals zero.}
 #' \item{second_tp_ci}{with \code{second_tp_mean}, it reports the corresponding credible interval and median.}
 #' \item{dic_val}{the output of \code{dic.samples()} in \code{\link[rjags]{dic.samples}}, computing deviance information criterion for model comparison.}
-#'
+#' \item{gelman_diag_list}{ Since version 0.3.3, we incorporated Gelman And Rubin's Convergence Diagnostic using \code{\link[coda]{gelman.diag}}. We included both the statistics and their upper C.I. limits. Values substantially above 1 indicate lack of convergence. Error messages would be printed as they are. This would be only valid for multiple chains (e.g. nchain > 1). Note that for time dependent processes, we only compute the convergence of the last observation data (\code{T_prime}), though it shows to be \code{T_prime+1}, which is due to the day 0 for initialization.}
 #'
 #' @examples
 #' \dontrun{
@@ -162,69 +162,76 @@ eSAIR<-function (Y,R, alpha0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
                           ")
   model.spec <- textConnection(model2.string)
 
-  posterior <- jags.model(model.spec,data=list('Y'=Y,'R'=R,'T_prime'=T_prime,'alpha_vec'=alpha_vec,'gamma_H_vec'=gamma_H_vec),n.chains =nchain, n.adapt = nadapt)
+  posterior <- jags.model(model.spec,data=list('Y'=Y,'R'=R,'T_prime'=T_prime,'alpha_vec'=alpha_vec,'gamma_H_vec'= gamma_H_vec),n.chains = nchain, n.adapt = nadapt)
 
   update(posterior,nburnin) #burn-in
 
-  jags_sample <-jags.samples(posterior,c('theta','theta_H','theta_A','gamma','R0','beta','Y','lambdaY','lambdaR','k','v'),n.iter=M*nchain,thin=thn)
+  jags_sample <-jags.samples(posterior,c('theta','theta_H','theta_A','gamma','R0','beta','Y','lambdaY','lambdaR','k','v'), n.iter = M, thin = thn)
 
   if(dic) {
-    dic_val <-dic.samples(posterior,n.iter=M*nchain,thin=thn)
+    dic_val <-dic.samples(posterior, n.iter = M ,thin = thn)
     #message(paste0("DIC is: ", dic_val))
   } else dic_val=NULL
 
 
   if(save_files) {
     png(paste0(file_add,casename,"theta_p.png"), width = 700, height = 900)
-    plot(as.mcmc.list(jags_sample$theta)[[1]][,(1:3)*(T_prime+1)]) # posterior true porbabilities
+    plot(as.mcmc.list(jags_sample$theta)[,(1:3)*(T_prime+1)]) # posterior true porbabilities
     dev.off()
 
     png(paste0(file_add,casename,"thetaA_p.png"), width = 700, height = 900)
-    plot(as.mcmc.list(jags_sample$theta_A)[[1]][,T_prime],main="thetaA[T_prime]") # posterior true porbabilities
+    plot(as.mcmc.list(jags_sample$theta_A)[,T_prime],main="thetaA[T_prime]") # posterior true porbabilities
     dev.off()
 
 
     png(paste0(file_add,casename,"R0_p.png"), width = 700, height = 350)
-    plot(R0_p<-as.mcmc.list(jags_sample$R0)[[1]])
+    R0_p <- unlist(as.mcmc.list(jags_sample$R0))
+    plot(as.mcmc.list(jags_sample$R0))
     dev.off()
     png(paste0(file_add,casename,"gamma_p.png"), width = 700, height = 350)
-    plot(gamma_p<-as.mcmc.list(jags_sample$gamma)[[1]])
+    gamma_p <- unlist(as.mcmc.list(jags_sample$gamma))
+    plot(as.mcmc.list(jags_sample$gamma))
     dev.off()
 
     png(paste0(file_add,casename,"beta_p.png"), width = 700, height = 350)
-    plot(beta_p<-as.mcmc.list(jags_sample$beta)[[1]])
+    beta_p <- unlist(as.mcmc.list(jags_sample$beta))
+    plot(as.mcmc.list(jags_sample$beta))
     dev.off()
 
 
     png(paste0(file_add,casename,"lambdaY_p.png"), width = 700, height = 350)
-    plot(lambdaY_p<-as.mcmc.list(jags_sample$lambdaY)[[1]])
+    lambdaY_p <- unlist(as.mcmc.list(jags_sample$lambdaY))
+    plot(as.mcmc.list(jags_sample$lambdaY))
     dev.off()
 
     png(paste0(file_add,casename,"lambdaR_p.png"), width = 700, height = 350)
-    plot(lambdaR_p<-as.mcmc.list(jags_sample$lambdaR)[[1]])
+    lambdaR_p <- unlist(as.mcmc.list(jags_sample$lambdaR))
+    plot(as.mcmc.list(jags_sample$lambdaR))
     dev.off()
 
     png(paste0(file_add,casename,"k_p.png"), width = 700, height = 350)
-    plot(k_p<-as.mcmc.list(jags_sample$k)[[1]])
+    k_p <- unlist(as.mcmc.list(jags_sample$k))
+    plot(as.mcmc.list(jags_sample$k))
     dev.off()
 
   }else{
 
-    R0_p<-as.mcmc.list(jags_sample$R0)[[1]]
-    gamma_p<-as.mcmc.list(jags_sample$gamma)[[1]]
-    beta_p<-as.mcmc.list(jags_sample$beta)[[1]]
-    lambdaY_p<-as.mcmc.list(jags_sample$lambdaY)[[1]]
-    lambdaR_p<-as.mcmc.list(jags_sample$lambdaR)[[1]]
-    k_p<-as.mcmc.list(jags_sample$k)[[1]]
+    R0_p <- unlist(as.mcmc.list(jags_sample$R0))
+    gamma_p <- unlist(as.mcmc.list(jags_sample$gamma))
+    beta_p <- unlist(as.mcmc.list(jags_sample$beta))
+    lambdaY_p <- unlist(as.mcmc.list(jags_sample$lambdaY))
+    lambdaR_p <- unlist(as.mcmc.list(jags_sample$lambdaR))
+    k_p <- unlist(as.mcmc.list(jags_sample$k))
   }
 
 
-  theta_p<-array(as.mcmc.list(jags_sample$theta)[[1]],dim=c(len,T_prime+1,3))
+  theta_p <- array(Reduce(rbind,as.mcmc.list(jags_sample$theta)),dim=c(len,T_prime+1,3))
   theta_p_mean <- apply(theta_p[,T_prime+1,],2,mean)
   theta_p_ci <- as.vector(apply(theta_p[,T_prime+1,],2,quantile,c(0.025,0.5,0.975)))
 
-  thetaA_p<-matrix(as.mcmc.list(jags_sample$theta_A)[[1]],nrow=len,ncol=T_prime+1)
-  thetaH_p<-matrix(as.mcmc.list(jags_sample$theta_H)[[1]],nrow=len,ncol=T_prime+1)
+  thetaA_p <- matrix(Reduce(rbind,as.mcmc.list(jags_sample$theta_A)),nrow=len,ncol=T_prime+1)
+  thetaH_p <- matrix(Reduce(rbind,as.mcmc.list(jags_sample$theta_H)),nrow=len,ncol=T_prime+1)
+
   thetaA_p_mean <- mean(thetaA_p[,T_prime+1])
   thetaA_p_ci <- quantile(thetaA_p[,T_prime+1],c(0.025,0.5,0.975))
 
@@ -259,14 +266,14 @@ eSAIR<-function (Y,R, alpha0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
     thetalt2 <- theta_p[l,T_prime+1,2]
     thetalt3 <- theta_p[l,T_prime+1,3]
     thetaltH <- thetaH_p[l,T_prime+1]
-    thetaltQ <- thetaA_p[l,T_prime+1]
+    thetaltA <- thetaA_p[l,T_prime+1]
 
     betal <- c(beta_p)[l]
     gammal <- c(gamma_p)[l]
     kl <- c(k_p)[l]
     lambdaYl <- c(lambdaY_p)[l]
     lambdaRl <- c(lambdaR_p)[l]
-    if(betal<0 |gammal<0 |thetalt1<0 |thetalt2<0 |thetalt3<0|thetaltH<0|thetaltQ<0) next
+    if(betal<0 |gammal<0 |thetalt1<0 |thetalt2<0 |thetalt3<0|thetaltH<0|thetaltA<0) next
     for(t in 1:(T_fin-T_prime)){
       Km<-NULL
       theta_temp <- alpha_temp <- alpha <- NULL
@@ -290,7 +297,7 @@ eSAIR<-function (Y,R, alpha0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
       alpha_temp[2] <- max(thetalt2+(Km[5]+2*Km[6]+2*Km[7]+Km[8])/6-gamma_H_vec[t+T_prime]*thetalt2,0)
       alpha_temp[3] <- max(thetalt3+(Km[9]+2*Km[10]+2*Km[11]+Km[12])/6,0)
 
-      thetaA_pp[l,t] <- thetaltQ <- thetaltQ+ min(alpha_vec[t+T_prime]*thetalt1,thetalt1+(Km[1]+2*Km[2]+2*Km[3]+Km[4])/6)
+      thetaA_pp[l,t] <- thetaltA <- thetaltA+ min(alpha_vec[t+T_prime]*thetalt1,thetalt1+(Km[1]+2*Km[2]+2*Km[3]+Km[4])/6)
       thetaH_pp[l,t] <- thetaltH <- thetaltH+ min(gamma_H_vec[t+T_prime]*thetalt2,thetalt2+(Km[5]+2*Km[6]+2*Km[7]+Km[8])/6)
 
 
@@ -628,7 +635,10 @@ eSAIR<-function (Y,R, alpha0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   #colnames(out_table)<-c("thetaS_p_mean","thetaI_p_mean","thetaR_p_mean","thetaS_p_ci_low","thetaS_p_ci_med","thetaS_p_ci_up","thetaI_p_ci_low","thetaI_p_ci_med","thetaI_p_ci_up","thetaR_p_ci_low","thetaR_p_ci_med","thetaR_p_ci_up","R0_p_mean","R0_p_ci_low","R0_p_ci_med","R0_p_ci_up","gamma_p_mean","gamma_p_ci_low","gamma_p_ci_med","gamma_p_ci_up","beta_p_mean","beta_p_ci_low","beta_p_ci_med","beta_p_ci_up","k_p_mean","k_p_ci_low","k_p_ci_med","k_p_ci_up","lambdaY_p_mean","lambdaY_p_ci_low","lambdaY_p_ci_med","lambdaY_p_ci_up","lambdaR_p_mean","lambdaR_p_ci_low","lambdaR_p_ci_med","lambdaR_p_ci_up","first_order_change_date","second_order_change_date")
 
   if(save_files) write.csv(out_table,file=paste0(file_add,casename,"_summary.csv"))
-  if(save_mcmc) save(theta_p,theta_pp,thetaA_p,thetaA_pp,Y,Y_pp,R,R_pp,beta_p,gamma_p,R0_p,k_p,lambdaY_p,lambdaR_p, file=paste0(file_add,casename,"_mcmc.RData")) #@
+  if(save_mcmc) {
+    save(theta_pp,thetaA_pp,Y_pp,R_pp, file=paste0(file_add,casename,"_forecast_MCMC.RData")) #@
+    save(jags_sample,file=paste0(file_add,casename,"_rjags_MCMC.RData"))
+  }
   if(save_plot_data){
     other_plot <-list(T_prime=T_prime,T_fin=T_fin,chron_ls=chron_ls,dthetaI_tp1=dthetaI_tp1,dthetaI_tp2=dthetaI_tp2,dthetaI_tp1_date=dthetaI_tp1_date,dthetaI_tp2_date=dthetaI_tp2_date,beta_p_mean=beta_p_mean,gamma_p_mean=gamma_p_mean,R0_p_mean=R0_p_mean)
     spaghetti_plot_ls <- list(spaghetti_ht=spaghetti_ht,dthetaI_mean_data=dthetaI_mean_data,sample_dthetaI_mat_long=sample_dthetaI_mat_long,first_tp_date_ci=first_tp_date_ci,second_tp_date_ci=second_tp_date_ci)
@@ -637,7 +647,42 @@ eSAIR<-function (Y,R, alpha0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
     plot_data_ls <- list(casename=casename,other_plot=other_plot,spaghetti_plot_ls=spaghetti_plot_ls,infection_plot_ls=infection_plot_ls,removed_plot_ls=removed_plot_ls)
     save(plot_data_ls,file=paste0(file_add,casename,"_plot_data.RData"))
   }
-  res<-list(casename=casename,incidence_mean=incidence_mean,incidence_ci=incidence_ci,out_table=out_table,plot_infection=plot1,plot_removed=plot2,spaghetti_plot=spaghetti_plot,first_tp_mean=as.character(first_tp_date_mean),first_tp_ci=as.character(first_tp_date_ci),second_tp_mean=as.character(second_tp_date_mean),second_tp_ci=as.character(second_tp_date_ci),dic_val=dic_val)
+
+  # Gelman-Rubin convergence diagnostics
+  gelman_out_name <- c('R0','gamma','beta','theta','theta_A','lambdaY','lambdaR','k')
+  gelman_diag_list <- lapply(gelman_out_name,function(name){
+    if(name == 'theta'){
+    tryCatch(
+    gelman.diag(as.mcmc.list(jags_sample[[name]])[,(1:3)*(T_prime+1)]),
+    error = function(e) e )
+    } else if (name == 'theta_A'){
+      list('theta_A: ', tryCatch(
+        gelman.diag(as.mcmc.list(jags_sample[[name]])[,(T_prime+1)]),
+        error = function(e) e ))
+    } else {
+      tryCatch(
+        gelman.diag(as.mcmc.list(jags_sample[[name]])),
+        error = function(e) e )
+    }
+  })
+  if(save_files) {
+    sink(paste0(file_add,casename,"_Gelman_diag.txt"))
+    print(gelman_diag_list)
+    sink()
+  }
+  res<-list(casename = casename,
+            incidence_mean = incidence_mean,
+            incidence_ci = incidence_ci,
+            out_table = out_table,
+            plot_infection = plot1,
+            plot_removed = plot2,
+            spaghetti_plot = spaghetti_plot,
+            first_tp_mean = as.character(first_tp_date_mean),
+            first_tp_ci = as.character(first_tp_date_ci),
+            second_tp_mean = as.character(second_tp_date_mean),
+            second_tp_ci = as.character(second_tp_date_ci),
+            dic_val = dic_val,
+            gelman_diag_list = gelman_diag_list)
   return(res)
 }
 
@@ -657,10 +702,10 @@ if ( FALSE ) {
   alpha0 <- c(0.2) # 20% of the susceptible population were found immunized
   res.antibody <- eSAIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
                     alpha0=alpha0,change_time=change_time,
-                    casename="Hubei_antibody",save_files = T,save_mcmc = F,
+                    casename="Hubei_antibody",save_files = F,save_mcmc = F,
                     M=5e2,nburnin = 2e2)
   res.antibody$plot_infection
-
+  res.antibody$gelman_diag_list
 
 }
 

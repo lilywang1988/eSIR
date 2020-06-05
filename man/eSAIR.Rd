@@ -98,6 +98,7 @@ eSAIR(
 \item{second_tp_mean}{the date t at which \eqn{\theta_t^I=0}, calculated as the average of the stationary points of all of posterior first-order derivatives \eqn{\dot{\theta}_t^I}; this value may be slightly different from the one labeled by the "pruple" lines in the plots of \code{plot_infection} and \code{plot_removed}. The latter indicate stationary t at which the first-order derivative of the averaged posterior of \eqn{\theta_t^I} equals zero.}
 \item{second_tp_ci}{with \code{second_tp_mean}, it reports the corresponding credible interval and median.}
 \item{dic_val}{the output of \code{dic.samples()} in \code{\link[rjags]{dic.samples}}, computing deviance information criterion for model comparison.}
+\item{gelman_diag_list}{ Since version 0.3.3, we incorporated Gelman And Rubin's Convergence Diagnostic using \code{\link[coda]{gelman.diag}}. We included both the statistics and their upper C.I. limits. Values substantially above 1 indicate lack of convergence. Error messages would be printed as they are. This would be only valid for multiple chains (e.g. nchain > 1). Note that for time dependent processes, we only compute the convergence of the last observation data (\code{T_prime}), though it shows to be \code{T_prime+1}, which is due to the day 0 for initialization.}
 }
 \description{
 In this function we allow it to characterize time-varying immunization among a subset of the population that have been tested positive in an antibody assessment. We expanded the SIR model by adding a time-varying antibody-positive proportion \eqn{\alpha_t}.

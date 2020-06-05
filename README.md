@@ -1,9 +1,26 @@
 R package eSIR: extended state-space SIR epidemiological models
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
-2020-05-14
+2020-06-05
 
-**Notice**: We add the US data (up to May 2nd, 2020) summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We thank [Kangping Yang](kangpiny@umich.edu) for helping us collect the recovery data from the web page. We will update the data every Friday evening. 
+**Notice**:
+
+1.  Since version 0.3.1, we added the US data (up to June 4th, 2020)
+    summarized from [JHU CSSE
+    GitHub](https://github.com/CSSEGISandData/COVID-19) and
+    [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states
+    have complete recovery data. We will update the data every Thursday
+    or Friday evening.
+
+2.  Since version 0.3.3, we added Gelman-Rubin statistic for convergence
+    check using
+    [gelman.diag](https://www.rdocumentation.org/packages/coda/versions/0.19-3/topics/gelman.diag)
+    from
+    [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
+    Their values substantially larger than 1 imply a failure of
+    convergence of the MCMC chains.
+
+<!-- end list -->
 
 ``` r
 data("confirmed") # From JHU CSSE
@@ -12,14 +29,40 @@ data("recovered") # partly from 1Point3Acres
 data("USA_state_N") #population in each state
 ```
 
-Chinese version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
+Chinese
+version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
 
-Purpose
--------
+## Purpose
 
-The outbreak of novel Corona Virus disease (a.k.a. COVID-19), originated in Wuhan, the capital of Hubei Province spreads quickly and affects many cities in China as well as many countries in the world. The Chinese government has enforced very stringent quarantine and inspection to prevent the worsening spread of COVID-19. Although various forms of forecast on the turning points of this epidemic within and outside Hubei Province have been published in the media, none of the prediction models has explicitly accounted for the time-varying quarantine protocols. We extended the classical SIR model for infectious disease by incorporating forms of medical isolation (in-home quarantine and hospitalization) in the underlying infectious disease dynamic system. Using the state-space model for both daily infected and hospitalized incidences and MCMC algorithms, we assess the effectiveness of quarantine protocols for confining COVID-19 spread in both Hubei Province and the other regions of China. Both predicted turning points and their credible bands may be obtained from the extended SIR under a given quarantine protocol. R software packages are also made publicly available for interested users.
+The outbreak of novel Corona Virus disease (a.k.a. COVID-19), originated
+in Wuhan, the capital of Hubei Province spreads quickly and affects many
+cities in China as well as many countries in the world. The Chinese
+government has enforced very stringent quarantine and inspection to
+prevent the worsening spread of COVID-19. Although various forms of
+forecast on the turning points of this epidemic within and outside Hubei
+Province have been published in the media, none of the prediction models
+has explicitly accounted for the time-varying quarantine protocols. We
+extended the classical SIR model for infectious disease by incorporating
+forms of medical isolation (in-home quarantine and hospitalization) in
+the underlying infectious disease dynamic system. Using the state-space
+model for both daily infected and hospitalized incidences and MCMC
+algorithms, we assess the effectiveness of quarantine protocols for
+confining COVID-19 spread in both Hubei Province and the other regions
+of China. Both predicted turning points and their credible bands may be
+obtained from the extended SIR under a given quarantine protocol. R
+software packages are also made publicly available for interested users.
 
-The standard SIR model has three components: susceptible, infected, and removed (including the recovery and dead). In the following sections, we will introduce the other extended state-space SIR models and their implementation in the package. **The results provided below are based on relatively short chains.** According to our experience, this setting (`M=5e3` and `nburnin=2e3`) should provide acceptable results in terms of the trend and turning points estimation, the estimation of parameters and their credible intervals might not be accurate. Hence, if possible, we would recommend using `M=5e5` and `nburnin=2e5` to obtain stable MCMC chains via [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
+The standard SIR model has three components: susceptible, infected, and
+removed (including the recovery and dead). In the following sections, we
+will introduce the other extended state-space SIR models and their
+implementation in the package. **The results provided below are based on
+relatively short chains.** According to our experience, this setting
+(`M=5e3` and `nburnin=2e3`) should provide acceptable results in terms
+of the trend and turning points estimation, the estimation of parameters
+and their credible intervals might not be accurate. Hence, if possible,
+we would recommend using `M=5e5` and `nburnin=2e5` to obtain stable MCMC
+chains via
+[`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
 
 ![Standard SIR](man/figures/model0.png)
 
@@ -31,14 +74,22 @@ The standard SIR model has three components: susceptible, infected, and removed 
 
 ![Standard SIR](man/figures/algorithm.png)
 
-Preparation
------------
+## Preparation
 
-[Download packages directly](https://github.com/lilywang1988/eSIR/blob/master/install_pkg)
+[Download packages
+directly](https://github.com/lilywang1988/eSIR/blob/master/install_pkg)
 
-To install and use this R package from Github, you will need to first install the R package `devtools`. Please uncomment the codes to install them. `eSIR` depends on three other packages, `rjags` (an interface to the JAGS library), `chron` and `gtools`, which could be installed with `eSIR` if not yet.
+To install and use this R package from Github, you will need to first
+install the R package `devtools`. Please uncomment the codes to install
+them. `eSIR` depends on three other packages, `rjags` (an interface to
+the JAGS library), `chron` and `gtools`, which could be installed with
+`eSIR` if not yet.
 
-An error may occur if you have not yet installed JAGS-4.x.y.exe (for any x &gt;= 0, y &gt;=0). **Windows** users may download and install JAGS from [here](http://www.sourceforge.net/projects/mcmc-jags/files). **Mac** users may follow steps at [casallas/8411082](https://gist.github.com/casallas/8411082).
+An error may occur if you have not yet installed JAGS-4.x.y.exe (for any
+x \>= 0, y \>=0). **Windows** users may download and install JAGS from
+[here](http://www.sourceforge.net/projects/mcmc-jags/files). **Mac**
+users may follow steps at
+[casallas/8411082](https://gist.github.com/casallas/8411082).
 
 ``` r
 # install.packages("devtools")
@@ -47,9 +98,16 @@ An error may occur if you have not yet installed JAGS-4.x.y.exe (for any x &gt;=
 library(eSIR) 
 ```
 
-Our data are collected daily from [dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5). Alternatively, we notice some convenient access to COVID-19 data from [GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) and [qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
+Our data are collected daily from
+[dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5).
+Alternatively, we notice some convenient access to COVID-19 data from
+[GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) and
+[qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
 
-For data outside China, we use [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) data. Another package [coronavirus](https://github.com/RamiKrispin/coronavirus) has its GitHub version udpated daily, which is also quite useful.
+For data outside China, we use [JHU CSSE
+GitHub](https://github.com/CSSEGISandData/COVID-19) data. Another
+package [coronavirus](https://github.com/RamiKrispin/coronavirus) has
+its GitHub version udpated daily, which is also quite useful.
 
 ``` r
 # Data of COVID-19 can be found in the following R packages: 
@@ -59,16 +117,17 @@ For data outside China, we use [JHU CSSE GitHub](https://github.com/CSSEGISandDa
 #library(2019-nCov-Data) 
 ```
 
-In Ubuntu (18.04) Linux, please first update R to a version &gt;= 3.6. You may need to install jags package as well by `sudo apt-get install jags` before install devtools by `install.packages("devtools")`.
+In Ubuntu (18.04) Linux, please first update R to a version \>= 3.6. You
+may need to install jags package as well by `sudo apt-get install jags`
+before install devtools by `install.packages("devtools")`.
 
-Model 1 using `tvt.eSIR()`: a SIR model with a time-varying transmission rate
------------------------------------------------------------------------------
+## Model 1 using `tvt.eSIR()`: a SIR model with a time-varying transmission rate
 
-By introducing a time-dependent
-*π*(*t*)∈\[0, 1\]
- function that modifies the transmission rate
-*β*
-, we can depict a series of time-varying changes caused by either external variations like government policies, protective measures and environment changes, or internal variations like mutations and evolutions of the pathogen.
+By introducing a time-dependent \[\pi(t)\in [0,1]\] function that
+modifies the transmission rate \[\beta\], we can depict a series of
+time-varying changes caused by either external variations like
+government policies, protective measures and environment changes, or
+internal variations like mutations and evolutions of the pathogen.
 
 The function can be either stepwise or exponential:
 
@@ -112,26 +171,26 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
   res.step$plot_infection
 ```
 
-![](man/figures/README-model1-1.png)
+![](man/figures/README-model1-1.png)<!-- -->
 
 ``` r
   res.step$plot_removed
 ```
 
-![](man/figures/README-model1-2.png)
+![](man/figures/README-model1-2.png)<!-- -->
 
 ``` r
   res.step$spaghetti_plot
 ```
 
-![](man/figures/README-model1-3.png)
+![](man/figures/README-model1-3.png)<!-- -->
 
 ``` r
   res.step$dic_val
-#> Mean deviance:  -1258 
-#> penalty 40.06 
-#> Penalized deviance: -1218
-
+#> Mean deviance:  -1257 
+#> penalty 37.67 
+#> Penalized deviance: -1220
+  #res.step$gelman_diag_list
   ### continuous exponential function of pi(t)
   res.exp <- tvt.eSIR(Y, R, begin_str="01/13/2020", death_in_R = 0.4,
                       T_fin = 200, exponential = TRUE, dic=F, lambda0 = 0.05,
@@ -152,13 +211,13 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
   res.exp$plot_infection
 ```
 
-![](man/figures/README-model1-4.png)
+![](man/figures/README-model1-4.png)<!-- -->
 
 ``` r
   res.exp$spaghetti_plot
 ```
 
-![](man/figures/README-model1-5.png)
+![](man/figures/README-model1-5.png)<!-- -->
 
 ``` r
   #res.exp$plot_removed
@@ -182,22 +241,29 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
   res.nopi$plot_infection
 ```
 
-![](man/figures/README-model1-6.png)
+![](man/figures/README-model1-6.png)<!-- -->
 
 ``` r
   res.nopi$spaghetti_plot
 ```
 
-![](man/figures/README-model1-7.png)
+![](man/figures/README-model1-7.png)<!-- -->
 
 ``` r
   #res.nopi$plot_removed
 ```
 
-Model 2 using `qh.eSIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
--------------------------------------------------------------------------------------------------
+## Model 2 using `qh.eSIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
 
-By introducing a vector of `phi` and its corresponding changing points `change_time`, we introduced a quarantine process that is dependent on a dirac delta function *ϕ*<sub>*t*</sub> ∈ \[0, 1\]. In other words, only at time points defined by `change_time`, we have certain porportions of the at-risk (susceptible) subjects moved to the quarantine stage. The difference of this model than the previous time-varying transmission one is that we do not allow the tranmission rate to change, but only let the proportion of susceptible subjects decrease. ![Standard SIR](man/figures/model2.png)
+By introducing a vector of `phi` and its corresponding changing points
+`change_time`, we introduced a quarantine process that is dependent on a
+dirac delta function \(\phi_t\in [0,1]\). In other words, only at time
+points defined by `change_time`, we have certain porportions of the
+at-risk (susceptible) subjects moved to the quarantine stage. The
+difference of this model than the previous time-varying transmission one
+is that we do not allow the tranmission rate to change, but only let the
+proportion of susceptible subjects decrease. ![Standard
+SIR](man/figures/model2.png)
 
 ![phi](man/figures/phi_functions.png)
 
@@ -236,10 +302,9 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444,
   res.q$plot_infection
 ```
 
-![](man/figures/README-model2-1.png)
+![](man/figures/README-model2-1.png)<!-- -->
 
 ``` r
-  #res.q$plot_removed
 
   #res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
   #                    T_fin=200,casename="Hubei_noq",
@@ -247,20 +312,40 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444,
   #res.noq$plot_infection
 ```
 
-You will obtain the following plot in addition to the traceplots and summary table if you set `save_file=T` in `qh.eSIR`. The blue vertical line denotes the beginning date, and the other three gray lines denote the three change points.
+You will obtain the following plot in addition to the traceplots and
+summary table if you set `save_file=T` in `qh.eSIR`. The blue vertical
+line denotes the beginning date, and the other three gray lines denote
+the three change points.
 
 ![Standard SIR](man/figures/Hubei_qthetaQ_plot.png)
 
-Model 3 using `eSAIR`: SIR with time-varying subset of population immunized with antibody positivity
-----------------------------------------------------------------------------------------------------
+## Model 3 using `eSAIR`: SIR with time-varying subset of population immunized with antibody positivity
 
-To address the under-reporting issue associated with the available public databases and to build the self-immunization into the infection dynamics, we then further extend the previous eSIR model to an eSAIR model by adding an antibody (A) compartment. As is shown in the bottom thread of the following figure, this A compartment accounts for the probability of being self-immunized with antibodies to COVID-19, denoted by *θ*<sub>*t*</sub><sup>*A*</sup>; see equation as follows too, where *α*(*t*) is a function describing the proportion of people moving from the susceptible compartment to the antibody compartment over time. Compartment A helps circumvent limitations of data collection, especially embracing individuals who were infected but self-cured at home with no confirmation by viral RT-PCR diagnostic tests. This new eSAIR model characterizes the underlying population-level dynamics of the pandemic. The following system of ordinary differential equations defines collectively the continuous-time dynamics for the eSAIR model, which governs the law of movements among four compartments of Susceptible, Self-immunized, Infected and Removed.
+To address the under-reporting issue associated with the available
+public databases and to build the self-immunization into the infection
+dynamics, we then further extend the previous eSIR model to an eSAIR
+model by adding an antibody (A) compartment. As is shown in the bottom
+thread of the following figure, this A compartment accounts for the
+probability of being self-immunized with antibodies to COVID-19, denoted
+by \(\theta_t^A\); see equation as follows too, where \(\alpha(t)\) is a
+function describing the proportion of people moving from the susceptible
+compartment to the antibody compartment over time. Compartment A helps
+circumvent limitations of data collection, especially embracing
+individuals who were infected but self-cured at home with no
+confirmation by viral RT-PCR diagnostic tests. This new eSAIR model
+characterizes the underlying population-level dynamics of the pandemic.
+The following system of ordinary differential equations defines
+collectively the continuous-time dynamics for the eSAIR model, which
+governs the law of movements among four compartments of Susceptible,
+Self-immunized, Infected and Removed.
 
 ![SAIR](man/figures/eSAIR_compartment.png)
 
 ![SAIR ODE](man/figures/SAIR_ODE.png)
 
-In the example below, we implemented this function onto New York state data assuming that by April 29, 20% of the population have been self-immunized with antibody positivity.
+In the example below, we implemented this function onto New York state
+data assuming that by April 29, 20% of the population have been
+self-immunized with antibody positivity.
 
 ``` r
 NI_complete <- c( 1, 2, 11, 23, 31, 76, 106, 142, 150, 220, 327,
@@ -308,23 +393,47 @@ NI_complete <- c( 1, 2, 11, 23, 31, 76, 106, 142, 150, 220, 327,
   res.antibody$plot_infection
 ```
 
-![](man/figures/README-model%203-1.png)
+![](man/figures/README-model%203-1.png)<!-- -->
 
-Outputs and summary table
--------------------------
+## Outputs and summary table
 
-To save all the plots (including trace plots) and summary tables, please set `save_files=T`, and if possible, provide a location by setting `file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other intermediate plots will not be saved, but you can still retrieve the forecast plots and summary table based on the return list, e.g., using `res.step$forecast_infection` and `res.step$out_table`. Moreover, if you are interested in plotting the figures on your own, you may set `save_mcmc=T` so that all the MCMC draws will be saved in a `.RData` file too.
+To save all the plots (including trace plots) and summary tables, please
+set `save_files=T`, and if possible, provide a location by setting
+`file_add="YOUR/FAVORITE/FOLDER"`. Otherwise, the traceplots and other
+intermediate plots will not be saved, but you can still retrieve the
+forecast plots and summary table based on the return list, e.g., using
+`res.step$forecast_infection` and `res.step$out_table`. Moreover, if you
+are interested in plotting the figures on your own, you may set
+`save_mcmc=T` so that all the MCMC draws will be saved in a `.RData`
+file too.
 
-For details, please explore our package directly. We have `.rd` files established, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them.
+For details, please explore our package directly. We have `.rd` files
+established, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them.
 
-References
-----------
+## Acknowledgements
 
-1.  Song, P. X., Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., ... & Eisenberg, M. (2020). An epidemiological forecast model and software assessing interventions on COVID-19 epidemic in China. medRxiv.
+This package is created and maintained by [Lili
+Wang](lilywang@umich.edu), contributed by [Fei
+Wang](https://github.com/feiwsteven), [Lu
+Tang](https://github.com/ClumsyBear), and [Paul
+Egeler](https://github.com/pegeler). We also thank [Kangping
+Yang](kangpiny@umich.edu) for helping us collect the recovery data from
+the web page.
 
-2.  Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del Valle, S. Y. (2017). Forecasting seasonal influenza with a state-space SIR model. The annals of applied statistics, 11(1), 202.
+## References
 
-3.  Mkhatshwa, T., & Mummert, A. (2010). Modeling super-spreading events for infectious diseases: case study SARS. arXiv preprint arXiv:1007.0908.
+1.  Song, P. X., Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., … &
+    Eisenberg, M. (2020). An epidemiological forecast model and software
+    assessing interventions on COVID-19 epidemic in China. medRxiv.
+
+2.  Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del
+    Valle, S. Y. (2017). Forecasting seasonal influenza with a
+    state-space SIR model. The annals of applied statistics, 11(1), 202.
+
+3.  Gelman, A., & Rubin, D. B. (1992). Inference from iterative
+    simulation using multiple sequences. Statistical science, 7(4),
+    457-472.
+
 -----------
 Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
 
@@ -336,3 +445,4 @@ License][cc-by].
 [cc-by]: http://creativecommons.org/licenses/by/4.0/
 [cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
 [cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
+
