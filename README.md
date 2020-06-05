@@ -9,8 +9,8 @@ R package eSIR: extended state-space SIR epidemiological models
     summarized from [JHU CSSE
     GitHub](https://github.com/CSSEGISandData/COVID-19) and
     [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states
-    have complete recovery data. We will update the data every Thursday or Friday
-    evening.
+    have complete recovery data. We will update the data every Thursday
+    or Friday evening.
 
 2.  Since version 0.3.3, we added Gelman-Rubin statistic for convergence
     check using
@@ -188,9 +188,9 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
 ``` r
   res.step$dic_val
 #> Mean deviance:  -1257 
-#> penalty 41.83 
-#> Penalized deviance: -1215
-
+#> penalty 37.67 
+#> Penalized deviance: -1220
+  #res.step$gelman_diag_list
   ### continuous exponential function of pi(t)
   res.exp <- tvt.eSIR(Y, R, begin_str="01/13/2020", death_in_R = 0.4,
                       T_fin = 200, exponential = TRUE, dic=F, lambda0 = 0.05,
@@ -305,35 +305,6 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444,
 ![](man/figures/README-model2-1.png)<!-- -->
 
 ``` r
-  res.q$gelman_diag_list
-#> [[1]]
-#> <simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
-#> 
-#> [[2]]
-#> <simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
-#> 
-#> [[3]]
-#> <simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
-#> 
-#> [[4]]
-#> <simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])[, (1:3) * (T_prime +     1)]): could not find function "gelman.diag">
-#> 
-#> [[5]]
-#> [[5]][[1]]
-#> [1] "theta_Q: "
-#> 
-#> [[5]][[2]]
-#> <simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])[, (T_prime + 1)]): could not find function "gelman.diag">
-#> 
-#> 
-#> [[6]]
-#> <simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
-#> 
-#> [[7]]
-#> <simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
-#> 
-#> [[8]]
-#> <simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
 
   #res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
   #                    T_fin=200,casename="Hubei_noq",
@@ -462,7 +433,7 @@ the web page.
 3.  Gelman, A., & Rubin, D. B. (1992). Inference from iterative
     simulation using multiple sequences. Statistical science, 7(4),
     457-472.
-    
+
 -----------
 Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
 
