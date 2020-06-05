@@ -19,6 +19,11 @@ R package eSIR: extended state-space SIR epidemiological models
     [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
     Their values substantially larger than 1 imply a failure of
     convergence of the MCMC chains.
+    Save it in a `.txt` file by setting `save_files = TRUE` or retrieve it via following R code (assuming that `res` is object returned from `tvt.eSIR` or `qh.eSIR`):
+
+```r
+res$gelman_diag_list
+```
 
 <!-- end list -->
 
@@ -101,8 +106,7 @@ library(eSIR)
 Our data are collected daily from
 [dxy.com](https://mama.dxy.com/outbreak/daily-of-nationwide-new?index=20200206&locationIds=999&from=todh5).
 Alternatively, we notice some convenient access to COVID-19 data from
-[GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019) and
-[qingyuanzhao/2019-nCov-Data](https://github.com/qingyuanzhao/2019-nCov-Data).
+[GuangchuangYu/nCov2019](https://github.com/GuangchuangYu/nCov2019).
 
 For data outside China, we use [JHU CSSE
 GitHub](https://github.com/CSSEGISandData/COVID-19) data. Another
