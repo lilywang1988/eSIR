@@ -15,20 +15,19 @@ knitr::opts_chunk$set(collapse = TRUE,
 
 **Notice**: 
 
-1. Since version 0.3.1, we added the US data (up to June 4th, 2020) summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We will update the data every Thursday or Friday evening. 
-
-2. Since version 0.3.3, we added Gelman-Rubin statistic for convergence check using [gelman.diag](https://www.rdocumentation.org/packages/coda/versions/0.19-3/topics/gelman.diag) from [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html). Their values substantially larger than 1 imply a failure of convergence of the MCMC chains. Save it in a `.txt` file by setting `save_files = TRUE` or retrieve it via following R code (assuming that `res` is object returned from `tvt.eSIR` or `qh.eSIR`):
-
-```r
-res$gelman_diag_list
-```
-
+1. Since version 0.3.1, we added the US data (up to June 4th, 2020) summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We will update the data every Thursday or Friday evening. Using following codes for the data:
 ```{r load data, eval = FALSE}
 data("confirmed") # From JHU CSSE
 data("death") # From JHU CSSE
 data("recovered") # partly from 1Point3Acres
 data("USA_state_N") #population in each state
 
+```
+
+2. Since version 0.3.3, we added Gelman-Rubin statistic for convergence check using [gelman.diag](https://www.rdocumentation.org/packages/coda/versions/0.19-3/topics/gelman.diag) from [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html). Their values substantially larger than 1 imply a failure of convergence of the MCMC chains. Save it in a `.txt` file by setting `save_files = TRUE` or retrieve it via following R code (assuming that `res` is object returned from `tvt.eSIR` or `qh.eSIR`):
+
+```r
+res$gelman_diag_list
 ```
 
 
