@@ -8,5 +8,6 @@
 #' @import grDevices
 #' @import graphics
 #' @import utils
+#' @import coda
 #' @importFrom coda as.mcmc.list
 NULL
