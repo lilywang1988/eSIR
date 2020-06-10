@@ -653,15 +653,18 @@ eSAIR<-function (Y,R, alpha0=NULL,change_time=NULL,begin_str="01/13/2020",T_fin=
   gelman_diag_list <- lapply(gelman_out_name,function(name){
     if(name == 'theta'){
     tryCatch(
-    gelman.diag(as.mcmc.list(jags_sample[[name]])[,(1:3)*(T_prime+1)]),
+    gelman.diag(as.mcmc.list(jags_sample[[name]])[,(1:3)*(T_prime+1)],
+                autoburnin=FALSE),
     error = function(e) e )
     } else if (name == 'theta_A'){
       list('theta_A: ', tryCatch(
-        gelman.diag(as.mcmc.list(jags_sample[[name]])[,(T_prime+1)]),
+        gelman.diag(as.mcmc.list(jags_sample[[name]])[,(T_prime+1)],
+                    autoburnin=FALSE),
         error = function(e) e ))
     } else {
       tryCatch(
-        gelman.diag(as.mcmc.list(jags_sample[[name]])),
+        gelman.diag(as.mcmc.list(jags_sample[[name]]),
+                    autoburnin=FALSE),
         error = function(e) e )
     }
   })
