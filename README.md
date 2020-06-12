@@ -5,7 +5,7 @@ R package eSIR: extended state-space SIR epidemiological models
 
 **Notice**:
 
-1.  Since version 0.3.1, we added the US data (up to June 4th, 2020)
+1.  Since version 0.3.1, we added the US data. The most recent update was on June 11th. We used data
     summarized from [JHU CSSE
     GitHub](https://github.com/CSSEGISandData/COVID-19) and
     [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states

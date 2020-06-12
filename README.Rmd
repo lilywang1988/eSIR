@@ -15,7 +15,7 @@ knitr::opts_chunk$set(collapse = TRUE,
 
 **Notice**: 
 
-1. Since version 0.3.1, we added the US data (up to June 4th, 2020) summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We will update the data every Thursday or Friday evening. Using following codes for the data:
+1. Since version 0.3.1, we added the US data. The most recent update was on June 11th. We used data summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We will update the data every Thursday or Friday evening. Using following codes for the data:
 ```{r load data, eval = FALSE}
 data("confirmed") # From JHU CSSE
 data("death") # From JHU CSSE
