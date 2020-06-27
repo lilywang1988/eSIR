@@ -119,9 +119,9 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
   #res.step$gelman_diag_list
   ### continuous exponential function of pi(t)
   res.exp <- tvt.eSIR(Y, R, begin_str="01/13/2020", death_in_R = 0.4,
-                      T_fin = 200, exponential = TRUE, dic=F, lambda0 = 0.05,
-                     casename = "Hubei_exp", save_files = F, save_mcmc = F,
-                     save_plot_data = F, M = 5e3,nburnin = 2e3)
+                      T_fin = 200, exponential = TRUE, dic=FALSE, lambda0 = 0.05,
+                     casename = "Hubei_exp", save_files = FALSE, save_mcmc = FALSE,
+                     save_plot_data = FALSE, M = 5e3,nburnin = 2e3)
   
   res.exp$plot_infection
   res.exp$spaghetti_plot

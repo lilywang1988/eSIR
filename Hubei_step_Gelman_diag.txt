@@ -9,23 +9,23 @@ R0      0.999          1
 Potential scale reduction factors:
 
       Point est. Upper C.I.
-gamma       1.01       1.04
+gamma          1       1.01
 
 
 [[3]]
 Potential scale reduction factors:
 
      Point est. Upper C.I.
-beta       1.01       1.03
+beta          1          1
 
 
 [[4]]
 Potential scale reduction factors:
 
             Point est. Upper C.I.
-theta[31,1]       1.01       1.02
+theta[31,1]       1.00       1.00
 theta[31,2]       1.00       1.00
-theta[31,3]       1.03       1.08
+theta[31,3]       1.02       1.05
 
 Multivariate psrf
 
@@ -42,13 +42,13 @@ lambdaY          1       1.01
 Potential scale reduction factors:
 
         Point est. Upper C.I.
-lambdaR        1.1       1.27
+lambdaR       1.03       1.09
 
 
 [[7]]
 Potential scale reduction factors:
 
   Point est. Upper C.I.
-k       1.01       1.03
+k          1          1
 
 
