@@ -1,29 +1,66 @@
 [[1]]
-<simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
+Potential scale reduction factors:
+
+   Point est. Upper C.I.
+R0          1       1.01
+
 
 [[2]]
-<simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
+Potential scale reduction factors:
+
+      Point est. Upper C.I.
+gamma       1.02       1.06
+
 
 [[3]]
-<simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
+Potential scale reduction factors:
+
+     Point est. Upper C.I.
+beta       1.01       1.03
+
 
 [[4]]
-<simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])[, (1:3) * (T_prime +     1)]): could not find function "gelman.diag">
+Potential scale reduction factors:
+
+            Point est. Upper C.I.
+theta[31,1]       1.01       1.03
+theta[31,2]       1.00       1.00
+theta[31,3]       1.04       1.12
+
+Multivariate psrf
+
+1.04
 
 [[5]]
 [[5]][[1]]
 [1] "theta_Q: "
 
 [[5]][[2]]
-<simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])[, (T_prime + 1)]): could not find function "gelman.diag">
+Potential scale reduction factors:
+
+     Point est. Upper C.I.
+[1,]          1          1
+
 
 
 [[6]]
-<simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
+Potential scale reduction factors:
+
+        Point est. Upper C.I.
+lambdaY       1.01       1.02
+
 
 [[7]]
-<simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
+Potential scale reduction factors:
+
+        Point est. Upper C.I.
+lambdaR          1       1.01
+
 
 [[8]]
-<simpleError in gelman.diag(as.mcmc.list(jags_sample[[name]])): could not find function "gelman.diag">
+Potential scale reduction factors:
+
+  Point est. Upper C.I.
+k          1       1.01
+
 

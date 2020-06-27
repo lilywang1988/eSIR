@@ -205,7 +205,7 @@ tvt.eSIR <- function (Y,R, pi0=NULL,change_time=NULL,exponential=FALSE,lambda0=N
   if(save_files) {
     png(paste0(file_add,casename,"theta_p.png"), width = 700, height = 900)
     plot(as.mcmc.list(jags_sample$theta)[,(1:3)*(T_prime+1)])
-    # posterior true porbabilities
+    # posterior true probabilities
     dev.off()
 
     png(paste0(file_add,casename,"R0_p.png"), width = 700, height = 350)
