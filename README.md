@@ -425,10 +425,11 @@ Yang](kangpiny@umich.edu) for helping us collect the recovery data from
 the web page.
 
 ## References
-
-1.  Song, P. X., Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., … &
-    Eisenberg, M. (2020). An epidemiological forecast model and software
-    assessing interventions on COVID-19 epidemic in China. medRxiv.
+1.  Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., … &
+    Eisenberg, M. Song, P. X., (2020). An epidemiological forecast model and software assessing 
+    interventions on COVID-19 epidemic in China. Journal of Data Science. 
+    DOI: 10.6339/JDS.202007_18(3).0003
+    [paper link](http://www.jds-online.com/file_download/742/3-jds-wang2020epidemiological.pdf)
 
 2.  Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del
     Valle, S. Y. (2017). Forecasting seasonal influenza with a
