@@ -123,7 +123,9 @@ its GitHub version udpated daily, which is also quite useful.
 
 In Ubuntu (18.04) Linux, please first update R to a version \>= 3.6. You
 may need to install jags package as well by `sudo apt-get install jags`
-before install devtools by `install.packages("devtools")`.
+before install devtools by `install.packages("devtools")`. [This](https://stackoverflow.com/questions/31114991/installation-of-package-devtools-had-non-zero-exit-status-on-ubuntu) 
+stackoverflow question perfectly solved the issue I encountered when 
+installing `devtools` on ubuntu. 
 
 ## Model 1 using `tvt.eSIR()`: a SIR model with a time-varying transmission rate
 
