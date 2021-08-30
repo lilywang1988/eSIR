@@ -158,4 +158,27 @@ res.nopi <- tvt.eSIR(Y, R,
 res.nopi$plot_infection
 # res.nopi$plot_removed
 }
+
+change_time <- c("01/18/2020")
+pi0<- c(1.0, 0.9)
+NI_complete2 <- c(41, 45, 62, 131)
+RI_complete2 <- c(1, 1, 7, 10)
+N2 <- 1E3
+res1 <- tvt.eSIR(
+  RI_complete2 / N2,
+  (NI_complete2 - RI_complete2) / N2,
+  begin_str = "01/10/2020",
+  T_fin =10,
+  pi0 = pi0,
+  change_time = change_time,
+  dic = FALSE,
+  casename = "Hubei_step",
+  save_files = FALSE,
+  save_mcmc = FALSE,
+  save_plot_data = FALSE,
+  M = 50,
+  nburnin = 1
+)
+closeAllConnections()
+
 }

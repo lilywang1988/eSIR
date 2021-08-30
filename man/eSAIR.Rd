@@ -128,4 +128,27 @@ res.antibody <- eSAIR(Y, R,
 )
 res.antibody$plot_infection
 }
+
+change_time <- c("01/16/2020")
+alpha0 <- c(0.2)
+NI_complete2 <- c(41, 45)
+RI_complete2 <- c(1, 1)
+N2 <- 1E3
+res3 <- eSAIR(
+  RI_complete2 / N2,
+  NI_complete2 / N2,
+  begin_str = "01/13/2020",
+  T_fin = 4,
+  alpha0 = alpha0,
+  change_time = change_time,
+  dic = FALSE,
+  casename = "Hubei_q",
+  save_files = FALSE,
+  save_mcmc = FALSE,
+  save_plot_data = FALSE,
+  M = 50,
+  nburnin = 1
+)
+closeAllConnections()
+
 }
