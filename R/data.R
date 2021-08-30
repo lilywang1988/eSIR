@@ -11,7 +11,6 @@
 #' \item{Province_State}{ State as a character string}
 #' \item{N}{ Population of the state}
 #' }
-#' @example data(USA_state_N)
 NULL
 
 #' Confirmed COVID-19 cases
@@ -26,7 +25,6 @@ NULL
 #' \item{Province_State}{ name of the US state}
 #' \item{date ...}{ a column for each date}
 #' }
-#' @example data(confirmed)
 NULL
 
 #' Confirmed COVID-19 deaths
@@ -41,7 +39,6 @@ NULL
 #' \item{Province_State}{ name of the US state}
 #' \item{date ...}{ a column for each date}
 #' }
-#' @example data(death)
 NULL
 
 
@@ -57,5 +54,4 @@ NULL
 #' \item{Province_State}{ name of the US state}
 #' \item{date ...}{ a column for each date}
 #' }
-#' @example data(recovered)
 NULL
