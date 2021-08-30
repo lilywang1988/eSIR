@@ -108,28 +108,36 @@ In this function we allow it to characterize time-varying proportions of suscept
 }
 \examples{
 \dontrun{
-NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
-             1052,1423,2714,3554,4903,5806,7153,9074,11177,
-             13522,16678,19665,22112,24953,27100,29631,31728,33366)
-RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,
-             252,345,417,561,650,811,1017,1261,1485,1917,2260,
-             2725,3284,3754)
-N=58.5e6
-R <- RI_complete/N
-Y <- NI_complete/N- R #Jan13->Feb 11
+NI_complete <- c(
+  41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
+  1052, 1423, 2714, 3554, 4903, 5806, 7153, 9074, 11177,
+  13522, 16678, 19665, 22112, 24953, 27100, 29631, 31728, 33366
+)
+RI_complete <- c(
+  1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94, 121, 152, 213,
+  252, 345, 417, 561, 650, 811, 1017, 1261, 1485, 1917, 2260,
+  2725, 3284, 3754
+)
+N <- 58.5e6
+R <- RI_complete / N
+Y <- NI_complete / N - R # Jan13->Feb 11
 
-change_time <- c("01/23/2020","02/04/2020","02/08/2020")
-phi0 <- c(0.1,0.4,0.4)
-res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-                 phi0=phi0,change_time=change_time,
-                casename="Hubei_q",save_files = T,save_mcmc = F,
-                 M=5e2,nburnin = 2e2)
+change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
+phi0 <- c(0.1, 0.4, 0.4)
+res.q <- qh.eSIR(Y, R,
+  begin_str = "01/13/2020", death_in_R = 0.4,
+  phi0 = phi0, change_time = change_time,
+  casename = "Hubei_q", save_files = T, save_mcmc = F,
+  M = 5e2, nburnin = 2e2
+)
 res.q$plot_infection
-#res.q$plot_removed
+# res.q$plot_removed
 
-res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-                    T_fin=200,casename="Hubei_noq",
-                    M=5e2,nburnin = 2e2)
+res.noq <- qh.eSIR(Y, R,
+  begin_str = "01/13/2020", death_in_R = 0.4,
+  T_fin = 200, casename = "Hubei_noq",
+  M = 5e2, nburnin = 2e2
+)
 res.noq$plot_infection
 }
 }
