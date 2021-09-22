@@ -6,7 +6,7 @@ Authors@R: c(
     person("Lili", "Wang", email = "lilywang@umich.edu", role = c("aut")),
     person("Song Lab", role = "aut", comment = "<http://www.umich.edu/~songlab/>"),
     person("Paul", "Egeler", email = "paul.egeler@spectrumhealth.org", role = "ctb", comment = "Spectrum Health Office of Research and Education"),
-    person("Michael", "Kleinsasser", email = "mkleinsa@umich.edu", role = c("cre"))
+    person("Michael", "Kleinsasser", email = "biostat-cran-manager@umich.edu", role = c("cre"))
     )
 Description: An implementation of extended state-space SIR models developed by
     Song Lab at UM school of Public Health. There are several functions available
