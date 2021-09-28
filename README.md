@@ -1,12 +1,12 @@
 R package eSIR: extended state-space SIR epidemiological models
 ================
-[Song Lab](http://www.umich.edu/~songlab/)
-2020-06-05
+[Song Lab](http://websites.umich.edu/~songlab/)
+2021-09-28
 
 **Notice**:
 
-1.  Since version 0.3.1, we added the US data. The most recent update was on Sep 3rd. We used data
-    summarized from [JHU CSSE
+1.  Since version 0.3.1, we added the US data. The most recent update
+    was on June 25th. We used data summarized from [JHU CSSE
     GitHub](https://github.com/CSSEGISandData/COVID-19) and
     [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states
     have complete recovery data. We will update the data every Thursday
@@ -22,17 +22,15 @@ data("USA_state_N") #population in each state
 2.  Since version 0.3.3, we added Gelman-Rubin statistic for convergence
     check using
     [gelman.diag](https://www.rdocumentation.org/packages/coda/versions/0.19-3/topics/gelman.diag)
-    from
-    [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
-    Their values substantially larger than 1 imply a failure of
-    convergence of the MCMC chains.
-    Save it in a `.txt` file by setting `save_files = TRUE` or retrieve it via following R code (assuming that `res` is object returned from `tvt.eSIR` or `qh.eSIR`):
+    from [`rjags`](https://CRAN.R-project.org/package=rjags). Their
+    values substantially larger than 1 imply a failure of convergence of
+    the MCMC chains. Save it in a `.txt` file by setting
+    `save_files = TRUE` or retrieve it via following R code (assuming
+    that `res` is object returned from `tvt.eSIR` or `qh.eSIR`):
 
-```r
+``` r
 res$gelman_diag_list
 ```
-
-<!-- end list -->
 
 Chinese
 version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
@@ -66,8 +64,7 @@ relatively short chains.** According to our experience, this setting
 of the trend and turning points estimation, the estimation of parameters
 and their credible intervals might not be accurate. Hence, if possible,
 we would recommend using `M=5e5` and `nburnin=2e5` to obtain stable MCMC
-chains via
-[`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
+chains via [`rjags`](https://CRAN.R-project.org/package=rjags).
 
 ![Standard SIR](man/figures/model0.png)
 
@@ -82,7 +79,7 @@ chains via
 ## Preparation
 
 [Download packages
-directly](https://github.com/lilywang1988/eSIR/blob/master/install_pkg)
+directly](https://github.com/lilywang1988/eSIR/tree/master/install_pkg)
 
 To install and use this R package from Github, you will need to first
 install the R package `devtools`. Please uncomment the codes to install
@@ -123,17 +120,24 @@ its GitHub version udpated daily, which is also quite useful.
 
 In Ubuntu (18.04) Linux, please first update R to a version \>= 3.6. You
 may need to install jags package as well by `sudo apt-get install jags`
-before install devtools by `install.packages("devtools")`. [This](https://stackoverflow.com/questions/31114991/installation-of-package-devtools-had-non-zero-exit-status-on-ubuntu) 
-stackoverflow question perfectly solved the issue I encountered when 
-installing `devtools` on ubuntu. You may follow this [gist](https://gist.github.com/lilywang1988/170fbf1bbea1a6c23bc43a0dc871a0ca) to resolve other possible issues when installing `eSIR` on the recent version of Ubuntu. 
+before install devtools by `install.packages("devtools")`.
+[This](https://stackoverflow.com/questions/31114991/installation-of-package-devtools-had-non-zero-exit-status-on-ubuntu)
+stackoverflow question perfectly solved the issue I encountered when
+installing `devtools` on ubuntu. You may follow this
+[gist](https://gist.github.com/lilywang1988/170fbf1bbea1a6c23bc43a0dc871a0ca)
+to resolve other possible issues when installing `eSIR` on the recent
+version of Ubuntu.
 
 ## Model 1 using `tvt.eSIR()`: a SIR model with a time-varying transmission rate
 
-By introducing a time-dependent \[\pi(t)\in [0,1]\] function that
-modifies the transmission rate \[\beta\], we can depict a series of
-time-varying changes caused by either external variations like
-government policies, protective measures and environment changes, or
-internal variations like mutations and evolutions of the pathogen.
+By introducing a time-dependent
+*π*(*t*) ∈ \[0,1\]
+function that modifies the transmission rate
+*β*
+, we can depict a series of time-varying changes caused by either
+external variations like government policies, protective measures and
+environment changes, or internal variations like mutations and
+evolutions of the pathogen.
 
 The function can be either stepwise or exponential:
 
@@ -149,7 +153,7 @@ library(eSIR)
 NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
                    1052, 1423, 2714, 3554, 4903, 5806, 7153, 9074, 11177,
                 13522,16678,19665,22112,24953,27100,29631,31728,33366)
-  RI_complete <- c(1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94, 
+RI_complete <- c(1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94, 
                    121, 152, 213, 252, 345, 417, 561, 650, 811, 
                    1017, 1261, 1485, 1917, 2260, 2725,3284,3754)
   N <- 58.5e6
@@ -193,15 +197,15 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
 
 ``` r
   res.step$dic_val
-#> Mean deviance:  -1257 
-#> penalty 37.67 
+#> Mean deviance:  -1259 
+#> penalty 39.26 
 #> Penalized deviance: -1220
   #res.step$gelman_diag_list
   ### continuous exponential function of pi(t)
   res.exp <- tvt.eSIR(Y, R, begin_str="01/13/2020", death_in_R = 0.4,
-                      T_fin = 200, exponential = TRUE, dic=F, lambda0 = 0.05,
-                     casename = "Hubei_exp", save_files = F, save_mcmc = F,
-                     save_plot_data = F, M = 5e3,nburnin = 2e3)
+                      T_fin = 200, exponential = TRUE, dic=FALSE, lambda0 = 0.05,
+                     casename = "Hubei_exp", save_files = FALSE, save_mcmc = FALSE,
+                     save_plot_data = FALSE, M = 5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for exponential-function pi(t)
 #> Compiling model graph
@@ -263,9 +267,9 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
 
 By introducing a vector of `phi` and its corresponding changing points
 `change_time`, we introduced a quarantine process that is dependent on a
-dirac delta function \(\phi_t\in [0,1]\). In other words, only at time
-points defined by `change_time`, we have certain porportions of the
-at-risk (susceptible) subjects moved to the quarantine stage. The
+dirac delta function *ϕ*<sub>*t*</sub> ∈ \[0,1\]. In other words, only
+at time points defined by `change_time`, we have certain porportions of
+the at-risk (susceptible) subjects moved to the quarantine stage. The
 difference of this model than the previous time-varying transmission one
 is that we do not allow the tranmission rate to change, but only let the
 proportion of susceptible subjects decrease. ![Standard
@@ -311,7 +315,6 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444,
 ![](man/figures/README-model2-1.png)<!-- -->
 
 ``` r
-
   #res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
   #                    T_fin=200,casename="Hubei_noq",
   #                    M=5e3,nburnin = 2e3)
@@ -333,17 +336,17 @@ dynamics, we then further extend the previous eSIR model to an eSAIR
 model by adding an antibody (A) compartment. As is shown in the bottom
 thread of the following figure, this A compartment accounts for the
 probability of being self-immunized with antibodies to COVID-19, denoted
-by \(\theta_t^A\); see equation as follows too, where \(\alpha(t)\) is a
-function describing the proportion of people moving from the susceptible
-compartment to the antibody compartment over time. Compartment A helps
-circumvent limitations of data collection, especially embracing
-individuals who were infected but self-cured at home with no
-confirmation by viral RT-PCR diagnostic tests. This new eSAIR model
-characterizes the underlying population-level dynamics of the pandemic.
-The following system of ordinary differential equations defines
-collectively the continuous-time dynamics for the eSAIR model, which
-governs the law of movements among four compartments of Susceptible,
-Self-immunized, Infected and Removed.
+by *θ*<sub>*t*</sub><sup>*A*</sup>; see equation as follows too, where
+*α*(*t*) is a function describing the proportion of people moving from
+the susceptible compartment to the antibody compartment over time.
+Compartment A helps circumvent limitations of data collection,
+especially embracing individuals who were infected but self-cured at
+home with no confirmation by viral RT-PCR diagnostic tests. This new
+eSAIR model characterizes the underlying population-level dynamics of
+the pandemic. The following system of ordinary differential equations
+defines collectively the continuous-time dynamics for the eSAIR model,
+which governs the law of movements among four compartments of
+Susceptible, Self-immunized, Infected and Removed.
 
 ![SAIR](man/figures/eSAIR_compartment.png)
 
@@ -396,6 +399,8 @@ NI_complete <- c( 1, 2, 11, 23, 31, 76, 106, 142, 150, 220, 327,
 #>    Total graph size: 5123
 #> 
 #> Initializing model
+#> 
+#> NOTE: Stopping adaptation
   res.antibody$plot_infection
 ```
 
@@ -427,11 +432,10 @@ Yang](kangpiny@umich.edu) for helping us collect the recovery data from
 the web page.
 
 ## References
-1.  Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., … &
-    Eisenberg, M. Song, P. X., (2020). An epidemiological forecast model and software assessing 
-    interventions on COVID-19 epidemic in China. Journal of Data Science. 
-    DOI: 10.6339/JDS.202007_18(3).0003
-    [paper link](http://www.jds-online.com/file_download/742/3-jds-wang2020epidemiological.pdf)
+
+1.  Song, P. X., Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., … &
+    Eisenberg, M. (2020). An epidemiological forecast model and software
+    assessing interventions on COVID-19 epidemic in China. medRxiv.
 
 2.  Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del
     Valle, S. Y. (2017). Forecasting seasonal influenza with a
@@ -440,16 +444,3 @@ the web page.
 3.  Gelman, A., & Rubin, D. B. (1992). Inference from iterative
     simulation using multiple sequences. Statistical science, 7(4),
     457-472.
-
------------
-Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
-
-This work is licensed under a [Creative Commons Attribution 4.0 International
-License][cc-by].
-
-[![CC BY 4.0][cc-by-image]][cc-by]
-
-[cc-by]: http://creativecommons.org/licenses/by/4.0/
-[cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
-[cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
-
