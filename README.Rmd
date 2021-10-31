@@ -16,7 +16,7 @@ knitr::opts_chunk$set(collapse = TRUE,
 
 **Notice**: 
 
-1. We add new features in `tvt.eSIR()`. Now the new function `tvt.eSIR()` adds `time_unit` which will allow users to change their time unit from 1 day to any arbitrary numbers of days. 
+1. We add new features in `tvt.eSIR()`. Now the new function `tvt.eSIR2()` adds `time_unit` which will allow users to change their time unit from 1 day to any arbitrary numbers of days. 
 
 
 2. Since version 0.3.1, we added the US data. The most recent update was on June 25th, 2021. We used data summarized from [JHU CSSE GitHub](https://github.com/CSSEGISandData/COVID-19) and [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states have complete recovery data. We will update the data every Thursday or Friday evening. Using following codes for the data:

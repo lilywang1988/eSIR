@@ -6,7 +6,7 @@ R package eSIR: extended state-space SIR epidemiological models
 **Notice**:
 
 1.  We add new features in `tvt.eSIR()`. Now the new function
-    `tvt.eSIR()` adds `time_unit` which will allow users to change their
+    `tvt.eSIR2()` adds `time_unit` which will allow users to change their
     time unit from 1 day to any arbitrary numbers of days.
 
 2.  Since version 0.3.1, we added the US data. The most recent update
