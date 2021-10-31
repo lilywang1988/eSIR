@@ -579,17 +579,11 @@ the web page.
 
 ## References
 
-1.  Song, P. X., Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., … &
-    Eisenberg, M. (2020). An epidemiological forecast model and software
-    assessing interventions on COVID-19 epidemic in China. medRxiv.
+1. Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., Tang, L., ... & Song, P. X. (2020). An epidemiological forecast model and software assessing interventions on the COVID-19 epidemic in China. Journal of Data Science, 18(3), 409-432. [link](https://www.airitilibrary.com/Publication/alDetailedMesh?DocID=16838602-202007-202008240002-202008240002-409-432&sourceBrowseType=0)
 
-2.  Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del
-    Valle, S. Y. (2017). Forecasting seasonal influenza with a
-    state-space SIR model. The annals of applied statistics, 11(1), 202.
+2. Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del Valle, S. Y. (2017). Forecasting seasonal influenza with a state-space SIR model. The annals of applied statistics, 11(1), 202.
 
-3.  Gelman, A., & Rubin, D. B. (1992). Inference from iterative
-    simulation using multiple sequences. Statistical science, 7(4),
-    457-472.
+3. Gelman, A., & Rubin, D. B. (1992). Inference from iterative simulation using multiple sequences. Statistical science, 7(4), 457-472.
 
 -----
 
