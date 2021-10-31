@@ -105,23 +105,50 @@ In this function we allow it to characterize time-varying immunization among a s
 }
 \examples{
 \dontrun{
-NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
-                1052,1423,2714,3554,4903,5806,7153,9074,11177,
-                13522,16678,19665,22112,24953,27100,29631,31728,33366)
-                RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,
-                121,152,213,252,345,417,561,650,811,1017,
-                1261,1485,1917,2260,2725,3284,3754)
-                N=58.5e6
-                R <- RI_complete/N
-                Y <- NI_complete/N- R #Jan13->Feb 11
-                change_time <- c("02/08/2020")
-                alpha0 <- c(0.2) # 20\% of the susceptible population were found immunized
-           res.antibody <- eSAIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-           alpha0=alpha0,change_time=change_time,
-           casename="Hubei_antibody",save_files = T,save_mcmc = F,
-           M=5e2,nburnin = 2e2)
-           res.antibody$plot_infection
-
-
+NI_complete <- c(
+  41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
+  1052, 1423, 2714, 3554, 4903, 5806, 7153, 9074, 11177,
+  13522, 16678, 19665, 22112, 24953, 27100, 29631, 31728, 33366
+)
+RI_complete <- c(
+  1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94,
+  121, 152, 213, 252, 345, 417, 561, 650, 811, 1017,
+  1261, 1485, 1917, 2260, 2725, 3284, 3754
+)
+N <- 58.5e6
+R <- RI_complete / N
+Y <- NI_complete / N - R # Jan13->Feb 11
+change_time <- c("02/08/2020")
+alpha0 <- c(0.2) # 20\% of the susceptible population were found immunized
+res.antibody <- eSAIR(Y, R,
+  begin_str = "01/13/2020", death_in_R = 0.4,
+  alpha0 = alpha0, change_time = change_time,
+  casename = "Hubei_antibody", save_files = T, save_mcmc = F,
+  M = 5e2, nburnin = 2e2
+)
+res.antibody$plot_infection
 }
+
+change_time <- c("01/16/2020")
+alpha0 <- c(0.2)
+NI_complete2 <- c(41, 45)
+RI_complete2 <- c(1, 1)
+N2 <- 1E3
+res3 <- eSAIR(
+  RI_complete2 / N2,
+  NI_complete2 / N2,
+  begin_str = "01/13/2020",
+  T_fin = 4,
+  alpha0 = alpha0,
+  change_time = change_time,
+  dic = FALSE,
+  casename = "Hubei_q",
+  save_files = FALSE,
+  save_mcmc = FALSE,
+  save_plot_data = FALSE,
+  M = 50,
+  nburnin = 1
+)
+closeAllConnections()
+
 }

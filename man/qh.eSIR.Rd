@@ -87,8 +87,8 @@ qh.eSIR(
 \item{casename}{the predefined \code{casename}.}
 \item{incidence_mean}{mean cumulative incidence, the mean prevalence of cumulative confirmed cases at the end of the study.}
 \item{incidence_ci}{2.5\%, 50\%, and 97.5\% quantiles of the incidences.}
-\item{out_table}{summary tables including the posterior mean of the prevalance processes of the 3 states compartments (\eqn{\theta_t^S,\theta_t^I,\theta_t^R,\theta_t^H}) at last date of data collected ((\eqn{t^\prime}) decided by the lengths of your input data \code{Y} and \code{R}), and their respective credible inctervals (ci); the respective means and ci's of the reporduction number (R0), removed rate (\eqn{\gamma}), transmission rate  (\eqn{\beta}).}
-\item{plot_infection}{plot of summarizing and forecasting for the infection compartment, in which the vertial blue line denotes the last date of data collected (\eqn{t^\prime}), the vertial darkgray line denotes the deacceleration point (first turning point) that the posterior mean first-derivative of infection prevalence \eqn{\dot{\theta}_t^I} achieves the  maximum, the vertical purple line denotes the second turning point that the posterior mean first-derivative infection proportion \eqn{\dot{\theta}_t^I} equals zero, the darkgray line denotes the posterior mean of the infection prevalence \eqn{\theta_t^I} and the red line denotes its posterior median. }
+\item{out_table}{summary tables including the posterior mean of the prevalence processes of the 3 states compartments (\eqn{\theta_t^S,\theta_t^I,\theta_t^R,\theta_t^H}) at last date of data collected ((\eqn{t^\prime}) decided by the lengths of your input data \code{Y} and \code{R}), and their respective credible intervals (ci); the respective means and ci's of the reproduction number (R0), removed rate (\eqn{\gamma}), transmission rate  (\eqn{\beta}).}
+\item{plot_infection}{plot of summarizing and forecasting for the infection compartment, in which the vertical blue line denotes the last date of data collected (\eqn{t^\prime}), the vertical darkgray line denotes the deacceleration point (first turning point) that the posterior mean first-derivative of infection prevalence \eqn{\dot{\theta}_t^I} achieves the  maximum, the vertical purple line denotes the second turning point that the posterior mean first-derivative infection proportion \eqn{\dot{\theta}_t^I} equals zero, the darkgray line denotes the posterior mean of the infection prevalence \eqn{\theta_t^I} and the red line denotes its posterior median. }
 \item{plot_removed}{plot of summarizing and forecasting for the removed compartment with lines similar to those in the \code{plot_infection}. The vertical lines are identical, but the horizontal mean and median correspond to the posterior mean and median of the removed process \eqn{\theta_t^R}. An additional line indicates the estimated death prevalence from the input \code{death_in_R}.}
 \item{spaghetti_plot}{20 randomly selected MCMC draws of the first-order derivative of the posterior prevalence of infection, namely \eqn{\dot{\theta}_t^I}. The black curve is the posterior mean of the derivative, and the vertical lines mark times of turning points corresponding respectively to those shown in \code{plot_infection} and \code{plot_removed}. Moreover, the 95\% credible intervals of these turning points are also highlighted by semi-transparent rectangles. }
 \item{first_tp_mean}{the date t at which \eqn{\ddot{\theta}_t^I=0}, calculated as the average of the time points with maximum posterior first-order derivatives \eqn{\dot{\theta}_t^I}; this value may be slightly different from the one labeled by the "darkgreen" lines in the two plots \code{plot_infection} and \code{plot_removed}, which indicate the stationary point such that the first-order derivative of the averaged posterior of \eqn{\theta_t^I} reaches its maximum.}
@@ -108,28 +108,59 @@ In this function we allow it to characterize time-varying proportions of suscept
 }
 \examples{
 \dontrun{
-NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
-             1052,1423,2714,3554,4903,5806,7153,9074,11177,
-             13522,16678,19665,22112,24953,27100,29631,31728,33366)
-RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,
-             252,345,417,561,650,811,1017,1261,1485,1917,2260,
-             2725,3284,3754)
-N=58.5e6
-R <- RI_complete/N
-Y <- NI_complete/N- R #Jan13->Feb 11
+NI_complete <- c(
+  41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
+  1052, 1423, 2714, 3554, 4903, 5806, 7153, 9074, 11177,
+  13522, 16678, 19665, 22112, 24953, 27100, 29631, 31728, 33366
+)
+RI_complete <- c(
+  1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94, 121, 152, 213,
+  252, 345, 417, 561, 650, 811, 1017, 1261, 1485, 1917, 2260,
+  2725, 3284, 3754
+)
+N <- 58.5e6
+R <- RI_complete / N
+Y <- NI_complete / N - R # Jan13->Feb 11
 
-change_time <- c("01/23/2020","02/04/2020","02/08/2020")
-phi0 <- c(0.1,0.4,0.4)
-res.q <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-                 phi0=phi0,change_time=change_time,
-                casename="Hubei_q",save_files = T,save_mcmc = F,
-                 M=5e2,nburnin = 2e2)
+change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
+phi0 <- c(0.1, 0.4, 0.4)
+res.q <- qh.eSIR(Y, R,
+  begin_str = "01/13/2020", death_in_R = 0.4,
+  phi0 = phi0, change_time = change_time,
+  casename = "Hubei_q", save_files = T, save_mcmc = F,
+  M = 5e2, nburnin = 2e2
+)
 res.q$plot_infection
-#res.q$plot_removed
+# res.q$plot_removed
 
-res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-                    T_fin=200,casename="Hubei_noq",
-                    M=5e2,nburnin = 2e2)
+res.noq <- qh.eSIR(Y, R,
+  begin_str = "01/13/2020", death_in_R = 0.4,
+  T_fin = 200, casename = "Hubei_noq",
+  M = 5e2, nburnin = 2e2
+)
 res.noq$plot_infection
 }
+
+change_time <- c("01/16/2020")
+phi0 <- c(0.1)
+NI_complete2 <- c(41, 45)
+RI_complete2 <- c(1, 1)
+N2 <- 1E3
+res2 <- qh.eSIR(
+  RI_complete2 / N2,
+  NI_complete2 / N2,
+  begin_str = "01/13/2020",
+  T_fin = 4,
+  phi0 = phi0,
+  change_time = change_time,
+  dic = FALSE,
+  casename = "Hubei_q",
+  save_files = FALSE,
+  save_mcmc = FALSE,
+  save_plot_data = FALSE,
+  M = 50,
+  nburnin = 1
+)
+closeAllConnections()
+
 }

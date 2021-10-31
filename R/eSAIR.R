@@ -107,6 +107,11 @@ eSAIR <- function(Y, R, alpha0 = NULL, change_time = NULL, begin_str = "01/13/20
 
   T_prime <- length(Y)
   if (T_prime != length(R)) stop("Y and R should be matched.")
+  if(T_prime >= T_fin) {
+    warning("T_fin must be larger than input time series Y and R,",
+    "we will automatically add 100 time units to it: T_fin = length(Y) + 10.")
+    T_fin = T_prime + 10
+  }
   Y <- pmax(Y, eps)
   R <- pmax(R, eps)
   if (add_death == T && death_in_R == 0.02) {

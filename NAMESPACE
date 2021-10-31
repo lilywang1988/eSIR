@@ -3,6 +3,7 @@
 export(eSAIR)
 export(qh.eSIR)
 export(tvt.eSIR)
+export(tvt.eSIR2)
 import(chron)
 import(coda)
 import(data.table)
