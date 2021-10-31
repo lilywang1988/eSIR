@@ -1,16 +1,22 @@
 R package eSIR: extended state-space SIR epidemiological models
 ================
 [Song Lab](http://www.umich.edu/~songlab/)
-2020-06-05
+2021-10-31
 
 **Notice**:
 
-1.  Since version 0.3.1, we added the US data. The most recent update was on Sep 3rd. We used data
-    summarized from [JHU CSSE
+1.  We add new features in `tvt.eSIR()`. Now the new function
+    `tvt.eSIR()` adds `time_unit` which will allow users to change their
+    time unit from 1 day to any arbitrary numbers of days.
+
+2.  Since version 0.3.1, we added the US data. The most recent update
+    was on June 25th, 2021. We used data summarized from [JHU CSSE
     GitHub](https://github.com/CSSEGISandData/COVID-19) and
     [1Point3Acres](https://coronavirus.1point3acres.com). Only 41 states
     have complete recovery data. We will update the data every Thursday
     or Friday evening. Using following codes for the data:
+
+<!-- end list -->
 
 ``` r
 data("confirmed") # From JHU CSSE
@@ -19,20 +25,21 @@ data("recovered") # partly from 1Point3Acres
 data("USA_state_N") #population in each state
 ```
 
-2.  Since version 0.3.3, we added Gelman-Rubin statistic for convergence
+3.  Since version 0.3.3, we added Gelman-Rubin statistic for convergence
     check using
     [gelman.diag](https://www.rdocumentation.org/packages/coda/versions/0.19-3/topics/gelman.diag)
     from
     [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
     Their values substantially larger than 1 imply a failure of
-    convergence of the MCMC chains.
-    Save it in a `.txt` file by setting `save_files = TRUE` or retrieve it via following R code (assuming that `res` is object returned from `tvt.eSIR` or `qh.eSIR`):
-
-```r
-res$gelman_diag_list
-```
+    convergence of the MCMC chains. Save it in a `.txt` file by setting
+    `save_files = TRUE` or retrieve it via following R code (assuming
+    that `res` is object returned from `tvt.eSIR` or `qh.eSIR`):
 
 <!-- end list -->
+
+``` r
+res$gelman_diag_list
+```
 
 Chinese
 version:[中文](https://github.com/lilywang1988/eSIR/blob/master/README_cn.md)
@@ -123,9 +130,13 @@ its GitHub version udpated daily, which is also quite useful.
 
 In Ubuntu (18.04) Linux, please first update R to a version \>= 3.6. You
 may need to install jags package as well by `sudo apt-get install jags`
-before install devtools by `install.packages("devtools")`. [This](https://stackoverflow.com/questions/31114991/installation-of-package-devtools-had-non-zero-exit-status-on-ubuntu) 
-stackoverflow question perfectly solved the issue I encountered when 
-installing `devtools` on ubuntu. You may follow this [gist](https://gist.github.com/lilywang1988/170fbf1bbea1a6c23bc43a0dc871a0ca) to resolve other possible issues when installing `eSIR` on the recent version of Ubuntu. 
+before install devtools by `install.packages("devtools")`.
+[This](https://stackoverflow.com/questions/31114991/installation-of-package-devtools-had-non-zero-exit-status-on-ubuntu)
+stackoverflow question perfectly solved the issue I encountered when
+installing `devtools` on ubuntu. You may follow this
+[gist](https://gist.github.com/lilywang1988/170fbf1bbea1a6c23bc43a0dc871a0ca)
+to resolve other possible issues when installing `eSIR` on the recent
+version of Ubuntu.
 
 ## Model 1 using `tvt.eSIR()`: a SIR model with a time-varying transmission rate
 
@@ -145,23 +156,39 @@ The function can be either stepwise or exponential:
 set.seed(20192020)
 library(eSIR)
 # Hubei province data Jan13 -> Feb 11
-# cumulative number of infected
-NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
-                   1052, 1423, 2714, 3554, 4903, 5806, 7153, 9074, 11177,
-                13522,16678,19665,22112,24953,27100,29631,31728,33366)
-  RI_complete <- c(1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94, 
-                   121, 152, 213, 252, 345, 417, 561, 650, 811, 
-                   1017, 1261, 1485, 1917, 2260, 2725,3284,3754)
-  N <- 58.5e6
-  R <- RI_complete / N
-  Y <- NI_complete / N - R #Jan13->Feb 11
-  ### Step function of pi(t)
-  change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
-  pi0<- c(1.0, 0.9, 0.5, 0.1)
-  res.step <- tvt.eSIR(Y, R, begin_str = "01/13/2020", T_fin = 200,
-            pi0 = pi0, change_time = change_time, dic = T, 
-            casename = "Hubei_step", save_files = T, save_mcmc=F,
-            save_plot_data = F, M = 5e3, nburnin = 2e3)
+# Cumulative number of infected cases
+NI_complete <- c(
+  41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
+  1052, 1423, 2714, 3554, 4903, 5806, 7153, 9074, 11177,
+  13522,16678,19665,22112,24953,27100,29631,31728,33366
+  )
+# Cumulative number of removed cases
+RI_complete <- c(
+  1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94,
+  121, 152, 213, 252, 345, 417, 561, 650, 811, 
+  1017, 1261, 1485, 1917, 2260, 2725, 3284, 3754
+  )
+N <- 58.5e6
+R <- RI_complete / N
+Y <- NI_complete / N - R #Jan13->Feb 11
+
+### Step function of pi(t)
+change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
+pi0 <- c(1.0, 0.9, 0.5, 0.1)
+res.step <- tvt.eSIR(Y, 
+                     R, 
+                     begin_str = "01/13/2020",
+                     T_fin = 200,
+                     pi0 = pi0, 
+                     change_time = change_time, 
+                     dic = FALSE, 
+                     casename = "Hubei_step", 
+                     save_files = FALSE, 
+                     save_mcmc = FALSE,
+                     save_plot_data = TRUE, # can plot them
+                     M = 5e3, 
+                     nburnin = 2e3 # additional to M
+                     )
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for step-function pi(t)
 #> Compiling model graph
@@ -173,35 +200,100 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
 #>    Total graph size: 1875
 #> 
 #> Initializing model
-  
-  res.step$plot_infection
+
+res.step$plot_infection
 ```
 
 ![](man/figures/README-model1-1.png)<!-- -->
 
 ``` r
-  res.step$plot_removed
+res.step$plot_removed
 ```
 
 ![](man/figures/README-model1-2.png)<!-- -->
 
 ``` r
-  res.step$spaghetti_plot
+res.step$spaghetti_plot
 ```
 
 ![](man/figures/README-model1-3.png)<!-- -->
 
 ``` r
-  res.step$dic_val
-#> Mean deviance:  -1257 
-#> penalty 37.67 
-#> Penalized deviance: -1220
-  #res.step$gelman_diag_list
-  ### continuous exponential function of pi(t)
-  res.exp <- tvt.eSIR(Y, R, begin_str="01/13/2020", death_in_R = 0.4,
-                      T_fin = 200, exponential = TRUE, dic=F, lambda0 = 0.05,
-                     casename = "Hubei_exp", save_files = F, save_mcmc = F,
-                     save_plot_data = F, M = 5e3,nburnin = 2e3)
+
+
+# If we change the time unit to 5 days
+# Cumulative number of infected cases
+NI_complete2 <- NI_complete[seq(1, length(NI_complete), 5)]
+# Cumulative number of removed cases
+RI_complete2 <- RI_complete[seq(1, length(RI_complete), 5)]
+N2 <- 58.5e6
+R2 <- RI_complete2 / N2
+Y2 <- NI_complete2 / N2 - R2 #Jan13->Feb 11
+change_time2 <- c("01/23/2020", "02/04/2020", "02/08/2020")
+pi02 <- c(1.0, 0.9, 0.5, 0.1)
+res.step2 <- tvt.eSIR2(Y2,
+                       R2,
+                       begin_str = "01/13/2020",
+                       T_fin = 40,
+                       pi0 = pi02,
+                       change_time = change_time,
+                       dic = FALSE,
+                       casename = "Hubei_step2",
+                       save_files = FALSE,
+                       save_mcmc = FALSE,
+                       save_plot_data = TRUE,
+                       M = 5e3, 
+                       nburnin = 2e3, 
+                       time_unit = 5 #new feature!
+                     )
+#> The follow-up is from 01/13/20 to 07/26/20 and the last observed date is 02/07/20.
+#> Running for step-function pi(t)
+#> Compiling model graph
+#>    Resolving undeclared variables
+#>    Allocating nodes
+#> Graph information:
+#>    Observed stochastic nodes: 12
+#>    Unobserved stochastic nodes: 12
+#>    Total graph size: 395
+#> 
+#> Initializing model
+
+res.step2$plot_infection
+```
+
+![](man/figures/README-model1-4.png)<!-- -->
+
+``` r
+res.step2$plot_removed
+```
+
+![](man/figures/README-model1-5.png)<!-- -->
+
+``` r
+res.step2$spaghetti_plot
+```
+
+![](man/figures/README-model1-6.png)<!-- -->
+
+``` r
+res.step2$dic_val
+#> NULL
+#res.step$gelman_diag_list
+### continuous exponential function of pi(t)
+res.exp <- tvt.eSIR(Y, 
+                    R,
+                    begin_str = "01/13/2020", 
+                    death_in_R = 0.4,
+                    T_fin = 200, 
+                    exponential = TRUE, 
+                    dic = FALSE, 
+                    lambda0 = 0.05,
+                    casename = "Hubei_exp", 
+                    save_files = FALSE, 
+                    save_mcmc = FALSE,
+                    save_plot_data = TRUE,
+                    M = 5e3,
+                    nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for exponential-function pi(t)
 #> Compiling model graph
@@ -214,25 +306,71 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
 #> 
 #> Initializing model
   
-  res.exp$plot_infection
+res.exp$plot_infection
 ```
 
-![](man/figures/README-model1-4.png)<!-- -->
+![](man/figures/README-model1-7.png)<!-- -->
 
 ``` r
-  res.exp$spaghetti_plot
+res.exp$spaghetti_plot
 ```
 
-![](man/figures/README-model1-5.png)<!-- -->
+![](man/figures/README-model1-8.png)<!-- -->
 
 ``` r
-  #res.exp$plot_removed
+#res.exp$plot_removed
 
-  ### without pi(t), the standard state-space SIR model without intervention
-  res.nopi <- tvt.eSIR(Y, R, begin_str = "01/13/2020", death_in_R = 0.4, 
-                       T_fin = 200, casename = "Hubei_nopi",
-                       save_files = F,save_plot_data = F,
-                       M=5e3,nburnin = 2e3)
+# Again, if we change our time unit to 5 days
+res.exp2 <- tvt.eSIR2(Y2,
+                      R2,
+                      begin_str = "01/13/2020", 
+                      death_in_R = 0.4,
+                      T_fin = 200, 
+                      exponential = TRUE, 
+                      dic=FALSE,
+                      lambda0 = 0.05,
+                      casename = "Hubei_exp2",
+                      save_files = FALSE, 
+                      save_mcmc = FALSE,
+                      save_plot_data = TRUE,
+                      M = 5e3,
+                      nburnin = 2e3,
+                      time_unit = 5)
+#> The follow-up is from 01/13/20 to 10/04/22 and the last observed date is 02/07/20.
+#> Running for exponential-function pi(t)
+#> Compiling model graph
+#>    Resolving undeclared variables
+#>    Allocating nodes
+#> Graph information:
+#>    Observed stochastic nodes: 12
+#>    Unobserved stochastic nodes: 12
+#>    Total graph size: 555
+#> 
+#> Initializing model
+
+res.exp2$plot_infection
+```
+
+![](man/figures/README-model1-9.png)<!-- -->
+
+``` r
+res.exp2$spaghetti_plot
+```
+
+![](man/figures/README-model1-10.png)<!-- -->
+
+``` r
+
+### without pi(t), the standard state-space SIR model without intervention
+res.nopi <- tvt.eSIR(Y, 
+                     R, 
+                     begin_str = "01/13/2020", 
+                     death_in_R = 0.4, 
+                     T_fin = 200, 
+                     casename = "Hubei_nopi",
+                     save_files = F,
+                     save_plot_data = F,
+                     M=5e3,nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running without pi(t)
 #> Compiling model graph
@@ -244,19 +382,19 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
 #>    Total graph size: 1875
 #> 
 #> Initializing model
-  res.nopi$plot_infection
+res.nopi$plot_infection
 ```
 
-![](man/figures/README-model1-6.png)<!-- -->
+![](man/figures/README-model1-11.png)<!-- -->
 
 ``` r
-  res.nopi$spaghetti_plot
+res.nopi$spaghetti_plot
 ```
 
-![](man/figures/README-model1-7.png)<!-- -->
+![](man/figures/README-model1-12.png)<!-- -->
 
 ``` r
-  #res.nopi$plot_removed
+#res.nopi$plot_removed
 ```
 
 ## Model 2 using `qh.eSIR()`: SIR with time-varying quarantine, which follows a Dirac Delta function
@@ -275,25 +413,35 @@ SIR](man/figures/model2.png)
 
 ``` r
 set.seed(20192020)
-NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444,
-                  549, 729, 1052, 1423, 2714, 3554, 4903, 5806,
-                  7153, 9074, 11177, 13522, 16678, 19665, 22112,
-                  24953, 27100, 29631, 31728, 33366)
-  RI_complete <- c(1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 
-                   71, 94, 121, 152, 213, 252, 345, 417, 561,
-                   650, 811, 1017, 1261, 1485, 1917, 2260,
-                   2725, 3284, 3754)
-  N <- 58.5e6
-  R <- RI_complete / N
-  Y <- NI_complete / N - R #Jan13->Feb 11
+# Cumulative number of infected cases
+NI_complete <- c( 
+  41, 41, 41, 45, 62, 131, 200, 270, 375, 444,
+  549, 729, 1052, 1423, 2714, 3554, 4903, 5806,
+  7153, 9074, 11177, 13522, 16678, 19665, 22112,
+  24953, 27100, 29631, 31728, 33366)
+# Cumulative number of removed cases
+RI_complete <- c(
+  1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 
+  71, 94, 121, 152, 213, 252, 345, 417, 561,
+  650, 811, 1017, 1261, 1485, 1917, 2260,
+  2725, 3284, 3754)
+N <- 58.5e6
+R <- RI_complete / N
+Y <- NI_complete / N - R #Jan13->Feb 11
 
-  change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
-  phi0 <- c(0.1, 0.4, 0.4)
-  res.q <- qh.eSIR(Y, R, begin_str = "01/13/2020",
-                    phi0 = phi0,change_time = change_time, 
-                   casename = "Hubei_q", save_files = T,
-                   save_mcmc = F,save_plot_data = F,
-                    M = 5e3,nburnin = 2e3)
+change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
+phi0 <- c(0.1, 0.4, 0.4)
+res.q <- qh.eSIR(Y, 
+                 R, 
+                 begin_str = "01/13/2020",
+                 phi0 = phi0,
+                 change_time = change_time,
+                 casename = "Hubei_q", 
+                 save_files = TRUE,
+                 save_mcmc = FALSE,
+                 save_plot_data = FALSE,
+                 M = 5e3,
+                 nburnin = 2e3)
 #> The follow-up is from 01/13/20 to 07/30/20 and the last observed date is 02/11/20.
 #> Running for qh.eSIR
 #> Compiling model graph
@@ -305,18 +453,10 @@ NI_complete <- c( 41, 41, 41, 45, 62, 131, 200, 270, 375, 444,
 #>    Total graph size: 2736
 #> 
 #> Initializing model
-  res.q$plot_infection
+res.q$plot_infection
 ```
 
 ![](man/figures/README-model2-1.png)<!-- -->
-
-``` r
-
-  #res.noq <- qh.eSIR (Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-  #                    T_fin=200,casename="Hubei_noq",
-  #                    M=5e3,nburnin = 2e3)
-  #res.noq$plot_infection
-```
 
 You will obtain the following plot in addition to the traceplots and
 summary table if you set `save_file=T` in `qh.eSIR`. The blue vertical
@@ -354,37 +494,46 @@ data assuming that by April 29, 20% of the population have been
 self-immunized with antibody positivity.
 
 ``` r
-NI_complete <- c( 1, 2, 11, 23, 31, 76, 106, 142, 150, 220, 327,
-                  421, 613, 615, 967, 1578, 3038, 5704, 8403,
-                  11727, 15800, 20884, 25681, 30841, 37877,
-                  44876, 52410, 59648, 66663, 75833, 83948,
-                  92506, 102987, 113833, 123160, 131815,
-                  139875, 151061, 161779, 172348, 181026,
-                  189033, 195749, 203020, 214454, 223691,
-                  230597, 237474, 243382, 248416, 253519,
-                  258222, 263460, 271590, 282143, 288045,
-                  291996, 295106, 299691, 304372, 308314)
-  RI_complete <- c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 
-                   20, 26, 38, 52, 200, 311, 468, 662,
-                   893, 1144, 1547, 2144, 2931, 3900, 
-                   5133, 6201, 7657, 9483, 11536, 
-                   13915, 16276, 18781, 21110, 23424,
-                   26469, 29784, 32899, 35785, 37730, 
-                   39207, 40703, 42164, 43488, 44723, 
-                   45887, 47473, 47686, 48769, 49572,
-                   50221, 52161, 52917, 54115, 54613,
-                   55473, 55816, 56809, 57265, 58525)
-  N <- 8.399e6
-  R <- RI_complete / N
-  
-  Y <- NI_complete / N - R 
+# Cumulative number of infected cases
+NI_complete <- c( 
+  1, 2, 11, 23, 31, 76, 106, 142, 150, 220, 327,
+  421, 613, 615, 967, 1578, 3038, 5704, 8403,
+  11727, 15800, 20884, 25681, 30841, 37877,
+  44876, 52410, 59648, 66663, 75833, 83948,
+  92506, 102987, 113833, 123160, 131815,
+  139875, 151061, 161779, 172348, 181026,
+  189033, 195749, 203020, 214454, 223691,
+  230597, 237474, 243382, 248416, 253519,
+  258222, 263460, 271590, 282143, 288045,
+  291996, 295106, 299691, 304372, 308314)
+# Cumulative number of removed cases
+RI_complete <- c(
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 
+  20, 26, 38, 52, 200, 311, 468, 662,
+  893, 1144, 1547, 2144, 2931, 3900, 
+  5133, 6201, 7657, 9483, 11536,
+  13915, 16276, 18781, 21110, 23424,
+  26469, 29784, 32899, 35785, 37730,
+  39207, 40703, 42164, 43488, 44723, 
+  45887, 47473, 47686, 48769, 49572,
+  50221, 52161, 52917, 54115, 54613,
+  55473, 55816, 56809, 57265, 58525)
+N <- 8.399e6
+R <- RI_complete / N
+Y <- NI_complete / N - R 
 
-  change_time <- c("04/29/2020")
-  alpha0 <- c(0.2) # 20% of the susceptible population were found immunized
-  res.antibody <- eSAIR(Y, R, begin_str = "03/01/2020",
-                    alpha0 = alpha0, change_time = change_time,
-                    casename = "New_York_antibody", save_files = F, 
-                    save_mcmc = F, M=5e2, nburnin = 2e2)
+change_time <- c("04/29/2020")
+alpha0 <- c(0.2) # 20% of the susceptible population were found immunized
+res.antibody <- eSAIR(Y,
+                      R, 
+                      begin_str = "03/01/2020",
+                      alpha0 = alpha0, 
+                      change_time = change_time,
+                      casename = "New_York_antibody", 
+                      save_files = F, 
+                      save_mcmc = F, 
+                      M=5e2, 
+                      nburnin = 2e2)
 #> The follow-up is from 03/01/20 to 09/16/20 and the last observed date is 04/30/20.
 #> Running for eSAIR
 #> Compiling model graph
@@ -396,7 +545,9 @@ NI_complete <- c( 1, 2, 11, 23, 31, 76, 106, 142, 150, 220, 327,
 #>    Total graph size: 5123
 #> 
 #> Initializing model
-  res.antibody$plot_infection
+#> 
+#> NOTE: Stopping adaptation
+res.antibody$plot_infection
 ```
 
 ![](man/figures/README-model%203-1.png)<!-- -->
@@ -427,11 +578,10 @@ Yang](kangpiny@umich.edu) for helping us collect the recovery data from
 the web page.
 
 ## References
-1.  Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., … &
-    Eisenberg, M. Song, P. X., (2020). An epidemiological forecast model and software assessing 
-    interventions on COVID-19 epidemic in China. Journal of Data Science. 
-    DOI: 10.6339/JDS.202007_18(3).0003
-    [paper link](http://www.jds-online.com/file_download/742/3-jds-wang2020epidemiological.pdf)
+
+1.  Song, P. X., Wang, L., Zhou, Y., He, J., Zhu, B., Wang, F., … &
+    Eisenberg, M. (2020). An epidemiological forecast model and software
+    assessing interventions on COVID-19 epidemic in China. medRxiv.
 
 2.  Osthus, D., Hickmann, K. S., Caragea, P. C., Higdon, D., & Del
     Valle, S. Y. (2017). Forecasting seasonal influenza with a
@@ -441,15 +591,11 @@ the web page.
     simulation using multiple sequences. Statistical science, 7(4),
     457-472.
 
------------
-Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
+-----
 
-This work is licensed under a [Creative Commons Attribution 4.0 International
-License][cc-by].
+Shield: [![CCBY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by/4.0/)
 
-[![CC BY 4.0][cc-by-image]][cc-by]
+This work is licensed under a [Creative Commons Attribution 4.0
+International License](http://creativecommons.org/licenses/by/4.0/).
 
-[cc-by]: http://creativecommons.org/licenses/by/4.0/
-[cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
-[cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
-
+[![CCBY 4.0](https://i.creativecommons.org/l/by/4.0/88x31.png)](http://creativecommons.org/licenses/by/4.0/)

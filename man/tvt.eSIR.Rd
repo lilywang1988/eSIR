@@ -39,7 +39,7 @@ tvt.eSIR(
 
 \item{R}{the time series of daily observed removed compartment proportions, including death and recovered.}
 
-\item{pi0}{the time-dependent transission rate modifier \eqn{\pi(t)} between 0 and 1.}
+\item{pi0}{the time-dependent transmission rate modifier \eqn{\pi(t)} between 0 and 1.}
 
 \item{change_time}{the change points over time for step function pi, defalt value is \code{NULL}.}
 
@@ -83,7 +83,7 @@ tvt.eSIR(
 
 \item{save_files}{logical, whether to save plots to file.}
 
-\item{save_mcmc}{logical, whether save (\code{TRUE}) all the MCMC outputs or not (\code{FALSE}).The output file will be an \code{.RData} file named by the \eqn{casename}. We include arrays of prevalence values of the three compartments with their matrices of posterior draws up to the last date of the collected data as \code{theta_p[,,1]} and afterwards as \code{theta_pp[,,1]} for \eqn{\theta_t^S}, \code{theta_p[,,2]} and \code{theta_pp[,,2]} for \eqn{\theta_t^I}, and \code{theta_p[,,3]} and \code{theta_pp[,,3]} for \eqn{\theta_t^R}. Moreover, the input and predicted proportions \code{Y}, \code{Y_pp}, \code{R} and \code{R_pp} can also be retrieved. The prevalence and prediceted proportion matrices have rows for MCMC replicates, and columns for days. The MCMC posterior draws of other parameters including \code{beta_p}, \code{gamma_p}, \code{R0_p}, and variance controllers \code{k_p}, \code{lambdaY_p}, \code{lambdaR_p} are also available.}
+\item{save_mcmc}{logical, whether save (\code{TRUE}) all the MCMC outputs or not (\code{FALSE}).The output file will be an \code{.RData} file named by the \eqn{casename}. We include arrays of prevalence values of the three compartments with their matrices of posterior draws up to the last date of the collected data as \code{theta_p[,,1]} and afterwards as \code{theta_pp[,,1]} for \eqn{\theta_t^S}, \code{theta_p[,,2]} and \code{theta_pp[,,2]} for \eqn{\theta_t^I}, and \code{theta_p[,,3]} and \code{theta_pp[,,3]} for \eqn{\theta_t^R}. Moreover, the input and predicted proportions \code{Y}, \code{Y_pp}, \code{R} and \code{R_pp} can also be retrieved. The prevalence and predicted proportion matrices have rows for MCMC replicates, and columns for days. The MCMC posterior draws of other parameters including \code{beta_p}, \code{gamma_p}, \code{R0_p}, and variance controllers \code{k_p}, \code{lambdaY_p}, \code{lambdaR_p} are also available.}
 
 \item{save_plot_data}{logical, whether save the plotting data or not.}
 
@@ -106,46 +106,79 @@ tvt.eSIR(
 \item{gelman_diag_list}{ Since version 0.3.3, we incorporated Gelman And Rubin's Convergence Diagnostic using \code{\link[coda]{gelman.diag}}. We included both the statistics and their upper C.I. limits. Values substantially above 1 indicate lack of convergence. Error messages would be printed as they are. This would be only valid for multiple chains (e.g. nchain > 1). Note that for time dependent processes, we only compute the convergence of the last observation data (\code{T_prime}), though it shows to be \code{T_prime+1}, which is due to the day 0 for initialization.}
 }
 \description{
-Fit extended state-space SIR model with prespecified changes in the transmission rate, either stepwise or continuous, accomodating time-varying quaratine protocols.
+Fit extended state-space SIR model with pre-specified changes in the transmission rate, either stepwise or continuous, accommodating time-varying quarantine protocols.
 }
 \details{
-We fit a state-space model with extended SIR, in which a time-varying transmission rate modifier \eqn{\pi(t)} (between 0 and 1) is introcuded to model. This allows us to accommodate quarantine protocol changes and ignored resources of hospitalization. The form of reducing rate may be a step-function with jomps at times of big policy changes or a smooth exponential survival function \eqn{\exp(-\lambda_0t)}. The parameters of the function and change points, if any, should be predefined.
+We fit a state-space model with extended SIR, in which a time-varying transmission rate modifier \eqn{\pi(t)} (between 0 and 1) is introduced to model. This allows us to accommodate quarantine protocol changes and ignored resources of hospitalization. The form of reducing rate may be a step-function with jumps at times of big policy changes or a smooth exponential survival function \eqn{\exp(-\lambda_0t)}. The parameters of the function and change points, if any, should be predefined.
 }
 \examples{
 \dontrun{
-NI_complete <- c( 41,41,41,45,62,131,200,270,375,444,549, 729,
-                  1052,1423,2714,3554,4903,5806,7153,9074,11177,
-               13522,16678,19665,22112,24953,27100,29631,31728,33366)
-RI_complete <- c(1,1,7,10,14,20,25,31,34,45,55,71,94,121,152,213,
-                 252,345,417,561,650,811,1017,1261,1485,1917,2260,
-                 2725,3284,3754)
-N=58.5e6
-R <- RI_complete/N
-Y <- NI_complete/N- R #Jan13->Feb 11
+NI_complete <- c(
+  41, 41, 41, 45, 62, 131, 200, 270, 375, 444, 549, 729,
+  1052, 1423, 2714, 3554, 4903, 5806, 7153, 9074, 11177,
+  13522, 16678, 19665, 22112, 24953, 27100, 29631, 31728, 33366
+)
+RI_complete <- c(
+  1, 1, 7, 10, 14, 20, 25, 31, 34, 45, 55, 71, 94, 121, 152, 213,
+  252, 345, 417, 561, 650, 811, 1017, 1261, 1485, 1917, 2260,
+  2725, 3284, 3754
+)
+N <- 58.5e6
+R <- RI_complete / N
+Y <- NI_complete / N - R # Jan13->Feb 11
 ### Step function of pi(t)
-change_time <- c("01/23/2020","02/04/2020","02/08/2020")
-pi0<- c(1.0,0.9,0.5,0.1)
-res.step <-tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-         T_fin=200,pi0=pi0,change_time=change_time,dic=T,
-         casename="Hubei_step",save_files = T,
-         save_mcmc=F,M=5e2,nburnin = 2e2)
+change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
+pi0 <- c(1.0, 0.9, 0.5, 0.1)
+res.step <- tvt.eSIR(Y, R,
+  begin_str = "01/13/2020", death_in_R = 0.4,
+  T_fin = 200, pi0 = pi0, change_time = change_time, dic = T,
+  casename = "Hubei_step", save_files = T,
+  save_mcmc = F, M = 5e2, nburnin = 2e2
+)
 res.step$plot_infection
 res.step$plot_removed
 res.step$dic_val
 
 ### continuous exponential function of pi(t)
-res.exp <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-           T_fin=200,exponential=TRUE,dic=F,lambda0=0.05,
-           casename="Hubei_exp",save_files = F,save_mcmc=F,
-           M=5e2,nburnin = 2e2)
+res.exp <- tvt.eSIR(Y, R,
+  begin_str = "01/13/2020", death_in_R = 0.4,
+  T_fin = 200, exponential = TRUE, dic = F, lambda0 = 0.05,
+  casename = "Hubei_exp", save_files = F, save_mcmc = F,
+  M = 5e2, nburnin = 2e2
+)
 res.exp$plot_infection
-#res.exp$plot_removed
+# res.exp$plot_removed
 
 ### without pi(t), the standard state-space SIR model without intervention
-res.nopi <- tvt.eSIR(Y,R,begin_str="01/13/2020",death_in_R = 0.4,
-                T_fin=200,casename="Hubei_nopi",save_files = F,
-                M=5e2,nburnin = 2e2)
+res.nopi <- tvt.eSIR(Y, R,
+  begin_str = "01/13/2020", death_in_R = 0.4,
+  T_fin = 200, casename = "Hubei_nopi", save_files = F,
+  M = 5e2, nburnin = 2e2
+)
 res.nopi$plot_infection
-#res.nopi$plot_removed
+# res.nopi$plot_removed
 }
+
+change_time <- c("01/18/2020")
+pi0<- c(1.0, 0.9)
+NI_complete2 <- c(41, 45, 62, 131)
+RI_complete2 <- c(1, 1, 7, 10)
+N2 <- 1E3
+res1 <- tvt.eSIR(
+  RI_complete2 / N2,
+  (NI_complete2 - RI_complete2) / N2,
+  begin_str = "01/10/2020",
+  T_fin =10,
+  pi0 = pi0,
+  change_time = change_time,
+  dic = FALSE,
+  casename = "Hubei_step",
+  save_files = FALSE,
+  save_mcmc = FALSE,
+  save_plot_data = FALSE,
+  M = 50,
+  nburnin = 1
+)
+closeAllConnections()
+
 }
