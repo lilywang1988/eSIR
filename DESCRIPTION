@@ -1,7 +1,11 @@
 Package: eSIR
 Type: Package
 Title: Extended State-Space SIR Models
+<<<<<<< HEAD
 Version: 0.3.3
+=======
+Version: 0.4.1
+>>>>>>> origin/master
 Authors@R: c(
     person("Lili", "Wang", email = "lilywang@umich.edu", role = c("aut")),
     person("Song Lab", role = "aut", comment = "<http://www.umich.edu/~songlab/>"),

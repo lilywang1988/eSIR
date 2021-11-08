@@ -1,7 +1,7 @@
 # This is the source code for R package eSIR: extended-SIR
-# Added on May 10, 2020
+# Added on May 10, 2020, and last edited on Oct 27, 2021
 # Correspondence : Peter X.K. Song, Ph.D. (pxsong@umich.edu)
-# Creator: Lili Wang, M.S. (lilywang@umich.edu)
+# Creator: Lili Wang, Ph.D. (lilywang@umich.edu)
 # An extend SIR with time-varying immunization among a subset of the population, which follows a Dirac Delta function
 #' Extended state-space SIR with a subset of the population showing antibody positivity
 #'
@@ -107,6 +107,14 @@ eSAIR <- function(Y, R, alpha0 = NULL, change_time = NULL, begin_str = "01/13/20
 
   T_prime <- length(Y)
   if (T_prime != length(R)) stop("Y and R should be matched.")
+<<<<<<< HEAD
+=======
+  if(T_prime >= T_fin) {
+    warning("T_fin must be larger than input time series Y and R,",
+    "we will automatically add 100 time units to it: T_fin = length(Y) + 10.")
+    T_fin = T_prime + 10
+  }
+>>>>>>> origin/master
   Y <- pmax(Y, eps)
   R <- pmax(R, eps)
   if (add_death == T && death_in_R == 0.02) {
@@ -142,37 +150,26 @@ eSAIR <- function(Y, R, alpha0 = NULL, change_time = NULL, begin_str = "01/13/20
                           Km[t-1,1] <- -beta*theta[t-1,1]*theta[t-1,2]
                           Km[t-1,9] <- gamma*theta[t-1,2]
                           Km[t-1,5] <- -Km[t-1,1]-Km[t-1,9]
-
                           Km[t-1,2] <- -beta*(theta[t-1,1]+0.5*Km[t-1,1])*(theta[t-1,2]+0.5*Km[t-1,5])
                           Km[t-1,10] <- gamma*(theta[t-1,2]+0.5*Km[t-1,5])
                           Km[t-1,6] <- -Km[t-1,2]-Km[t-1,10]
-
                           Km[t-1,3] <- -beta*(theta[t-1,1]+0.5*Km[t-1,2])*(theta[t-1,2]+0.5*Km[t-1,6])
                           Km[t-1,11] <- gamma*(theta[t-1,2]+0.5*Km[t-1,6])
                           Km[t-1,7] <- -Km[t-1,3]-Km[t-1,11]
-
                           Km[t-1,4] <- -beta*(theta[t-1,1]+Km[t-1,3])*(theta[t-1,2]+Km[t-1,7])
                           Km[t-1,12] <- gamma*(theta[t-1,2]+Km[t-1,7])
                           Km[t-1,8] <- -Km[t-1,4]-Km[t-1,12]
-
-
                           alpha_temp[t-1,1] <- max(theta[t-1,1]+(Km[t-1,1]+2*Km[t-1,2]+2*Km[t-1,3]+Km[t-1,4])/6-alpha_vec[t-1]*theta[t-1,1],0)
                           alpha_temp[t-1,2] <- max(theta[t-1,2]+(Km[t-1,5]+2*Km[t-1,6]+2*Km[t-1,7]+Km[t-1,8])/6-gamma_H_vec[t-1]*theta[t-1,2],0)
                           alpha_temp[t-1,3] <- theta[t-1,3]+(Km[t-1,9]+2*Km[t-1,10]+2*Km[t-1,11]+Km[t-1,12])/6
-
-
                           theta_A[t] <- theta_A[t-1]+min(alpha_vec[t-1]*theta[t-1,1],theta[t-1,1]+(Km[t-1,1]+2*Km[t-1,2]+2*Km[t-1,3]+Km[t-1,4])/6)
                           theta_H[t] <- theta_H[t-1]+min(gamma_H_vec[t-1]*theta[t-1,2],theta[t-1,2]+(Km[t-1,5]+2*Km[t-1,6]+2*Km[t-1,7]+Km[t-1,8])/6)
-
                           v[t-1] <- (1-theta_A[t]-theta_H[t])
-
                           alpha[t-1,1] <- (1-step(-v[t-1]))*alpha_temp[t-1,1]/v[t-1]
                           alpha[t-1,2] <- (1-step(-v[t-1]))*alpha_temp[t-1,2]/v[t-1]
                           alpha[t-1,3] <- (1-step(-v[t-1]))*alpha_temp[t-1,3]/v[t-1]
-
                           theta_temp[t,1:3] ~ ddirch(k*alpha[t-1,1:3])
                           theta[t,1:3] <- v[t-1]*theta_temp[t,1:3]
-
                           Y[t-1] ~ dbeta(lambdaY*theta[t,2],lambdaY*(1-theta[t,2]))
                           R[t-1] ~ dbeta(lambdaR*theta[t,3],lambdaR*(1-theta[t,3]))
                           }
@@ -199,10 +196,17 @@ eSAIR <- function(Y, R, alpha0 = NULL, change_time = NULL, begin_str = "01/13/20
         "T_prime" = T_prime,
         "alpha_vec" = alpha_vec,
         "gamma_H_vec" = gamma_H_vec
+<<<<<<< HEAD
         ),
       n.chains = nchain,
       n.adapt = nadapt
       )
+=======
+      ),
+      n.chains = nchain,
+      n.adapt = nadapt
+    )
+>>>>>>> origin/master
   )
 
   suppressWarnings(update(posterior, nburnin)) # burn-in
@@ -221,10 +225,17 @@ eSAIR <- function(Y, R, alpha0 = NULL, change_time = NULL, begin_str = "01/13/20
         "lambdaR",
         "k",
         "v"
+<<<<<<< HEAD
         ),
       n.iter = M,
       thin = thn
       )
+=======
+      ),
+      n.iter = M,
+      thin = thn
+    )
+>>>>>>> origin/master
   )
 
   if (dic) {
@@ -750,21 +761,33 @@ eSAIR <- function(Y, R, alpha0 = NULL, change_time = NULL, begin_str = "01/13/20
     if (name == "theta") {
       tryCatch(
         gelman.diag(as.mcmc.list(jags_sample[[name]])[, (1:3) * (T_prime + 1)],
+<<<<<<< HEAD
           autoburnin = FALSE
+=======
+                    autoburnin = FALSE
+>>>>>>> origin/master
         ),
         error = function(e) e
       )
     } else if (name == "theta_A") {
       list("theta_A: ", tryCatch(
         gelman.diag(as.mcmc.list(jags_sample[[name]])[, (T_prime + 1)],
+<<<<<<< HEAD
           autoburnin = FALSE
+=======
+                    autoburnin = FALSE
+>>>>>>> origin/master
         ),
         error = function(e) e
       ))
     } else {
       tryCatch(
         gelman.diag(as.mcmc.list(jags_sample[[name]]),
+<<<<<<< HEAD
           autoburnin = FALSE
+=======
+                    autoburnin = FALSE
+>>>>>>> origin/master
         ),
         error = function(e) e
       )
@@ -812,10 +835,17 @@ if (FALSE) {
   change_time <- c("02/08/2020")
   alpha0 <- c(0.2) # 20% of the susceptible population were found immunized
   res.antibody <- eSAIR(Y, R,
+<<<<<<< HEAD
     begin_str = "01/13/2020", death_in_R = 0.4,
     alpha0 = alpha0, change_time = change_time,
     casename = "Hubei_antibody", save_files = F, save_mcmc = F,
     M = 5e2, nburnin = 2e2
+=======
+                        begin_str = "01/13/2020", death_in_R = 0.4,
+                        alpha0 = alpha0, change_time = change_time,
+                        casename = "Hubei_antibody", save_files = F, save_mcmc = F,
+                        M = 5e2, nburnin = 2e2
+>>>>>>> origin/master
   )
   res.antibody$plot_infection
   res.antibody$gelman_diag_list

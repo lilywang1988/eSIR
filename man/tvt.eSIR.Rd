@@ -39,7 +39,7 @@ tvt.eSIR(
 
 \item{R}{the time series of daily observed removed compartment proportions, including death and recovered.}
 
-\item{pi0}{the time-dependent transission rate modifier \eqn{\pi(t)} between 0 and 1.}
+\item{pi0}{the time-dependent transmission rate modifier \eqn{\pi(t)} between 0 and 1.}
 
 \item{change_time}{the change points over time for step function pi, defalt value is \code{NULL}.}
 
@@ -106,10 +106,10 @@ tvt.eSIR(
 \item{gelman_diag_list}{ Since version 0.3.3, we incorporated Gelman And Rubin's Convergence Diagnostic using \code{\link[coda]{gelman.diag}}. We included both the statistics and their upper C.I. limits. Values substantially above 1 indicate lack of convergence. Error messages would be printed as they are. This would be only valid for multiple chains (e.g. nchain > 1). Note that for time dependent processes, we only compute the convergence of the last observation data (\code{T_prime}), though it shows to be \code{T_prime+1}, which is due to the day 0 for initialization.}
 }
 \description{
-Fit extended state-space SIR model with prespecified changes in the transmission rate, either stepwise or continuous, accomodating time-varying quaratine protocols.
+Fit extended state-space SIR model with pre-specified changes in the transmission rate, either stepwise or continuous, accommodating time-varying quarantine protocols.
 }
 \details{
-We fit a state-space model with extended SIR, in which a time-varying transmission rate modifier \eqn{\pi(t)} (between 0 and 1) is introcuded to model. This allows us to accommodate quarantine protocol changes and ignored resources of hospitalization. The form of reducing rate may be a step-function with jomps at times of big policy changes or a smooth exponential survival function \eqn{\exp(-\lambda_0t)}. The parameters of the function and change points, if any, should be predefined.
+We fit a state-space model with extended SIR, in which a time-varying transmission rate modifier \eqn{\pi(t)} (between 0 and 1) is introduced to model. This allows us to accommodate quarantine protocol changes and ignored resources of hospitalization. The form of reducing rate may be a step-function with jumps at times of big policy changes or a smooth exponential survival function \eqn{\exp(-\lambda_0t)}. The parameters of the function and change points, if any, should be predefined.
 }
 \examples{
 \dontrun{

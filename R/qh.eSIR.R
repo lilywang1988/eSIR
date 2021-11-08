@@ -1,7 +1,7 @@
 # This is the source code for R package eSIR: extended-SIR
-# Built on Feb 13, 2020, and last edited on Feb 19, 2020
+# Built on Feb 13, 2020, and last edited on Oct 27, 2021
 # Correspondence : Peter X.K. Song, Ph.D. (pxsong@umich.edu)
-# Creator: Lili Wang, M.S. (lilywang@umich.edu)
+# Creator: Lili Wang, Ph.D. (lilywang@umich.edu)
 # Model 2: An extend SIR with time-varying quarantine, which follows a Dirac Delta function
 #' Extended state-space SIR with quarantine
 #'
@@ -40,8 +40,8 @@
 #' \item{casename}{the predefined \code{casename}.}
 #' \item{incidence_mean}{mean cumulative incidence, the mean prevalence of cumulative confirmed cases at the end of the study.}
 #' \item{incidence_ci}{2.5\%, 50\%, and 97.5\% quantiles of the incidences.}
-#' \item{out_table}{summary tables including the posterior mean of the prevalance processes of the 3 states compartments (\eqn{\theta_t^S,\theta_t^I,\theta_t^R,\theta_t^H}) at last date of data collected ((\eqn{t^\prime}) decided by the lengths of your input data \code{Y} and \code{R}), and their respective credible inctervals (ci); the respective means and ci's of the reporduction number (R0), removed rate (\eqn{\gamma}), transmission rate  (\eqn{\beta}).}
-#' \item{plot_infection}{plot of summarizing and forecasting for the infection compartment, in which the vertial blue line denotes the last date of data collected (\eqn{t^\prime}), the vertial darkgray line denotes the deacceleration point (first turning point) that the posterior mean first-derivative of infection prevalence \eqn{\dot{\theta}_t^I} achieves the  maximum, the vertical purple line denotes the second turning point that the posterior mean first-derivative infection proportion \eqn{\dot{\theta}_t^I} equals zero, the darkgray line denotes the posterior mean of the infection prevalence \eqn{\theta_t^I} and the red line denotes its posterior median. }
+#' \item{out_table}{summary tables including the posterior mean of the prevalence processes of the 3 states compartments (\eqn{\theta_t^S,\theta_t^I,\theta_t^R,\theta_t^H}) at last date of data collected ((\eqn{t^\prime}) decided by the lengths of your input data \code{Y} and \code{R}), and their respective credible intervals (ci); the respective means and ci's of the reproduction number (R0), removed rate (\eqn{\gamma}), transmission rate  (\eqn{\beta}).}
+#' \item{plot_infection}{plot of summarizing and forecasting for the infection compartment, in which the vertical blue line denotes the last date of data collected (\eqn{t^\prime}), the vertical darkgray line denotes the deacceleration point (first turning point) that the posterior mean first-derivative of infection prevalence \eqn{\dot{\theta}_t^I} achieves the  maximum, the vertical purple line denotes the second turning point that the posterior mean first-derivative infection proportion \eqn{\dot{\theta}_t^I} equals zero, the darkgray line denotes the posterior mean of the infection prevalence \eqn{\theta_t^I} and the red line denotes its posterior median. }
 #' \item{plot_removed}{plot of summarizing and forecasting for the removed compartment with lines similar to those in the \code{plot_infection}. The vertical lines are identical, but the horizontal mean and median correspond to the posterior mean and median of the removed process \eqn{\theta_t^R}. An additional line indicates the estimated death prevalence from the input \code{death_in_R}.}
 #' \item{spaghetti_plot}{20 randomly selected MCMC draws of the first-order derivative of the posterior prevalence of infection, namely \eqn{\dot{\theta}_t^I}. The black curve is the posterior mean of the derivative, and the vertical lines mark times of turning points corresponding respectively to those shown in \code{plot_infection} and \code{plot_removed}. Moreover, the 95\% credible intervals of these turning points are also highlighted by semi-transparent rectangles. }
 #' \item{first_tp_mean}{the date t at which \eqn{\ddot{\theta}_t^I=0}, calculated as the average of the time points with maximum posterior first-order derivatives \eqn{\dot{\theta}_t^I}; this value may be slightly different from the one labeled by the "darkgreen" lines in the two plots \code{plot_infection} and \code{plot_removed}, which indicate the stationary point such that the first-order derivative of the averaged posterior of \eqn{\theta_t^I} reaches its maximum.}
@@ -136,12 +136,24 @@ qh.eSIR <- function(Y,
                     save_mcmc = FALSE,
                     save_plot_data = FALSE,
                     eps = 1e-10
+<<<<<<< HEAD
                     ) {
+=======
+) {
+>>>>>>> origin/master
   beta0 <- R0 * gamma0
   len <- round(M / thn) * nchain # number of MCMC draws in total
 
   T_prime <- length(Y)
   if (T_prime != length(R)) stop("Y and R should be matched.")
+<<<<<<< HEAD
+=======
+  if(T_prime >= T_fin) {
+    warning("T_fin must be larger than input time series Y and R,",
+    "we will automatically add 100 time units to it: T_fin = length(Y) + 10.")
+    T_fin = T_prime + 10
+  }
+>>>>>>> origin/master
   Y <- pmax(Y, eps)
   R <- pmax(R, eps)
   if (add_death == T && death_in_R == 0.02) {
@@ -177,37 +189,26 @@ qh.eSIR <- function(Y,
                           Km[t-1,1] <- -beta*theta[t-1,1]*theta[t-1,2]
                           Km[t-1,9] <- gamma*theta[t-1,2]
                           Km[t-1,5] <- -Km[t-1,1]-Km[t-1,9]
-
                           Km[t-1,2] <- -beta*(theta[t-1,1]+0.5*Km[t-1,1])*(theta[t-1,2]+0.5*Km[t-1,5])
                           Km[t-1,10] <- gamma*(theta[t-1,2]+0.5*Km[t-1,5])
                           Km[t-1,6] <- -Km[t-1,2]-Km[t-1,10]
-
                           Km[t-1,3] <- -beta*(theta[t-1,1]+0.5*Km[t-1,2])*(theta[t-1,2]+0.5*Km[t-1,6])
                           Km[t-1,11] <- gamma*(theta[t-1,2]+0.5*Km[t-1,6])
                           Km[t-1,7] <- -Km[t-1,3]-Km[t-1,11]
-
                           Km[t-1,4] <- -beta*(theta[t-1,1]+Km[t-1,3])*(theta[t-1,2]+Km[t-1,7])
                           Km[t-1,12] <- gamma*(theta[t-1,2]+Km[t-1,7])
                           Km[t-1,8] <- -Km[t-1,4]-Km[t-1,12]
-
-
                           alpha_temp[t-1,1] <- max(theta[t-1,1]+(Km[t-1,1]+2*Km[t-1,2]+2*Km[t-1,3]+Km[t-1,4])/6-phi_vec[t-1]*theta[t-1,1],0)
                           alpha_temp[t-1,2] <- max(theta[t-1,2]+(Km[t-1,5]+2*Km[t-1,6]+2*Km[t-1,7]+Km[t-1,8])/6-gamma_H_vec[t-1]*theta[t-1,2],0)
                           alpha_temp[t-1,3] <- theta[t-1,3]+(Km[t-1,9]+2*Km[t-1,10]+2*Km[t-1,11]+Km[t-1,12])/6
-
-
                           theta_Q[t] <- theta_Q[t-1]+min(phi_vec[t-1]*theta[t-1,1],theta[t-1,1]+(Km[t-1,1]+2*Km[t-1,2]+2*Km[t-1,3]+Km[t-1,4])/6)
                           theta_H[t] <- theta_H[t-1]+min(gamma_H_vec[t-1]*theta[t-1,2],theta[t-1,2]+(Km[t-1,5]+2*Km[t-1,6]+2*Km[t-1,7]+Km[t-1,8])/6)
-
                           v[t-1] <- (1-theta_Q[t]-theta_H[t])
-
                           alpha[t-1,1] <- (1-step(-v[t-1]))*alpha_temp[t-1,1]/v[t-1]
                           alpha[t-1,2] <- (1-step(-v[t-1]))*alpha_temp[t-1,2]/v[t-1]
                           alpha[t-1,3] <- (1-step(-v[t-1]))*alpha_temp[t-1,3]/v[t-1]
-
                           theta_temp[t,1:3] ~ ddirch(k*alpha[t-1,1:3])
                           theta[t,1:3] <- v[t-1]*theta_temp[t,1:3]
-
                           Y[t-1] ~ dbeta(lambdaY*theta[t,2],lambdaY*(1-theta[t,2]))
                           R[t-1] ~ dbeta(lambdaR*theta[t,3],lambdaR*(1-theta[t,3]))
                           }
@@ -231,7 +232,11 @@ qh.eSIR <- function(Y,
 
   suppressWarnings(
     update(posterior, nburnin)
+<<<<<<< HEAD
     )# burn-in
+=======
+  )# burn-in
+>>>>>>> origin/master
 
   jags_sample <- suppressWarnings(
     jags.samples(posterior, c("theta", "theta_H", "theta_Q", "gamma", "R0", "beta", "Y", "lambdaY", "lambdaR", "k", "v"), n.iter = M, thin = thn)
@@ -835,7 +840,11 @@ qh.eSIR <- function(Y,
     "end_p_ci_med",
     "end_p_ci_up",
     "begin_str"
+<<<<<<< HEAD
     )
+=======
+  )
+>>>>>>> origin/master
 
   if (save_files) write.csv(out_table, file = paste0(file_add, casename, "_summary.csv"))
   if (save_mcmc) {
@@ -857,14 +866,22 @@ qh.eSIR <- function(Y,
     if (name == "theta") {
       tryCatch(
         gelman.diag(as.mcmc.list(jags_sample[[name]])[, (1:3) * (T_prime + 1)],
+<<<<<<< HEAD
           autoburnin = FALSE
+=======
+                    autoburnin = FALSE
+>>>>>>> origin/master
         ),
         error = function(e) e
       )
     } else if (name == "theta_Q") {
       list("theta_Q: ", tryCatch(
         gelman.diag(as.mcmc.list(jags_sample[[name]])[, (T_prime + 1)],
+<<<<<<< HEAD
           autoburnin = FALSE
+=======
+                    autoburnin = FALSE
+>>>>>>> origin/master
         ),
         error = function(e) e
       ))
@@ -918,19 +935,32 @@ if (FALSE) {
   change_time <- c("01/23/2020", "02/04/2020", "02/08/2020")
   phi0 <- c(0.1, 0.4, 0.4)
   res.q <- qh.eSIR(Y, R,
+<<<<<<< HEAD
     begin_str = "01/13/2020", death_in_R = 0.4,
     phi0 = phi0, change_time = change_time,
     casename = "Hubei_q", save_files = F, save_mcmc = F,
     M = 5e2, nburnin = 2e2
+=======
+                   begin_str = "01/13/2020", death_in_R = 0.4,
+                   phi0 = phi0, change_time = change_time,
+                   casename = "Hubei_q", save_files = F, save_mcmc = F,
+                   M = 5e2, nburnin = 2e2
+>>>>>>> origin/master
   )
   res.q$plot_infection
   res.q$gelman_diag_list
   # res.q$plot_removed
 
   res.noq <- qh.eSIR(Y, R,
+<<<<<<< HEAD
     begin_str = "01/13/2020", death_in_R = 0.4,
     T_fin = 200, casename = "Hubei_noq",
     M = 5e2, nburnin = 2e2
+=======
+                     begin_str = "01/13/2020", death_in_R = 0.4,
+                     T_fin = 200, casename = "Hubei_noq",
+                     M = 5e2, nburnin = 2e2
+>>>>>>> origin/master
   )
   res.noq$plot_infection
 }
