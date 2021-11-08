@@ -9,7 +9,7 @@ R package eSIR: extended state-space SIR epidemiological models
 1.  Since version 0.3.1, we added the US data. The most recent update
     was on June 25th. We used data summarized from [JHU CSSE
 =======
-[Song Lab](http://www.umich.edu/~songlab/)
+[Song Lab](http://websites.umich.edu/~songlab/)
 2021-10-31
 
 **Notice**:
@@ -46,7 +46,7 @@ data("USA_state_N") #population in each state
     that `res` is object returned from `tvt.eSIR` or `qh.eSIR`):
 =======
     from
-    [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html).
+    [`rjags`](https://CRAN.R-project.org/package=rjags).
     Their values substantially larger than 1 imply a failure of
     convergence of the MCMC chains. Save it in a `.txt` file by setting
     `save_files = TRUE` or retrieve it via following R code (assuming
@@ -116,7 +116,7 @@ the JAGS library), `chron` and `gtools`, which could be installed with
 
 An error may occur if you have not yet installed JAGS-4.x.y.exe (for any
 x \>= 0, y \>=0). **Windows** users may download and install JAGS from
-[here](http://www.sourceforge.net/projects/mcmc-jags/files). **Mac**
+[here](https://www.sourceforge.net/projects/mcmc-jags/files). **Mac**
 users may follow steps at
 [casallas/8411082](https://gist.github.com/casallas/8411082).
 
@@ -637,11 +637,11 @@ established, please use `help(tvt.eSIR)` or `?qh.eSIR` to find them.
 ## Acknowledgements
 
 This package is created and maintained by [Lili
-Wang](lilywang@umich.edu), contributed by [Fei
+Wang](https://github.com/lilywang1988), contributed by [Fei
 Wang](https://github.com/feiwsteven), [Lu
 Tang](https://github.com/ClumsyBear), and [Paul
 Egeler](https://github.com/pegeler). We also thank [Kangping
-Yang](kangpiny@umich.edu) for helping us collect the recovery data from
+Yang](https://github.com/kangpingy) for helping us collect the recovery data from
 the web page.
 
 ## References
@@ -666,10 +666,10 @@ the web page.
 
 -----
 
-Shield: [![CCBY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by/4.0/)
+Shield: [![CCBY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
 This work is licensed under a [Creative Commons Attribution 4.0
-International License](http://creativecommons.org/licenses/by/4.0/).
+International License](https://creativecommons.org/licenses/by/4.0/).
 
-[![CCBY 4.0](https://i.creativecommons.org/l/by/4.0/88x31.png)](http://creativecommons.org/licenses/by/4.0/)
+[![CCBY 4.0](https://i.creativecommons.org/l/by/4.0/88x31.png)](https://creativecommons.org/licenses/by/4.0/)
 >>>>>>> origin/master

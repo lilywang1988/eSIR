@@ -1,6 +1,6 @@
 R包eSIR：扩展的状态空间SIR流行病学模型
 ================
-[Song Lab](http://www.umich.edu/~songlab/)
+[Song Lab](http://websites.umich.edu/~songlab/)
 2020-03-05
 
 英文版本: [English](https://github.com/lilywang1988/eSIR/blob/master/README.md)
@@ -10,7 +10,7 @@ R包eSIR：扩展的状态空间SIR流行病学模型
 
 起源于湖北省省会武汉市的新型冠状病毒病（又名COVID-19）的爆发迅速蔓延，并影响了中国许多城市以及世界许多国家。中国政府已经实施了非常严格的检疫和检查，以防止COVID-19的传播恶化。尽管在媒体上已经发布了关于湖北省内外流行病拐点的各种形式的预测，但是没有一个预测模型明确说明了时变隔离协议。通过将医学隔离形式（家庭隔离和住院）纳入基本的传染病动态系统，我们扩展了传染病的经典SIR模型。使用针对每日感染和住院发病率的状态空间模型以及MCMC算法，我们评估了隔离方案对限制湖北省和中国其他地区传播的COVID-19的有效性。在给定的隔离协议下，可以从扩展的SIR获取预测的转折点及其可信带。 R软件包也向感兴趣的用户公开提供。
 
-标准SIR模型包含三个组件：易感，受感染和已删除（包括恢复和死亡）。在以下各节中，我们将在包中介绍其他扩展状态空间SIR模型及其实现。 **以下提供的结果基于相对较短的链。** 根据我们的经验，此设置 (`M=5e3` and `nburnin=2e3`) 应在趋势和转折点估计方面提供可接受的结果， 参数及其可信区间的估计值可能不准确。 因此，如果可能，我们建议使用“ M = 5e5”和“ nburnin = 2e5”来通过[`rjags`](https://cran.r-project.org/web/packages/rjags/index.html)以获得稳定的MCMC链.
+标准SIR模型包含三个组件：易感，受感染和已删除（包括恢复和死亡）。在以下各节中，我们将在包中介绍其他扩展状态空间SIR模型及其实现。 **以下提供的结果基于相对较短的链。** 根据我们的经验，此设置 (`M=5e3` and `nburnin=2e3`) 应在趋势和转折点估计方面提供可接受的结果， 参数及其可信区间的估计值可能不准确。 因此，如果可能，我们建议使用“ M = 5e5”和“ nburnin = 2e5”来通过[`rjags`](https://CRAN.R-project.org/package=rjags)以获得稳定的MCMC链.
 
 ![Standard SIR](man/figures/model0.png)
 
@@ -26,7 +26,7 @@ R包eSIR：扩展的状态空间SIR流行病学模型
 -----------
 [直接下载并安装](https://github.com/lilywang1988/eSIR/blob/master/install_binary)
 
-如果要从Github安装和使用此R软件包，您需要首先安装R软件包`devtools`。 请取消注释代码以安装它们。 eSIR依赖于其他三个软件包：rjags（JAGS库的接口），chron和gtools，如果尚未安装，它们可以与eSIR一起安装。如果尚未安装JAGS-4.x.y.exe，可能会发生错误。(for any x &gt;= 0, y &gt;=0). **Windows** 用户可以从以下位置下载并安装JAGS [here](http://www.sourceforge.net/projects/mcmc-jags/files). **Mac** 用户可以按照以下步骤操作 [casallas/8411082](https://gist.github.com/casallas/8411082).
+如果要从Github安装和使用此R软件包，您需要首先安装R软件包`devtools`。 请取消注释代码以安装它们。 eSIR依赖于其他三个软件包：rjags（JAGS库的接口），chron和gtools，如果尚未安装，它们可以与eSIR一起安装。如果尚未安装JAGS-4.x.y.exe，可能会发生错误。(for any x &gt;= 0, y &gt;=0). **Windows** 用户可以从以下位置下载并安装JAGS [here](https://www.sourceforge.net/projects/mcmc-jags/files). **Mac** 用户可以按照以下步骤操作 [casallas/8411082](https://gist.github.com/casallas/8411082).
 
 
 ``` r

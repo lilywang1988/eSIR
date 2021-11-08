@@ -31,7 +31,7 @@ data("USA_state_N") #population in each state
 <<<<<<< HEAD
 2. Since version 0.3.3, we added Gelman-Rubin statistic for convergence check using [gelman.diag](https://www.rdocumentation.org/packages/coda/versions/0.19-3/topics/gelman.diag) from [`rjags`](https://CRAN.R-project.org/package=rjags). Their values substantially larger than 1 imply a failure of convergence of the MCMC chains. Save it in a `.txt` file by setting `save_files = TRUE` or retrieve it via following R code (assuming that `res` is object returned from `tvt.eSIR` or `qh.eSIR`):
 =======
-3. Since version 0.3.3, we added Gelman-Rubin statistic for convergence check using [gelman.diag](https://www.rdocumentation.org/packages/coda/versions/0.19-3/topics/gelman.diag) from [`rjags`](https://cran.r-project.org/web/packages/rjags/index.html). Their values substantially larger than 1 imply a failure of convergence of the MCMC chains. Save it in a `.txt` file by setting `save_files = TRUE` or retrieve it via following R code (assuming that `res` is object returned from `tvt.eSIR` or `qh.eSIR`):
+3. Since version 0.3.3, we added Gelman-Rubin statistic for convergence check using [gelman.diag](https://www.rdocumentation.org/packages/coda/versions/0.19-3/topics/gelman.diag) from [`rjags`](https://CRAN.R-project.org/package=rjags). Their values substantially larger than 1 imply a failure of convergence of the MCMC chains. Save it in a `.txt` file by setting `save_files = TRUE` or retrieve it via following R code (assuming that `res` is object returned from `tvt.eSIR` or `qh.eSIR`):
 >>>>>>> origin/master
 
 ```r
@@ -63,7 +63,7 @@ The standard SIR model has three components: susceptible, infected, and removed 
 
 To install and use this R package from Github, you will need to first install the R package `devtools`. Please uncomment the codes to install them. `eSIR` depends on three other packages, `rjags` (an interface to the JAGS library), `chron` and `gtools`, which could be installed with `eSIR` if not yet. 
 
-An error may occur if you have not yet installed JAGS-4.x.y.exe (for any x >= 0, y >=0). **Windows** users may download and install JAGS from [here](http://www.sourceforge.net/projects/mcmc-jags/files). **Mac** users may follow steps  at [casallas/8411082](https://gist.github.com/casallas/8411082).
+An error may occur if you have not yet installed JAGS-4.x.y.exe (for any x >= 0, y >=0). **Windows** users may download and install JAGS from [here](https://www.sourceforge.net/projects/mcmc-jags/files). **Mac** users may follow steps  at [casallas/8411082](https://gist.github.com/casallas/8411082).
 
 
 ``` r
@@ -391,7 +391,7 @@ License][cc-by].
 
 [![CC BY 4.0][cc-by-image]][cc-by]
 
-[cc-by]: http://creativecommons.org/licenses/by/4.0/
+[cc-by]: https://creativecommons.org/licenses/by/4.0/
 [cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
 [cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
 
